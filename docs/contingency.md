@@ -50,16 +50,24 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
 ## G4 — Power
 
 - Preliminary check in Phase 3 (pilot SD, proxy contrast A1 vs A3).
-- Binding check in Phase 6 (dress rehearsal SD of A3 vs A4, upper limit of the
-  80% interval), before eval-L1 ids are frozen.
+- Power targets the *supported* verdict at Δ_design = 0.35, separately for
+  H1 and H2; the larger n\* governs.
+- Binding check in Phase 6 (dress-rehearsal SD of A3 vs A4 and of A2 vs A4,
+  upper limit of the 80% interval), before eval-L1 ids are frozen.
 - Branches (keep plan / draw more questions / descriptive claim) are fixed in
   measurability gate 8.
 
 ## G5 — Last exit
 
 - **v1.0 cut order** (applied if the budget runs short): (1) arm A6, (2) cue
-  ablation, (3) O2 on S3/S4. **Never cut:** eval-L1 for A2, A3, A4 and A4p —
-  without the placebo the mechanism cannot be read.
+  ablation, (3) the A3′ rerun. **Never cut:** eval-L1 for A2, A3, A4, A4p and
+  O2 — without the placebo the mechanism cannot be read, and without O2 rows
+  6–7 of the outcome space cannot be told apart.
+- **Pessimistic scenario:** with A3′ the v1.0 estimate is US$ 11.3 central /
+  14.7 pessimistic against the 13.5 cap. Cutting A6 and the cue ablation saves
+  ~US$ 1.8 in the pessimistic case (→ ~12.9). If gate 8 also asks for extra
+  questions, A3′ is cut before any cap increase; a cap increase, if ever
+  needed, is a dated decision taken before Phase 6.
 - **Extension cut order:** (1) GPT-4o-mini replication, (2) MuSiQue, (3) real
   world, (4) the whole v1.1 — the last only by rule (outcome-space row 6, or the
   Phase 8 futility rule), never by fatigue.

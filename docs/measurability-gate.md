@@ -36,8 +36,8 @@ one row.
 
 ### Outcome space of v1.0 (the first matching row wins)
 
-**Three-valued verdict**, with D = C(reference) − C(treatment) and a
-Holm-adjusted interval:
+**Three-valued verdict**, with D = C(reference) − C(treatment) and a 97.5%
+BCa bootstrap interval (Bonferroni over the two primary contrasts):
 
 - **supported:** the interval excludes zero in favour of the treatment **and**
   the point estimate is ≥ 0.25;
@@ -48,19 +48,25 @@ Holm-adjusted interval:
 
 | # | Condition | Published reading |
 |---|---|---|
-| 1 | **Falsifier fired**: A4's pooled gain over A3 is positive, the S0 gain is ≥ 50% of it **and** the S0 interval excludes zero in favour of A4 | "The gain exists but is not attributable to detection: it appears where there is nothing to detect." H1 is reported, not interpreted as mechanism |
-| 2 | **Placebo explains the gain**: H1 supported, but A4's gain over A4p is < 50% of its gain over A3 | "The gain comes from searching more, not from knowing when to stop." A4's token cost becomes the argument against it |
+| 0 | **Gate 8 descriptive branch** (n\* > 640) | No verdict: detector precision / recall by subtype, with intervals; the README states the budget did not support a cost claim |
+| 1 | **Falsifier fired**: H1 supported, the S0 gain is ≥ 50% of the pooled gain **and** the S0 interval excludes zero in favour of A4 (≥ 10 discordant pairs) | "The gain exists but is not attributable to detection: it appears where there is nothing to detect." |
+| 2 | **Placebo explains the gain**: H1 supported, placebo delivered and not harmful, and A4's gain over A4p is < 50% of its gain over A3 | "The gain comes from searching more, not from knowing when to stop." A4's token cost becomes the argument against it |
 | 3 | H1 supported and mediation ≥ 50% | **Thesis supported**: deliberate detection reduces cost, and the gain goes through correct stops |
 | 4 | H1 supported and mediation < 50% | "The judge helps, but by another path" — diagnosis by subtype and steps spent |
 | 5 | H1 refuted | "Deliberate detection does not pay for itself here." If A4 is worse, diagnosis by subtype: abstains too much? stops too late? |
-| 6 | H1 inconclusive and O2 − A3 ceiling < 0.25 | "There is no room: not even a perfect detector would pay here." A finding about the premise |
-| 7 | H1 inconclusive and O2 − A3 ceiling ≥ 0.25 | "There is room, and the explicit judge does not capture it" — directly motivates v1.1 |
+| 6 | H1 inconclusive and the upper 95% limit of O2 − A3 < 0.25 | "A gold-label stop applied to A3's search does not reach the threshold." A finding about the premise |
+| 7 | H1 inconclusive otherwise | "There is room, and the explicit judge does not capture it" — directly motivates v1.1 |
+
+Mediation counts the questions where A4 beats A3 and the judge overrode a
+logged "answer" proposal at an insufficient step, **net of the same count for
+the placebo A4p**. The exact definitions, the placebo delivery rules and the
+A3′ noise null are registered in E-001 (`experiments/registry.md`).
 
 H2 is read independently, with three values (supported / refuted /
-inconclusive), each with its sentence registered in E-001. If E-002 declares a
-stratum without room for H2 (Phase 3), that stratum leaves the H2 pool **by a
-rule written beforehand**, and this is reported. λ\* accompanies every row: it is
-the reading that does not depend on the λ = 4 scenario
+inconclusive), each with its sentence registered in E-001. **The H2 population
+is always S1–S4**; the typed-expansion measurement (E-002) is descriptive and
+cannot change it. λ\* accompanies every row: it is the reading that does not
+depend on the λ = 4 scenario
 ([ADR-005](adr/adr-005-cost-function-lambda-4-and-caps.md)).
 
 ---
@@ -124,6 +130,26 @@ single-stratum claim enters the verdict.
 **The falsifier is not a powered interaction test.** An interaction costs ~4×
 the n of a simple contrast. The falsifier is a registered rule on the S0
 interval, declared as a check, not a power test.
+
+### Power for the *supported* verdict
+
+The table above sizes for "the interval excludes zero". The verdict
+**supported** also needs the point estimate to be ≥ 0.25; at a true effect of
+exactly 0.25 that happens only half the time, whatever n is. Power is therefore
+computed for the event *supported* = {point ≥ 0.25 and lower limit > 0} at a
+**design effect Δ_design = 0.35**:
+
+| P(supported) at n = 320 | SD = 1.0 | SD = 1.5 | SD = 2.0 |
+|---|---:|---:|---:|
+| true effect 0.25 | 0.50 | 0.50 | 0.50 |
+| true effect 0.30 | 0.81 | 0.72 | 0.67 |
+| **true effect 0.35** | **0.96** | **0.88** | **0.81** |
+| true effect 0.40 | 1.00 | 0.96 | 0.91 |
+
+n\* for P(supported) ≥ 0.80 at Δ_design = 0.35: **78 / 175 / 311** pooled
+questions for SD 1.0 / 1.5 / 2.0. The plan of 320 holds up to SD ≈ 2.03. In
+words: the design is powered to call an effect of 0.35 *supported*; an effect of
+exactly 0.25 is a coin flip, and that is stated next to the verdict.
 
 **Fails if:** the SD of D measured in the dress rehearsal (Phase 6) requires
 n > 640 → gate 8.
@@ -202,7 +228,7 @@ threshold or stratum.
 | Power script | Reproduces the detectability table of the previous project's E-026 |
 | Identity probe | **Positive control:** real pages **with their own name masked** must be identified in ≥ 50% (threshold fixed here, before running); if not, the probe is broken, not the twin safe |
 | Classifier (v1.1) | Evaluated only on held-out templates and on real trajectory states |
-| Depth placebo (A4p) | The drawn step distribution matches A4's in each stratum — checked before any result is read |
+| Depth placebo (A4p) | Total-variation distance ≤ 0.10 per stratum between the realized step distribution and A4's — checked before any result is read; one re-run with a new seed on failure |
 
 **Fails if:** a number in `docs/evaluation.md` comes from an instrument without
 its registered check.
@@ -211,23 +237,28 @@ its registered check.
 
 ## Gate 8 — The abort criterion
 
-**Power (Phase 6, before freezing eval-L1 ids):** with SD_sup = the upper limit
-of the SD of D, compute n\* = (3.08 × SD_sup / 0.25)².
+**Power (Phase 6, before freezing eval-L1 ids):** SD_sup = the upper limit of
+the 80% percentile-bootstrap interval of the SD of D on the dress-rehearsal
+S1–S4 questions, computed **separately for D(A3 − A4) and D(A2 − A4)**. n\* =
+the smallest pooled n with P(supported | Δ_design = 0.35) ≥ 0.80; the larger of
+the two n\* governs.
 
-- **n\* ≤ 320:** keep the plan.
-- **320 < n\* ≤ 640:** the generator draws more questions up to n\*, and the extra
-  cost (~US$ 0.014 per question across A2, A3, A4 and A4p) is paid by the v1.0
-  cut order: (1) arm A6, (2) cue ablation, (3) O2 on S3/S4.
-- **n\* > 640 (SD_sup > 2.05):** H1 and H2 stop being superiority tests. The
-  primary claim becomes **descriptive**: detector precision / recall by
+- **n\* ≤ 320 (SD_sup ≤ 2.03):** keep the plan.
+- **320 < n\* ≤ 640 (SD_sup ≤ 2.87):** the generator draws more questions up to
+  n\*, balanced by stratum, and the extra cost is paid by the v1.0 cut order
+  ([`contingency.md`](contingency.md), G5).
+- **n\* > 640:** H1 and H2 stop being superiority tests (outcome-space row 0).
+  The primary claim becomes **descriptive**: detector precision / recall by
   insufficiency subtype, with intervals, and the README states that the budget
   did not support a cost claim. Registered now, not negotiated later.
 
-**Futility (Phase 6, before the opening):** if the stopping-oracle ceiling
-(O2 − A3, on dev) is below 0.25, **not even a perfect detector would reach the
-threshold** given the search policy. H1 is declared without room before the
-opening, and the published result is the ceiling itself — a clean finding
-about the premise. O2 is an oracle and is labelled as such wherever quoted.
+**Futility (Phase 6, before the opening):** if the **upper 80% limit** of the
+O2 − A3 difference on dev S1–S4 is below 0.25, a gold-label stop applied to
+A3's own search would not reach the threshold. H1 is declared without room
+before the opening (row 6 by rule). eval-L1 is still opened, for H2 and for a
+descriptive H1. O2 is an oracle and is labelled as such wherever quoted; it is
+not a strict ceiling under C, because abstaining on sufficient but error-prone
+questions can beat it.
 
 **Cost (Phase 3):** if the measured cost per question exceeds 1.3× the estimate,
 the cut order is applied before Phase 4.

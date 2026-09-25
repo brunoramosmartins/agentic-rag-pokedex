@@ -117,3 +117,36 @@ every link type) so its rule errs toward shrinking H2; dev split assumed
 balanced at 30 questions per stratum. Noted while drafting: E-002's "≥ 3 of 4
 strata" rule can only trigger through S1–S3, since S4 has no sufficient set by
 construction.
+
+## 2026-09-24 — Red-team of E-001 / E-002 applied in full
+
+An adversarial review of both drafts found 5 blockers, 4 major and 3 minor
+issues. All were adopted; details are in the Amendments of each registry
+entry. The decisions that change the design:
+
+- **Power targets the verdict actually published.** "Supported" needs the
+  point estimate ≥ 0.25, so sizing for "interval excludes zero" gave only ~50%
+  chance of *supported* at a true effect of 0.25. Power is now computed for the
+  *supported* event at **Δ_design = 0.35** (n\* = 78 / 175 / 311 for SD 1.0 /
+  1.5 / 2.0; the 320 plan holds up to SD ≈ 2.03), separately for H1 and H2.
+- **E-002 is descriptive; H2 is always estimated on S1–S4.** Correction to the
+  entry "G1 passed; E-001 and E-002 registered as drafts" above: that entry
+  said the generous A2 configuration made E-002's rule "err toward shrinking
+  H2". It did shrink the pool, but in doing so it **inflated** the H2 effect,
+  because the strata removed were exactly those where the pipeline is strong.
+  The reasoning was wrong; the gating rule is gone.
+- **An A3′ rerun is added** (S1–S4, ~US$ 1.1 central / 1.45 pessimistic) as the
+  noise null for the gain decomposition. v1.0 becomes US$ 11.3 / 14.7 against
+  the 13.5 cap; the new cut order (A6, cue ablation, then A3′) brings the
+  pessimistic case back to ~12.9. O2 moved to the never-cut set, since rows 6–7
+  of the outcome space depend on it.
+- **Mediation** is measured on the logged judge override, net of the placebo;
+  **inference** uses sign-flip p-values and BCa intervals, with a ≥ 10
+  discordant-pairs rule per stratum; **λ\*** is published only when the error
+  difference is resolved; **prompt-tuning parity** across the agent, pipeline
+  and judge prompts.
+
+Documents updated the same day: `experiments/registry.md`,
+`docs/measurability-gate.md` (gates 1, 3, 7, 8), `docs/contingency.md`,
+`docs/hypothesis.md`, `docs/data-sources.md`, ADR-005, ADR-006, ADR-008,
+ADR-010.

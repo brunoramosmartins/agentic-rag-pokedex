@@ -81,8 +81,10 @@ with a learnset, for the candidate groups:
    near-certain section to give a **different** answer, otherwise answering from
    the wrong version is correct by accident. Consequences: (a) the 3–4 version
    groups chosen in Phase 1 should span generations, not be adjacent; (b) the
-   S2 generator keeps only pairs whose level differs between the asked and the
-   near-certain versions (a filter with an N-of-M count in `docs/examiner.md`).
+   S2 generator keeps only pairs whose level differs between the asked version
+   and **every other version group in the corpus** — otherwise answering from a
+   third version is correct by accident (a filter with an N-of-M count in
+   `docs/examiner.md`).
 3. **Pokédex text does not follow learnset coverage.** English flavor text
    exists for 721 species in x-y / omega-ruby-alpha-sapphire, 609 in
    sword-shield, but only **120** in scarlet / violet. Flavor text is attached

@@ -2,9 +2,12 @@
 
 Every experiment is registered here **before it runs**: objective, hypothesis,
 configuration, decision rule and expected result. The **Actual result** is
-filled only after the run, next to the date. A registered entry is never
-rewritten after data exists: changes before the run are dated amendments at the
-end of the entry; changes after the run are new entries.
+filled only after the run, next to the date.
+
+- While an entry is `draft`, its body may be edited, and **every change is
+  logged with its date and reason under Amendments**.
+- Once `frozen` (configuration hashed, before the run), the body is immutable;
+  corrections become new entries.
 
 ## Schema
 
@@ -13,7 +16,7 @@ end of the entry; changes after the run are new entries.
 | ID | `E-XXX`, zero-padded, monotonically increasing |
 | Phase | Phase (milestone) that runs it |
 | Status | `draft` → `frozen` (config hashed, before the run) → `run` → `analyzed` |
-| Hypothesis | H1 / H2 / H3 (see `docs/hypothesis.md`), or gating / exploratory |
+| Hypothesis | H1 / H2 / H3 (see `docs/hypothesis.md`), or gating / descriptive |
 | Objective | One sentence: what question does it answer? |
 | Configuration | Split, n, arms, model, caps, seeds, hashes |
 | Decision rule | What each possible result leads to, written before the run |
@@ -25,18 +28,18 @@ end of the entry; changes after the run are new entries.
 | ID | Phase | Status | Hypothesis | Objective | Actual |
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
-| [E-002](#e-002--how-much-does-typed-expansion-already-solve) | 3 | draft | gating for H2 | How much of each insufficiency stratum does the fixed pipeline with typed expansion already solve? | — |
+| [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
 
 ---
 
 ## E-001 — Layer 1: does an explicit sufficiency detector pay for itself?
 
 - **Phase:** 6 (dress rehearsal, freeze, single opening of eval-L1).
-- **Status:** draft — registered 2026-09-24, before any code or data. Becomes
-  `frozen` when the freeze manifest (below) is hashed in Phase 6, before
-  eval-L1 is opened.
-- **Hypotheses:** H1, H2 (primary family, Holm); H1b (secondary, outside the
-  family). Statements in [`docs/hypothesis.md`](../docs/hypothesis.md).
+- **Status:** draft — registered 2026-09-24, before any code or data; revised
+  the same day after a red-team review (see Amendments). Becomes `frozen` when
+  the freeze manifest is hashed in Phase 6, before eval-L1 is opened.
+- **Hypotheses:** H1, H2 (primary family); H1b (secondary, outside the family).
+  Statements in [`docs/hypothesis.md`](../docs/hypothesis.md).
 
 ### Objective
 
@@ -44,7 +47,26 @@ Decide, on a pre-registered rule, whether an agent with an **explicit**
 per-step sufficiency judge (A4) reduces expected cost C relative to (H1) the
 same agent with an **implicit** detector (A3) and (H2) a fixed pipeline with
 typed expansion (A2) — and whether any gain is attributable to **knowing when
-to stop** rather than to searching more.
+to stop** rather than to searching more or to sampling noise.
+
+### Definitions
+
+- **Step:** one tool call plus its observation. **Stopped at step t:** the
+  final action (answer or abstain) is taken after observation t. A2 has a single
+  step (its delivered evidence set); A4p stops at its drawn k.
+- **Label at the final action:** the sufficiency label of the units seen up to
+  the stopping step — `sufficient`, `insufficient` (with subtype), or
+  `abstained` when the final action is abstention.
+- **Outcome per question:** C = 0 if correct, 1 if abstained, λ = 4 if wrong.
+  `abstain = true` overrides any answer text. An unparseable final output
+  scores **C = λ** in every arm (a model error; it is also logged as
+  `format-error` for the grader audit). An API failure after 3 retries on the
+  same id scores **C = λ**, is counted per arm, and is never excluded.
+- **Judge output** other than yes/no is read as "no".
+- **S3 grading:** set equality after alias normalization; a partial or
+  over-complete set is wrong.
+- **Pooled estimand:** the mean of D over S1–S4 with **equal weight per
+  stratum** (the design is balanced, so this is the plain mean).
 
 ### Configuration
 
@@ -53,9 +75,19 @@ to stop** rather than to searching more.
   [`docs/data-sources.md`](../docs/data-sources.md)); rendered pages; hybrid
   index (BM25 + dense).
 - **eval-L1: 400 questions** — S0 80; S1, S2, S3, S4 80 each — drawn with a
-  registered seed from template groups **A and B**. The size stays adjustable
-  until the ids are frozen in Phase 6 (measurability gate 8); the pooled S1–S4
-  n is the one used for H1/H2 (plan: 320).
+  registered seed from template groups A and B, with **equal numbers per
+  template within each stratum** (so the A/B proportion equals the template
+  proportion, recorded in the manifest). Extra questions under gate 8 keep the
+  strata balanced.
+- **Separation from dev:** no eval-L1 question shares a gold chain, or a
+  (template, anchor entity) pair, with any dev or train question. Checked by the
+  generator and logged with N-of-M.
+- **S2:** a (species, move) pair is kept only if the asked level differs from
+  its level in **every other version group in the corpus** (N-of-M logged). The
+  selection shift toward moves whose level changed is a declared threat.
+- **S4:** withheld units are absent from the index **globally**; the generator
+  asserts that no question in any stratum has a withheld unit in its gold
+  chain.
 - eval-L1 is opened **once**. The opening count is published.
 
 **Arms** (all share corpus, tools, model, cost instruction, caps and the
@@ -65,23 +97,37 @@ structured output `{answer, abstain}`):
 |---|---|
 | A0 closed-book | Contamination check (descriptive) |
 | A1 single-shot | Baseline (descriptive) |
-| A2 fixed pipeline, typed expansion | H2 reference |
+| A2 fixed pipeline, typed expansion | H2 reference; configuration pinned in the manifest after the Phase 4 sweep |
 | A3 agent, implicit detector | H1 reference |
+| **A3′ second run of A3** | Noise null for the gain decomposition; S1–S4 only |
 | A4 agent, explicit boolean judge | Treatment |
 | A4p depth placebo | H1b reference; dose = A4's step distribution per stratum from this same opening |
 | O1 evidence oracle | P(correct \| sufficient); labelled oracle |
-| O2 stopping oracle | Ceiling O2 − A3; labelled oracle |
+| O2 gold-label stop on A3's search | Reference for "room" (rows 6–7); labelled oracle. Not a strict ceiling under C: abstaining on sufficient but error-prone questions can beat it |
 | A6 16× context | S3 only (descriptive) |
 
-**Run order:** A0, A1, A2, A3, A4, O1, O2, A6 → A4p (dose from A4; **dose
-adherence checked before any result is read**) → cue ablation on S3 (A3, A4 with
+**Prompt tuning parity.** The A3 agent prompt (shared by A3, A3′, A4 and A4p),
+the A2 answer prompt and the A4 judge prompt get the **same tuning budget**: at
+most 3 recorded iterations each, on dev group-A templates, with mean C on dev
+S1–S4 as the criterion. Any stratum-specific instruction that enters the judge
+prompt (e.g. "check the version", "is the list complete?") is added verbatim to
+the shared agent prompt.
+
+**Run order:** A0, A1, A2, A3, A3′, A4, O1, O2, A6 → A4p (dose from A4;
+adherence checked before any result is read) → cue ablation on S3 (A3, A4 with
 total count and `(k/N)` markers). Batch API, idempotent per question id; a
 failed job is re-run on the same ids, never re-drawn.
 
-**Fixed parameters:** λ = 4 (C = 0 correct, 1 abstain, 4 wrong); T_max = 6
-steps; B = 4,000 evidence tokens; `search(query, k ≤ 5)` with no total count and
-no pagination markers (main condition); same cost instruction for every arm
-("a wrong answer costs 4× not answering").
+**Depth placebo rules.**
+- If B binds before step k, A4p decides at that step; the question is flagged.
+- **Adherence:** total-variation distance ≤ 0.10, per stratum, between the
+  realized A4p step distribution and A4's. On failure, one re-run with a new
+  registered seed; if it fails again, row 2 reads "placebo not delivered".
+
+**Fixed parameters:** λ = 4; T_max = 6 steps; B = 4,000 evidence tokens;
+`search(query, k ≤ 5)` with no total count and no pagination markers (main
+condition); the same cost instruction for every arm ("a wrong answer costs 4×
+not answering").
 
 **Model:** gpt-5-mini, Batch tier, `reasoning_effort` low, frozen for the run.
 
@@ -91,62 +137,67 @@ no pagination markers (main condition); same cost instruction for every arm
 |---|---|
 | World hash (graph export, twin map, rendered pages) | _Phase 6_ |
 | Index hash | _Phase 6_ |
-| Prompt hashes (all arms, judge prompt after ≤ 3 dev iterations on group A) | _Phase 6_ |
+| Prompt hashes (all arms, after ≤ 3 dev iterations each on group A) | _Phase 6_ |
+| A2 configuration (from the Phase 4 sweep) | _Phase 4_ |
 | Model id and snapshot; `reasoning_effort` | _Phase 6_ |
 | Container image versions (Neo4j, Phoenix) | _Phase 6_ |
-| eval-L1 ids, seed, n per stratum | _Phase 6_ |
+| eval-L1 ids, seed, n per stratum, A/B proportion per stratum | _Phase 6_ |
 | Template partition A / B | _Phase 2_ |
 | Tool condition (main) and cue-ablation condition | _Phase 5_ |
-| A4p dose rule | This entry (above) |
+| Randomization and bootstrap seeds | _Phase 6_ |
 | Price per million tokens at run time | _Phase 6_ |
 
 **Instrument prerequisites (measurability gate 7):** twin round trip 100%;
 renderer registry complete; generator audit ≥ 58/60 (G3); labeler 100% on
 golden trajectories; grader ≥ 98/100 on the audit; token meter matches API
-usage on 10 calls; identity probe positive control ≥ 50%. No number from an
-instrument without its check.
+usage on 10 calls; identity probe positive control ≥ 50%.
 
 ### Analysis plan
 
 - **Unit:** question, paired across arms. D = C(reference) − C(treatment);
   positive D favours the treatment.
-- **Primary contrasts:** H1 = A3 − A4, H2 = A2 − A4, on S1–S4 pooled.
-- **Inference:** mean of D with a paired bootstrap (10,000 resamples, seed
-  recorded in the freeze manifest). Two-sided p-values from the bootstrap;
-  **Holm** over {H1, H2} at familywise α = 0.05; each contrast's interval is
-  reported at its Holm-adjusted level.
-- If E-002 removes strata from the H2 pool, H2 is computed on the remaining
-  strata; if E-002 removes H2 from the family, H1 is tested alone at α = 0.05.
+- **Primary contrasts:** H1 = D(A3 − A4) and H2 = D(A2 − A4), both on S1–S4
+  pooled. The H2 population is **always S1–S4**; E-002 cannot change it.
+- **Inference.**
+  - p-values: paired **sign-flip randomization test** on D (10,000 flips, seed
+    in the manifest); Holm-adjusted p-values reported for {H1, H2}.
+  - Intervals: **BCa bootstrap** (10,000 resamples) at **97.5%** for both
+    contrasts (Bonferroni, conservative relative to Holm). The verdict uses
+    these intervals.
 - **Three-valued verdict** per contrast:
   - **supported** — the interval excludes zero in favour of the treatment
     **and** the point estimate is ≥ 0.25;
   - **refuted** — the upper limit of the interval is below 0.25;
   - **inconclusive** — everything else.
-- **Per-stratum readings** (n = 80 each): descriptive, with 95% intervals; no
-  single-stratum claim enters the verdict.
+- **Per-stratum readings and the S0 falsifier:** exact sign-flip test and
+  interval; an interval "excludes zero" only if the stratum has **≥ 10
+  discordant pairs**. Per-stratum readings are descriptive.
 
 **Mechanism quantities.**
-- **Falsifier (S0):** A4's gain over A3 on S0, with its interval.
-- **Placebo (H1b):** gain of A4 over A4p, as a fraction of the gain of A4 over
-  A3, on S1–S4 pooled.
-- **Mediation:** among questions where C(A4) < C(A3), the fraction in which A3
-  stopped at a step labelled insufficient and A4 did not.
-- **Gain decomposition:** A4's gain over A3 split into questions where the two
-  stopped at different steps (detection component) and at the same step
-  (non-attributable component).
+- **Mediated gain:** a question with C(A4) < C(A3) where, at some step labelled
+  insufficient, A4's **logged proposed action was "answer" and the judge
+  returned "no"**. The same count is computed for A4p vs A3 (the agent proposed
+  "answer" before step k and was forced to continue) as a placebo baseline. The
+  **published mediation figure is the difference** (A4 minus A4p), as a share
+  of the questions where C(A4) < C(A3), with its bootstrap interval.
+- **Gain decomposition by label state at the final action** (sufficient /
+  insufficient / abstained): A4's gain over A3 split by the transition between
+  the two arms' final label states. The **same decomposition for A3 vs A3′** is
+  the noise null: only the excess over A3 vs A3′ is attributed to the judge.
+- **Placebo (H1b):** gain of A4 over A4p as a share of the gain of A4 over A3,
+  with its bootstrap interval.
 - **Detector precision / recall per step**, against the exact label, by
-  insufficiency subtype (`missing-hop`, `wrong-version`, `truncated`,
-  `nonexistent`); implicit-detector firing rate.
-- **Stopping-oracle ceiling:** O2 − A3 (labelled oracle).
+  subtype (`missing-hop`, `wrong-version`, `truncated`, `nonexistent`);
+  implicit-detector firing rate.
+- **O2 − A3** on S1–S4 (labelled oracle).
 
-**λ-free headline.** Each arm's operating point (error rate, abstention rate).
-For A4 vs A3 and A4 vs A2, the tipping point
-
-```text
-λ* = (abst_A4 − abst_ref) / (err_ref − err_A4)
-```
-
-with a paired-bootstrap interval, classified into exactly one of four cases:
+**λ-free headline.**
+- Each arm's operating point (error rate, abstention rate), S1–S4 pooled.
+- For λ in {1, 1.5, 2, …, 20}: the paired interval of
+  D(λ) = λ·Δerr − Δabst, for A4 vs A3 and A4 vs A2, and the set of λ where the
+  lower limit is > 0 (A4 better) or the upper limit is < 0 (A4 worse).
+- The tipping point λ\* = Δabst / Δerr and its case are reported **only if the
+  95% interval of Δerr excludes zero**; otherwise "case undetermined".
 
 | Case | Condition | Reading |
 |---|---|---|
@@ -155,42 +206,53 @@ with a paired-bootstrap interval, classified into exactly one of four cases:
 | Tipping below λ\* | err_A4 > err_ref and abst_A4 < abst_ref | A4 answers more and errs more; better only for λ < λ\* |
 | A4 dominated | err_A4 ≥ err_ref and abst_A4 ≥ abst_ref, one strictly | A4 is worse for every λ |
 
-(Equal error and abstention rates: no difference, reported as such.)
-Sensitivity: C recomputed at λ ∈ {2, 4, 9}.
+- Sensitivity: C recomputed at λ ∈ {2, 4, 9}.
 
 **Other secondary readings (descriptive):** accuracy and abstention rate per
 arm and stratum; **template gap A × B per arm, aggregated by group, never per
-template**; cue ablation on S3; tokens, US$ and steps per question per arm,
-with the agent's cost multiplier next to every gain; A6 vs A1 on S3.
+template**; cue ablation on S3; tokens, US$ and steps per question per arm, with
+the agent's cost multiplier next to every gain; A6 vs A1 on S3.
 
 ### Decision rule — outcome space (first matching row wins)
 
 | # | Condition | Published reading |
 |---|---|---|
-| 1 | **Falsifier fired**: A4's pooled gain over A3 is positive, the S0 gain is ≥ 50% of it **and** the S0 interval excludes zero in favour of A4 | "The gain exists but is not attributable to detection: it appears where there is nothing to detect." H1 reported, not interpreted as mechanism |
-| 2 | **Placebo explains the gain**: H1 supported, but A4's gain over A4p is < 50% of its gain over A3 | "The gain comes from searching more, not from knowing when to stop." |
+| 0 | **Gate 8 descriptive branch** (n\* > 640) | No verdict. Detector precision / recall by subtype with intervals; the README states the budget did not support a cost claim |
+| 1 | **Falsifier fired**: H1 supported, the S0 gain is ≥ 50% of the pooled gain, **and** the S0 interval excludes zero in favour of A4 (≥ 10 discordant pairs) | "The gain exists but is not attributable to detection: it appears where there is nothing to detect." |
+| 2 | H1 supported, placebo delivered and not harmful (lower limit of C(A3) − C(A4p) > −0.25), and A4's gain over A4p is < 50% of its gain over A3 | "The gain comes from searching more, not from knowing when to stop." |
 | 3 | H1 supported and mediation ≥ 50% | **Thesis supported**: deliberate detection reduces cost, and the gain goes through correct stops |
 | 4 | H1 supported and mediation < 50% | "The judge helps, but by another path" — diagnosis by subtype and steps spent |
 | 5 | H1 refuted | "Deliberate detection does not pay for itself here." If A4 is worse: abstains too much, or stops too late? |
-| 6 | H1 inconclusive and O2 − A3 < 0.25 | "There is no room: not even a perfect detector would pay here." |
-| 7 | H1 inconclusive and O2 − A3 ≥ 0.25 | "There is room, and the explicit judge does not capture it" — motivates v1.1 |
+| 6 | H1 inconclusive and the upper 95% limit of O2 − A3 is < 0.25 | "A gold-label stop applied to A3's search does not reach the threshold." |
+| 7 | H1 inconclusive otherwise | "There is room, and the explicit judge does not capture it" — motivates v1.1 |
+
+Notes on the rows:
+- Placebo not delivered or harmful: row 2 cannot fire; it is stated next to
+  rows 3–4 ("placebo uninformative").
+- If the S0 gain is large but H1 is not supported, the S0 reading is published
+  as a caveat under rows 5–7.
 
 **H2, read independently:**
 
 | H2 verdict | Published sentence |
 |---|---|
-| supported | "An explicit detector beats a well-tuned fixed pipeline on the insufficiency strata, by at least the action threshold." |
-| refuted | "A well-tuned fixed pipeline is as good as the agent with an explicit detector, within the action threshold; the extra machinery does not pay here." |
+| supported | "A4 reduces expected cost versus the fixed pipeline on S1–S4: the point estimate is at least the action threshold and the interval excludes zero." |
+| refuted | "The fixed pipeline is within the action threshold of the agent with an explicit detector; the extra machinery does not pay here." |
 | inconclusive | "The budget does not separate the agent with an explicit detector from the fixed pipeline." |
 
-**Abort and futility rules (applied in Phase 6, before the opening):**
-- n\* = (3.08 × SD_sup / 0.25)², SD_sup = upper limit of the 80% interval of the
-  SD of D(A3 − A4) on the dress rehearsal. n\* ≤ 320: keep the plan.
-  320 < n\* ≤ 640: draw more questions up to n\*, paid by the v1.0 cut order.
-  n\* > 640: H1 and H2 become descriptive (detector precision / recall by
-  subtype); the README states that the budget did not support a cost claim.
-- If O2 − A3 on dev is below 0.25, H1 is declared without room before the
-  opening, and the published result is the ceiling (row 6 by rule).
+**Sizing, abort and futility (applied in Phase 6, before the opening):**
+- Power targets the event *supported* = {point ≥ 0.25 and lower limit > 0}.
+  Design effect **Δ_design = 0.35**; n\* = the smallest pooled n with
+  P(supported | Δ_design) ≥ 0.80 under the normal approximation.
+- SD_sup = upper limit of the 80% percentile-bootstrap interval of the SD of D
+  on the dress-rehearsal S1–S4 questions, computed **separately for D(A3 − A4)
+  and D(A2 − A4)**; the larger n\* governs.
+- n\* ≤ 320 (SD_sup ≤ 2.03): keep the plan. 320 < n\* ≤ 640 (SD_sup ≤ 2.87): draw
+  more questions up to n\*, balanced by stratum, paid by the cut order.
+  n\* > 640: row 0.
+- **Futility:** if the upper 80% limit of O2 − A3 on dev S1–S4 is below 0.25,
+  H1 is declared without room before the opening (row 6 by rule). eval-L1 is
+  still opened, for H2 and for a descriptive H1.
 
 ### Error taxonomy (fixed before the run; mostly mechanical)
 
@@ -204,14 +266,12 @@ with the agent's cost multiplier next to every gain; A6 vs A1 on S3.
 | `over-search` | Kept searching after reaching sufficient evidence (cost error, not outcome error) | Automatic |
 | `never-reached` | Reached T_max without ever reaching sufficient evidence (search failure, not decision failure) | Automatic |
 | `generation-error` | Answered at a sufficient step and was wrong | Automatic code; **manual reading** for the cause |
-| `format-error` | The grader could not parse the output | Automatic; counts against the grader (gate 4) |
+| `format-error` | Unparseable final output (scored C = λ) | Automatic; also audited against the grader (gate 4) |
 
 Every code that occurs gets a manual sample with prompt and completion
 rendered; no code is published as a count only.
 
 ### Expected result (author's prediction, 2026-09-24)
-
-Per stratum (C with λ = 4; "gain" = reduction in C):
 
 | Stratum | A2 vs A1 | A3 | A4 − A3 | Mechanism |
 |---|---|---|---|---|
@@ -222,9 +282,10 @@ Per stratum (C with λ = 4; "gain" = reduction in C):
 | S4 no answer | Tie (both wrong) | Answers from another version | **Large gain**, with more tokens | Abstention instead of invention |
 
 - **Placebo:** on S1, A4p between A3 and A4; on S2 and S4, A4p near A3.
-- **Mediation:** ≥ 50%.
-- **Overall:** outcome-space **row 3** (thesis supported); H2 supported;
-  λ\* case "tipping above λ\*" or "A4 dominates" vs A3.
+- **Mediation (A4 minus A4p):** ≥ 50%.
+- **Decomposition:** the A4 vs A3 transitions exceed the A3 vs A3′ null.
+- **Overall:** outcome-space **row 3**; H2 supported; vs A3, λ\* case "tipping
+  above λ\*" or "A4 dominates".
 
 ### Actual result
 
@@ -232,63 +293,81 @@ _Not run._
 
 ### Amendments
 
-_None._
+- **2026-09-24 — red-team revision (before any code or data).** Changes:
+  1. Power now targets the *supported* event, with Δ_design = 0.35, and n\* is
+     computed for H1 and H2 separately (previously sized for "interval excludes
+     zero", which gives ~50% chance of *supported* at a true effect of 0.25).
+  2. The H2 population is fixed at S1–S4; E-002 became descriptive. Dropping
+     strata where A2 is strong would have inflated the H2 effect.
+  3. Mediation redefined on the logged judge override, net of the A4p
+     baseline; decomposition by label state, with an **A3′ rerun** as noise
+     null.
+  4. Outcome space: row 0 added; row 1 requires H1 supported; row 2 requires a
+     delivered, non-harmful placebo; row 6 uses an interval and new wording;
+     futility uses the upper 80% limit.
+  5. Prompt-tuning parity across the agent, A2 and judge prompts.
+  6. Inference: sign-flip p-values, BCa intervals at 97.5%, and a ≥ 10
+     discordant-pairs rule for per-stratum intervals.
+  7. λ\*: a λ-grid reading; λ\* only when Δerr is resolved.
+  8. Placebo: rule for B binding before k, adherence tolerance, re-run rule.
+  9. S2 level-difference filter against every in-corpus version; S4
+     withheld units removed globally.
+  10. Definitions (step, stop, error handling, S3 grading), dev/eval
+      separation, balanced template sampling.
 
 ---
 
-## E-002 — How much does typed expansion already solve?
+## E-002 — How much does typed expansion already deliver?
 
 - **Phase:** 3 (pilot gate), before any agent exists.
-- **Status:** draft — registered 2026-09-24.
-- **Hypothesis:** gating for H2. The cheap thing is measured first: if a fixed
-  pipeline already delivers sufficient evidence, the agent has nothing to add
-  there.
+- **Status:** draft — registered 2026-09-24; made descriptive the same day
+  after a red-team review (see Amendments).
+- **Hypothesis:** descriptive. It **cannot** change the H2 population, the
+  primary family, or any E-001 rule.
 
 ### Objective
 
 For each stratum, measure the fraction of questions for which the evidence set
-delivered by A2 (search + typed-link expansion up to B) is **labelled
-sufficient** — and remove from H2 the strata where there is no room.
+delivered by a fixed pipeline with typed expansion is **labelled sufficient** —
+the ceiling on what the non-agentic approach can put in front of the model
+within B.
 
 ### Configuration
 
-- **Split:** dev, 150 questions, **template group A only** (S0 30; S1–S4 30
-  each).
-- **Arm:** A2 retrieval only — **no LLM call**. The outcome is the sufficiency
-  label of the delivered evidence set, computed by the labeler over the fact →
-  units registry. Cost: zero API spend.
-- **A2 configuration — generous by design:** `search(query, k = 5)` on the
-  question text; expand **every** typed link type from the pages found,
-  breadth-first, until B = 4,000 evidence tokens. This is an upper bound on what
-  a fixed pipeline can deliver within B, so the rule errs toward removing strata
-  from H2, not toward keeping them. Sensitivity: k = 3.
+- **Split:** dev, 150 questions, **template group A only**, balanced: S0 30,
+  S1–S4 30 each.
+- **Pipeline:** retrieval only — **no LLM call**. The outcome is the
+  sufficiency label of the delivered set, computed by the labeler over the
+  fact → units registry. Cost: zero API spend.
+- **Configuration (governs):** `search(query, k = 5)` on the question text;
+  expand every typed link type from the pages found, breadth-first, in a
+  **link-type order registered in this entry before the run** (link types are
+  defined in Phase 1), until B = 4,000 evidence tokens. This is a generous
+  upper bound on what a fixed pipeline can deliver; it is **not** the tuned A2
+  of E-001.
+- **Descriptive only:** k = 3.
 - Main tool condition (no total count, no pagination markers).
 
 ### Measurement
 
 Per stratum: N-of-M questions with a sufficient delivered set, Wilson 95%
-interval. For S2 and S4 also: N-of-M sets containing near-certain units
-(another version's section). For S3: the distribution of the fraction of the
-set delivered.
+interval. For S2 and S4: N-of-M sets containing near-certain units (another
+version's section). For S3: the distribution of the delivered fraction of the
+set. S4 is 0 by construction (no sufficient set exists).
 
-### Decision rule
+### Use of the result
 
-- If A2 delivers sufficient evidence in **≥ 80%** of the questions of a stratum
-  (point estimate), H2 has no room in that stratum, and **it leaves the H2 pool**
-  in E-001.
-- If this happens in **≥ 3 of the 4 insufficiency strata**, H2 leaves the
-  primary family and H1 is tested alone at α = 0.05.
-- Note on S4: by construction no sufficient set exists, so S4 can never reach
-  80% and always stays in the pool. In practice the second rule triggers only if
-  S1, S2 and S3 all reach 80%.
-- The rule is applied as written and logged in the decision journal the same
-  day, with the counts.
+- Reported in the Phase 3 pilot report and in `docs/evaluation.md`.
+- It informs the Phase 4 A2 sweep only through the registered sweep grid, on
+  group A, under the prompt-tuning parity rule of E-001.
+- It never selects strata, thresholds or n for E-001 (measurability gate 6).
 
 ### Expected result (author's prediction, 2026-09-24)
 
-No stratum reaches 80%. S1 is the highest (typed expansion sometimes reaches
-the second hop); S2 and S3 stay low; S4 is 0 by construction. H2 stays in the
-primary family on all four insufficiency strata.
+No stratum above 80%. S1 is the highest (typed expansion sometimes reaches the
+second hop). S2 is high on "delivered" but not on "used correctly": the
+breadth-first expansion will often bring every version's section. S3 is low;
+S4 is 0 by construction.
 
 ### Actual result
 
@@ -296,4 +375,13 @@ _Not run._
 
 ### Amendments
 
-_None._
+- **2026-09-24 — red-team revision (before any code or data).** Changed from a
+  gating rule (a stratum with ≥ 80% sufficient delivered sets left the H2 pool;
+  ≥ 3 of 4 removed H2 from the family) to descriptive. Reasons:
+  - removing strata where the pipeline is strong inflates the pooled H2 effect;
+  - "sufficient delivered set" is a poor proxy for the pipeline answering
+    correctly, especially on S2;
+  - the rule could reduce H2 to S4 alone while the published sentence still
+    claimed all insufficiency strata.
+  k = 5 now governs, and the link-type order must be registered before the
+  run.

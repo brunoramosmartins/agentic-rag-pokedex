@@ -25,7 +25,14 @@ One long release in spare time risks ending with nothing shipped.
   *when to stop on each question*. If A4 still beats it, the advantage lies in
   per-question stopping time, which is exactly the thesis.
 - The dose comes from A4's run in the **same eval-L1 opening**; A4p runs after
-  A4, and **dose adherence is checked before any result is read** (gate 7).
+  A4, and **dose adherence is checked before any result is read** (gate 7):
+  total-variation distance ≤ 0.10 per stratum, one re-run with a new seed on
+  failure, otherwise "placebo not delivered".
+- If B binds before step k, A4p decides at that step (flagged).
+- **Harmful placebo guard:** forced blind search can hurt (more wrong-version
+  sections, budget used up). Row 2 is read only if the lower limit of
+  C(A3) − C(A4p) is above −0.25; otherwise the placebo is reported as
+  uninformative, not as evidence for detection.
 - No information from the judge or the label reaches the placebo — only the step
   distribution (tested in Phase 5).
 - Read through outcome-space row 2: if A4's gain over A4p is < 50% of its gain

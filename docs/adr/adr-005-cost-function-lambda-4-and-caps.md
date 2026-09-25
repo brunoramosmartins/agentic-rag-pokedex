@@ -56,6 +56,10 @@ objective and the comparison would measure the instruction.
   (A5, v1.1). For A3 and A4 (binary decisions) the λ-free objects are the
   operating point and λ\* — correcting an earlier draft of this design that
   listed them for every arm.
+- λ\* is a ratio and breaks when the two error rates are close (the
+  denominator crosses zero across resamples). It is published only when the
+  interval of Δerr excludes zero; the always-available reading is a λ grid
+  (1 to 20) with the λ ranges where A4 is better or worse.
 - Action threshold for H1/H2: **0.25 units of C** (≈ 1 in 16 questions going from
   wrong to correct, or 1 in 12 from wrong to abstained).
 - The trained detector's theoretical threshold follows from λ:

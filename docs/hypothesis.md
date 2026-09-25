@@ -70,7 +70,8 @@ cost instruction ("a wrong answer costs 4× not answering"), the caps
 | A4p | Depth placebo | A3's loop, forced to search until a step k drawn from A4's step distribution in the same stratum ([ADR-010](adr/adr-010-depth-placebo-and-release-slicing.md)) | v1.0 |
 | A5 | Agent, trained detector | A calibrated classifier over cheap state signals decides | v1.1 |
 | O1 | Evidence oracle | Receives exactly the gold units; ceiling of generation, measures P(correct \| sufficient) | v1.0 |
-| O2 | Stopping oracle | A3's search, stop decided by the gold label; ceiling of the detector given the search policy | v1.0 |
+| O2 | Stopping oracle | A3's search, stop decided by the gold label; the reference for "room" (not a strict ceiling under C) | v1.0 |
+| A3′ | Second run of A3 | Same arm run twice; the noise null for the gain decomposition (S1–S4) | v1.0 |
 | A6 | 16× context | Single-shot with 16 × B; answers "just add more context"; S3 only | v1.0 |
 
 Oracle figures (O1, O2) are never system scores and are labelled as oracle
@@ -123,8 +124,11 @@ not help reject near-certain evidence or recognize absence, so A4p stays near
 A3. If A4p matches A4 on those two strata, the detection thesis falls —
 outcome-space row 2.
 
-**Mediation prediction.** Among the questions where A4 reduces C, in **≥ 50%**
-A3 stopped at a step labelled insufficient and A4 did not.
+**Mediation prediction.** Among the questions where A4 reduces C relative to
+A3, the share where the judge **overrode a logged "answer" proposal at a step
+labelled insufficient**, net of the same share for the placebo A4p, is
+**≥ 50%**. The net share removes what forced extra search alone would produce;
+the exact definition is registered in E-001.
 
 ## Scope
 

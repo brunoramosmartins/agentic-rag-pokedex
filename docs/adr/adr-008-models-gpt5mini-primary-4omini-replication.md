@@ -31,10 +31,12 @@ tokens count as output. Estimates assume ~150 reasoning tokens per call
 
 ## Consequences
 
-- Budget (central / pessimistic / cap): v1.0 US$ 10.2 / 13.2 / **13.5**;
+- Budget (central / pessimistic / cap): v1.0 US$ 11.3 / 14.7 / **13.5**
+  (including the A3′ noise-null rerun, US$ 1.1 / 1.45; before it: 10.2 / 13.2);
   v1.1 4.1 / 5.3 / **5.5**; v1.2 2.7 / 3.3 / **3.5**.
-- Cut order for v1.0 if costs run over: (1) A6, (2) cue ablation, (3) O2 on
-  S3/S4. **Never cut** eval-L1 for A2, A3, A4 and A4p.
+- Cut order for v1.0 if costs run over: (1) A6, (2) cue ablation, (3) the A3′
+  rerun. **Never cut** eval-L1 for A2, A3, A4, A4p and O2. In the pessimistic
+  scenario the first two cuts bring v1.0 back to ~US$ 12.9, under the cap.
 - Cost gate (Phase 3): if measured cost per question exceeds 1.3× the estimate,
   the cut order is applied before Phase 4.
 - Every script that calls an LLM in a loop supports `--limit N` and prints an

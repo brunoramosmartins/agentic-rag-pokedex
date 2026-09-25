@@ -28,17 +28,23 @@ The A4 judge (`detectors/explicit_judge.py`):
   abstain.
 
 Prompt discipline: at most **3 iterations on dev, group-A templates only**, each
-recorded; then frozen with its hash in E-001.
+recorded; then frozen with its hash in E-001. **Parity:** the shared agent prompt
+(A3, A4, A4p) and the A2 answer prompt get the same budget, and any
+stratum-specific instruction that enters the judge prompt ("check the
+version", "is the list complete?") is copied verbatim into the shared agent
+prompt. Otherwise H1 would measure the instruction, not the detector — the same
+reasoning that gives every arm the same cost instruction (ADR-005).
 
 ## Consequences
 
 - "One more LLM call" is not the confounder. The remaining confounder is
   **searching more** — A4 may win just by taking more steps regardless of *when*
   it stops. That is what the depth placebo A4p exists for (ADR-010).
-- Gain decomposition becomes interpretable: the part of A4's gain from questions
-  where A3 and A4 stopped at the same step should be small, because the judge
-  adds nothing to the context. If it is not small, the gain comes from somewhere
-  else — reported, not explained away.
+- Gain decomposition becomes interpretable: A4's gain is split by the label
+  state at the final action (sufficient / insufficient / abstained), and a
+  second run of A3 (A3′) gives the same split under pure sampling noise; only
+  the excess is attributed to the judge. If the excess is small, the judge's
+  stopping decisions do not explain the gain — reported, not explained away.
 - The agent's proposed action is logged **before** the judge decides (ADR-004).
 - The judge is an LLM, but it is a **treatment**, not a measurement: no primary
   or mechanism endpoint is graded by an LLM.
