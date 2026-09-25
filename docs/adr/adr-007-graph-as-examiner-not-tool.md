@@ -1,6 +1,6 @@
 # ADR-007 — The Graph Is the Examiner, Never a Tool
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

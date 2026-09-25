@@ -1,6 +1,6 @@
 # ADR-001 — Theme and Thesis: Sequential Sufficiency Detection on a Pokémon Twin
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

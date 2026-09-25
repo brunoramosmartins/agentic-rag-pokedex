@@ -1,6 +1,6 @@
 # ADR-010 — Depth Placebo (A4p) and Release Slicing
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

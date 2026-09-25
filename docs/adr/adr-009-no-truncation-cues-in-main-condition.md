@@ -1,6 +1,6 @@
 # ADR-009 — No Truncation Cues in the Main Condition
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

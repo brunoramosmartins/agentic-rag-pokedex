@@ -1,6 +1,6 @@
 # ADR-008 — Models: GPT-5 mini Primary, GPT-4o-mini Replication
 
-**Status:** Proposed (Phase 0, 2026-09-24). Prices re-verified in
+**Status:** Accepted (Phase 0, 2026-09-25). Prices re-verified in
 `docs/data-sources.md` during Phase 0.
 
 ## Context

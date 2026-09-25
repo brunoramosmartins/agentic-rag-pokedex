@@ -1,6 +1,6 @@
 # ADR-005 — Cost Function: λ = 4 as the Test Scenario, λ\* as the Headline, and Hard Caps
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

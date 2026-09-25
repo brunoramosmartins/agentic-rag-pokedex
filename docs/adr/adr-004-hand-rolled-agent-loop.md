@@ -1,6 +1,6 @@
 # ADR-004 — Hand-Rolled Agent Loop
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

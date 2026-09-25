@@ -1,6 +1,6 @@
 # ADR-006 — The Sufficiency Judge Outputs a Boolean Only
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 

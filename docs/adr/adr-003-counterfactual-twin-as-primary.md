@@ -1,6 +1,6 @@
 # ADR-003 — Counterfactual Twin as the Primary Population
 
-**Status:** Proposed (Phase 0, 2026-09-24).
+**Status:** Accepted (Phase 0, 2026-09-25).
 
 ## Context
 
