@@ -31,8 +31,10 @@ runs/
 .DS_Store
 *:Zone.Identifier
 
-# Local copies of papers (third-party copyright; links live in notes/)
+# Local copies of papers and their extracted text (third-party copyright;
+# links live in notes/)
 papers/
+notes/sources/
 
 # Personal planning document and local tool configuration (not versioned)
 roadmap-*.md

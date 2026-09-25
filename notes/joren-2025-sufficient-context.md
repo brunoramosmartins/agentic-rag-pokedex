@@ -28,6 +28,13 @@ and before skimming Singh et al. 2025 (the survey).
 **Legend.** 🔄 = needs synthesis with another source. Cross-source questions
 (Joren × Ferrazzi × Singh) go in `notes/phase0-synthesis.md`, not here.
 
+**Reading material** (local extraction, gitignored; paths under
+`notes/sources/joren-2025-sufficient-context/`): `manifest.json`, and per
+prompt block — §1 → `sections/03`; §2 → `sections/04`; §3.1 → `sections/06`;
+§3.2 → `sections/07` + `24`–`27` (autorater prompt); §4.1 → `sections/09`;
+§4.2 → `sections/10` + `22`; §4.3 → `sections/11`; §5.1 → `sections/13`;
+§5.2 → `sections/14` + `19`, `21`; §6 → `sections/15`; B.3 → `sections/23`.
+
 ---
 
 ## §1 — Introduction
