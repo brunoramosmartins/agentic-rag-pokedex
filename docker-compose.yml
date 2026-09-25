@@ -5,6 +5,7 @@ services:
   neo4j:
     image: neo4j:5-community
     container_name: pokedex-neo4j
+    restart: unless-stopped
     ports:
       - "7474:7474"   # browser
       - "7687:7687"   # bolt
@@ -24,6 +25,7 @@ services:
   phoenix:
     image: arizephoenix/phoenix:latest
     container_name: pokedex-phoenix
+    restart: unless-stopped
     ports:
       - "6006:6006"   # UI + OTLP over HTTP
       - "4317:4317"   # OTLP over gRPC

@@ -139,7 +139,8 @@ interval, declared as a check, not a power test.
 
 The table above sizes for "the interval excludes zero". The verdict
 **supported** also needs the point estimate to be ≥ 0.25; at a true effect of
-exactly 0.25 that happens only half the time, whatever n is. Power is therefore
+exactly 0.25 that happens at most half the time, whatever n is (exactly half
+once z·SE ≤ 0.25; slightly less below that n, e.g. 0.498 at n = 320, SD = 2.0). Power is therefore
 computed for the event *supported* = {point ≥ 0.25 and lower limit > 0} at a
 **design effect Δ_design = 0.35**:
 

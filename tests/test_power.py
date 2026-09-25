@@ -59,9 +59,13 @@ def test_n_for_is_the_inverse_of_the_floor() -> None:
 
 def test_an_interaction_costs_four_times_the_questions() -> None:
     sd = math.sqrt(pw.E026_DISCORDANCE)
-    simple = pw.mde(57, sd)
-    per_group = pw.n_for(simple, sd, interaction=True)
-    assert per_group == 114  # two groups of 114 = 228 = 4 × 57
+    # The identity: two groups of 2n match the SE of one simple contrast on n.
+    assert pw.se_interaction(114, sd) == pytest.approx(pw.se_paired(57, sd))
+    # n_for sits exactly on that boundary, so floating point may land on 114
+    # or 115 per group; the claim is the ratio, not the last question.
+    per_group = pw.n_for(pw.mde(57, sd), sd, interaction=True)
+    assert per_group is not None
+    assert 2 * per_group == pytest.approx(4 * 57, rel=0.02)
 
 
 # ---------------------------------------------------------------------------
@@ -130,10 +134,19 @@ def test_p_supported_at_the_plan(delta: float, expected: list[float]) -> None:
     assert [round(pw.p_supported(delta, s, 320), 2) for s in SDS] == expected
 
 
-def test_supported_is_a_coin_flip_at_the_threshold() -> None:
+def test_supported_is_at_most_a_coin_flip_at_the_threshold() -> None:
+    # At a true effect of exactly 0.25, *supported* needs point >= 0.25: half
+    # the time at best. When z·SE > 0.25 the binding condition becomes
+    # "lower limit > 0" and the probability drops below one half.
     for sd in SDS:
-        for n in (320, 640, 5000):
-            assert pw.p_supported(0.25, sd, n) == pytest.approx(0.5)
+        for n in (100, 320, 640, 5000):
+            p = pw.p_supported(0.25, sd, n)
+            assert p <= 0.5 + 1e-12
+            z_se = pw.z_crit(pw.ALPHA_PER_CONTRAST) * pw.se_paired(n, sd)
+            if z_se <= 0.25:
+                assert p == pytest.approx(0.5)
+            else:
+                assert p < 0.5
 
 
 def test_n_star_at_design_effect() -> None:

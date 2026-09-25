@@ -243,3 +243,28 @@ root without overriding variables already set. `docker compose` reads the same
 file, so the Neo4j password and the API key live in one place. A project-only
 API key with a provider-side spending limit is recommended, as a second guard
 on the v1.0 cap. Dependency added: `python-dotenv` (core).
+
+## 2026-09-24 — Gate 7, token meter: PASS
+
+`scripts/check_token_meter.py`, 10 Standard-tier calls to gpt-5-mini
+(`reasoning_effort` low). Snapshot returned by the API:
+**`gpt-5-mini-2025-08-07`** — the candidate for the E-001 freeze manifest.
+
+- Meter totals equal the raw API usage summed independently: **yes**.
+- Local input counts within tolerance (5% or 10 tokens): **10 of 10**.
+- Measured cost: **US$ 0.001399** (prices as of 2026-09-24); the pre-flight
+  estimate was 0.0038 central / 0.0088 pessimistic, so it erred high, as it
+  should.
+
+Observations, recorded without changing the registered tolerance or the
+overhead constants:
+
+- The local count is **1 token low** on every call with a system message and
+  exact on the single user-message call. The largest gap was **5 tokens (11%)**
+  on the 4-message conversation — inside the 10-token absolute allowance, but
+  outside 5% relative. Agent prompts in this project are hundreds to thousands
+  of tokens, where a per-message offset of this size is well under 1%; the
+  multi-turn agent loop is the case to watch when Phase 5 builds it.
+- Reasoning tokens on these trivial prompts: 0 on 6 calls, 64–192 on 4 (mean
+  ~45). Not representative of agent steps; the central / pessimistic scenarios
+  (150 / 400) stay until Phase 3 measures them on real prompts.
