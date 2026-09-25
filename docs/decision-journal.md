@@ -195,3 +195,27 @@ raw API usage summed independently, and every local input count must be within
 5% or 10 tokens (whichever is larger) of the API's. The check makes 10 small
 Standard-tier calls (`scripts/check_token_meter.py`, well under US$ 0.01) and
 its result is logged here when it runs.
+
+## 2026-09-24 — power.py passes gate 7; P2 located; one rounding error corrected
+
+**Open item closed.** The P2 repository (`graphrag-mtg-rules`) is public on
+GitHub; E-026 and its instrument (`scripts/detectability.py`) were read at
+commit `b3f293e`. `evaluation/power.py` generalizes that method from a binary
+paired difference (SD² = discordance) to the expected-cost outcome of this
+project (any SD of D), and adds the verdict-specific functions (P(supported),
+P(refuted), n\*, n_max, the gate 8 decision).
+
+**Gate 7 — power script: PASS.** At P2's pooled discordance (17/57) it
+reproduces every published E-026 number: the six simple floors, the six
+interaction floors and all eight "n needed" values, the latter exactly. The
+check is `python -m agentic_pokedex.evaluation.power --reproduce-e026` and a
+test.
+
+**Correction.** The entry "The repo is self-contained; planning files stay
+local" above said the gate 3 figures were recomputed and "all values match",
+quoting n = 152 / 342 / 608 to detect 0.25. Those were rounded, not ceilinged:
+the smallest n reaching 80% power is **153 / 343 / 609**. Fixed in
+`docs/measurability-gate.md`; every other figure in gates 3 and 8 (MDE table,
+per-stratum MDE, H3 n, P(supported), n\*, P(refuted), the SD thresholds 2.03
+and 2.87) now comes from `power.py` and is pinned by tests that also parse the
+document.

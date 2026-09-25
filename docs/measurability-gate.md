@@ -121,7 +121,7 @@ Minimum detectable effect (in units of C), by pooled n and SD of D:
 | 640 | 0.122 | 0.183 | 0.244 |
 
 MDE = (z₀.₉₈₇₅ + z₀.₈₀) · SD / √n = 3.08 · SD / √n. The n needed to detect the
-action threshold 0.25: **152 / 342 / 608** pooled questions for SD 1.0 / 1.5 / 2.0.
+action threshold 0.25: **153 / 343 / 609** pooled questions for SD 1.0 / 1.5 / 2.0.
 
 **Action threshold, written before the run: 0.25 units of C.** In words: 1 in
 every 16 questions going from wrong to correct, or 1 in 12 going from wrong to
@@ -241,7 +241,7 @@ threshold or stratum.
 | Sufficiency labeler | Hand-built trajectories with known labels; 100% correct |
 | Grader | Audit of 100 outputs (gate 4) |
 | Token meter | Usage reported by the API on 10 calls (`scripts/check_token_meter.py`): the meter's totals equal the raw API usage, and every local input count is within 5% or 10 tokens of the API's |
-| Power script | Reproduces the detectability table of the previous project's E-026 |
+| Power script | Reproduces the detectability table of the previous project's E-026 (`graphrag-mtg-rules@b3f293e`): every floor, interaction floor and "n needed" (`python -m agentic_pokedex.evaluation.power --reproduce-e026`) |
 | Identity probe | **Positive control:** real pages **with their own name masked** must be identified in ≥ 50% (threshold fixed here, before running); if not, the probe is broken, not the twin safe |
 | Classifier (v1.1) | Evaluated only on held-out templates and on real trajectory states |
 | Depth placebo (A4p) | Total-variation distance ≤ 0.10 per stratum between the realized step distribution and A4's — checked before any result is read; one re-run with a new seed on failure |
