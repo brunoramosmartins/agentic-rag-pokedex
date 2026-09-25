@@ -44,6 +44,24 @@ The corpus is **rendered from the graph** (`world/render.py`):
   against hand-built trajectories (measurability gate 7).
 - Gate 7 check for the renderer: every graph fact appears in ≥ 1 unit and the
   fact → units registry is complete.
+- **Free text is outside the registry.** Pokédex flavor text is prose; the
+  registry cannot know whether a flavor unit states a gold fact (an evolution,
+  a type). An unregistered unit that gives the answer away makes the label say
+  `insufficient` while the agent holds the evidence, and the error lands in the
+  detector's precision and recall — it looks like a detector mistake and is a
+  labeler mistake. The labeler's golden trajectories cannot catch this: they
+  take the registry as given.
+- **Shortcut scan** (`examiner/`, gate 7), run on every generated question: any
+  unit that mentions the question's anchor entity **together with** the answer
+  (name or alias) and is not registered as carrying a gold-chain fact flags the
+  question. For numeric answers, the scan looks for the number in units of the
+  entity that owns the attribute (a bare "42" matches everywhere). Flagged
+  questions are inspected and re-labelled or discarded, with N-of-M published
+  in `docs/examiner.md`. The scan is itself checked on **planted leaks**,
+  including one in flavor text, before it is trusted.
+- The scan is lexical and misses paraphrase ("it grows into a fearsome
+  dragon"), so the G3 audit also reads the flavor text of the entities on
+  every audited chain.
 - **Declared limitation:** rendered text is cleaner than real documents — no
   contradictions, no internal jargon. Exactness of the label is chosen over
   realism. Real prose is parked as an external-validity idea (open-ideas).

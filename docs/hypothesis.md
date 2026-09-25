@@ -141,3 +141,6 @@ the exact definition is registered in E-001.
   the real world, where the model remembers.
 - Per-stratum readings are **descriptive**, with intervals; no single-stratum
   claim enters the verdict.
+- The verdict holds for **one model configuration** — GPT-5 mini at
+  `reasoning_effort` low (ADR-008). The GPT-4o-mini extension replicates the
+  direction of H1 only, not the mechanism.

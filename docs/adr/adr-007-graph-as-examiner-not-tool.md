@@ -48,6 +48,10 @@ rendered pages.
 - Reachability: every insufficiency subtype and every error code
   must be producible by at least one dev question, or unreachable by declared
   design.
+- Integrity of the minimal sufficient sets and of the fact ↔ unit mapping is
+  checked from **outside** the registry by the shortcut scan (ADR-002, gate 7).
+  The labeler's golden trajectories test the labeling function given the
+  registry; they cannot detect a unit the registry does not know about.
 - A Phase 5 anti-leak test: the agent never sees a label, subtype, withheld-unit
   mark or any metadata beyond the section header.
 

@@ -69,6 +69,8 @@ The price of Pokémon — contamination — is handled by the counterfactual twi
   "a plausible answer exists given C" vs "the units seen cover a gold minimal
   sufficient set") is fixed in `docs/examiner.md` after
   `notes/phase0-synthesis.md` S.3. The two can disagree on S2 and S3.
+  **Blocking for the E-001 freeze:** the labeler's golden trajectories
+  (measurability gate 7) cannot be written until the definition is fixed.
 - Honest framing: the twin controls the model's memory; it does not reproduce a
   company corpus. No business ROI is computed on the benchmark (see ADR-005).
 

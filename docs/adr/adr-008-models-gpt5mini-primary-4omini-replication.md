@@ -31,6 +31,13 @@ tokens count as output. Estimates assume ~150 reasoning tokens per call
 
 ## Consequences
 
+- **Scope of the claim.** v1.0 measures the effect for **one model
+  configuration**: GPT-5 mini (the dated snapshot recorded in the E-001 freeze
+  manifest) at `reasoning_effort` low. The effort level is part of the
+  configuration, not a detail. The GPT-4o-mini extension runs A1, A3 and A4
+  only — no A4p, no O2 — so it can replicate the **direction of H1**, not the
+  mechanism (placebo, mediation). Neither result is stated for other models
+  or effort levels.
 - Budget (central / pessimistic / cap): v1.0 US$ 11.3 / 14.7 / **13.5**
   (including the A3′ noise-null rerun, US$ 1.1 / 1.45; before it: 10.2 / 13.2);
   v1.1 4.1 / 5.3 / **5.5**; v1.2 2.7 / 3.3 / **3.5**.

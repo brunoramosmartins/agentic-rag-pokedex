@@ -268,3 +268,48 @@ overhead constants:
 - Reasoning tokens on these trivial prompts: 0 on 6 calls, 64–192 on 4 (mean
   ~45). Not representative of agent steps; the central / pessimistic scenarios
   (150 / 400) stay until Phase 3 measures them on real prompts.
+
+## 2026-09-25 — ADR review before acceptance
+
+The author reviewed ADRs 001–010: all ten decisions stand. Five carried a
+caveat; each was checked against the current text of the ADRs and E-001.
+
+- **Already covered, no change:** ADR-005 already calls λ = 4 the scenario of
+  the registered test, not a measured quantity. ADR-006's judge diagnostic
+  against the exact label is already an E-001 mechanism quantity (detector
+  precision / recall per step, by subtype).
+- **ADR-001:** the open item (definition of the sufficiency label) is now
+  marked as blocking for the E-001 freeze, since the labeler's golden
+  trajectories need it.
+- **ADR-002 and ADR-007:** a real gap. Pokédex flavor text is prose outside the
+  fact → units registry, so a flavor unit that states a gold fact would make
+  the label say `insufficient` while the agent holds the evidence — a labeler
+  error that reads as a detector error. The golden trajectories cannot catch
+  it, because they take the registry as given. Added: a **shortcut scan**
+  (a unit mentioning the question's anchor together with the answer, outside
+  the registered gold units, flags the question), validated on planted leaks,
+  and a read of the flavor text of every chain in the G3 audit. First drafted
+  as "the answer appears only in gold units"; rejected before writing,
+  because a species name appears in type lists and on every move page it
+  learns, so the rule would flag almost every question.
+- **ADR-008:** scope stated. v1.0 measures one model configuration (GPT-5 mini
+  at `reasoning_effort` low); the GPT-4o-mini extension runs A1, A3 and A4
+  only, so it replicates the direction of H1, not the mechanism. Mirrored in
+  `docs/hypothesis.md` → Scope.
+- **ADR-010:** the 50% cut of rows 2–4 is stated as a registered reading
+  convention (a majority rule), not a statistical threshold. The author's
+  other caveat — A4p's k comes from A4's behaviour, matched by distribution —
+  is the design, not a weakness: matching k per question would hand the
+  placebo the judge's per-question stopping information, so the placebo would
+  contain the treatment.
+- E-001 amended (draft; dated entry under Amendments): the shortcut scan joins
+  the instrument prerequisites, and the 50% note is added. No row definition
+  changed.
+
+**Plan impact PI-001:** Phase 1 — World and Phase 2 — Examiner — the fact →
+units registry was assumed complete by construction, but free-text units
+(Pokédex flavor text) can state gold facts it does not know about → Phase 2
+gains a shortcut scan checked on planted leaks (including one in flavor text),
+with its flags resolved and published N-of-M, and the G3 audit reads the
+flavor text of each audited chain; Phase 1's renderer must mark flavor units
+so the scan can find them. Open.

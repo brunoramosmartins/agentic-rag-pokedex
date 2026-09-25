@@ -238,7 +238,8 @@ threshold or stratum.
 |---|---|
 | Renamer (twin) | Round trip = identity, on 100% of entities |
 | Renderer | Every graph fact appears in ≥ 1 unit; the fact → units registry is complete |
-| Generator | Human audit (G3) |
+| Generator | Human audit (G3), which also reads the flavor text of the entities on every audited chain |
+| Shortcut scan | **Planted leaks** — hand-built units naming a question's anchor and its answer outside the gold units, one of them in flavor text — flagged 100%; then run on every generated question, flags published N-of-M |
 | Sufficiency labeler | Hand-built trajectories with known labels; 100% correct |
 | Grader | Audit of 100 outputs (gate 4) |
 | Token meter | Usage reported by the API on 10 calls (`scripts/check_token_meter.py`): the meter's totals equal the raw API usage, and every local input count is within 5% or 10 tokens of the API's |

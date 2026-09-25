@@ -175,8 +175,9 @@ not answering").
 | Price per million tokens at run time | _Phase 6_ |
 
 **Instrument prerequisites (measurability gate 7):** twin round trip 100%;
-renderer registry complete; generator audit ≥ 58/60 (G3); labeler 100% on
-golden trajectories; grader ≥ 98/100 on the audit; token meter matches API
+renderer registry complete; generator audit ≥ 58/60 (G3); shortcut scan 100%
+on planted leaks, with its flags on the generated questions resolved and
+published N-of-M; labeler 100% on golden trajectories; grader ≥ 98/100 on the audit; token meter matches API
 usage on 10 calls; identity probe positive control ≥ 50%.
 
 ### Analysis plan
@@ -267,7 +268,9 @@ Notes on the rows:
 - O2 − A3 in rows 6–7 uses a 95% BCa interval on eval S1–S4.
 - Rows 2–4 are assigned on point estimates (the 50% share of row 2, the 50%
   mediation of rows 3–4); the interval is printed next to the row, and the
-  assignment itself is not a significance test.
+  assignment itself is not a significance test. The 50% cut is a reading
+  convention (a majority rule), fixed before any data and derived from
+  nothing; the printed interval lets a reader apply another cut.
 - Placebo not delivered or harmful: row 2 cannot fire; it is stated next to
   rows 3–4 ("placebo uninformative").
 - If the S0 gain is large but H1 is not supported, the S0 reading is published
@@ -376,6 +379,14 @@ _Not run._
      secondary intervals 95% BCa pointwise.
   9. A2 sweep grid and criterion registered; the larger n\* governs both
      contrasts; rows 2–4 print intervals; Δ_design rationale stated.
+- **2026-09-25 — ADR review (before any code or data).** Changes:
+  1. Instrument prerequisites: the shortcut scan (ADR-002) is added — 100% on
+     planted leaks, flags on the generated questions resolved and published.
+     Reason: the labeler's golden trajectories take the fact → units registry
+     as given, and flavor text can state a gold fact the registry does not
+     know about.
+  2. Notes on the rows: the 50% cut of rows 2–4 is stated as a reading
+     convention, not a statistical threshold. No row definition changes.
 
 ---
 

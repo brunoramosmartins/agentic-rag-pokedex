@@ -40,6 +40,12 @@ One long release in spare time risks ending with nothing shipped.
 - Read through outcome-space row 2: if A4's gain over A4p is < 50% of its gain
   over A3, "the gain comes from searching more, not from knowing when to stop".
   H1b (A4 > A4p) is secondary, outside the Holm family.
+- **The 50% cut is a registered reading convention**, here and in the
+  mediation of rows 3–4: a majority rule ("did more than half of the gain go
+  through X?"), fixed before any data. It is not a statistical threshold and
+  follows from no derivation. The row is assigned on the point estimate, and
+  the bootstrap interval of the share is always printed beside it, so a reader
+  can apply a different cut.
 
 ### Release slicing
 
