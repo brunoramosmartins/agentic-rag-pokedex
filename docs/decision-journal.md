@@ -88,3 +88,32 @@ files were edited to remove references to the planning document.
 The power table in `docs/measurability-gate.md` was recomputed before
 publishing (MDE = 3.08 · SD / √n; n for 0.25 = 152 / 342 / 608; H3 n = 99 / 223 /
 396; per-stratum MDE at n = 80 = 0.31 / 0.47 / 0.63): all values match.
+
+## 2026-09-24 — G1 passed; E-001 and E-002 registered as drafts
+
+**G1 — pass** (`docs/data-sources.md`). PokéAPI BSD-3-Clause and MuSiQue
+CC BY 4.0 confirmed from the license files; PokéAPI pinned to commit
+`6bbd96bb`; SHA-256 recorded for 14 CSVs and the MuSiQue archive; learnsets
+complete for the candidate base version groups. Three findings change later
+phases:
+
+- **S2 needs cross-generation versions.** Levels differ in only 3% of shared
+  level-up pairs between scarlet-violet and sword-shield (59% vs
+  ultra-sun-ultra-moon). The Phase 1 version scope must span generations, and
+  the S2 generator keeps only pairs whose level differs.
+- **DLC version groups are empty** (moves folded into the base group).
+- **MuSiQue-Full test has no labels**: the v1.2 sample comes from dev.
+
+**Published benchmark:** twin-side, fact-level material only (ids, twin
+question text, answers, unit ids, seeds, pinned commit). No real names, no
+twin map, no unit text, no Pokédex text in any form; the corpus is rebuilt
+locally.
+
+**Registry.** E-001 (Layer 1) and E-002 (typed expansion) registered as
+`draft`. Analysis choices made explicit while drafting, beyond the
+measurability gate: paired bootstrap with 10,000 resamples for D and λ\*; Holm
+over the two bootstrap p-values; E-002 uses a deliberately generous A2 (k = 5,
+every link type) so its rule errs toward shrinking H2; dev split assumed
+balanced at 30 questions per stratum. Noted while drafting: E-002's "≥ 3 of 4
+strata" rule can only trigger through S1–S3, since S4 has no sufficient set by
+construction.
