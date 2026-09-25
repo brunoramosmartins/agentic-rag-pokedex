@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Secrets
+.env
+
+# IP compliance: raw PokéAPI data and the generated world are never committed.
+# Everything arrives via world/download.py with hash checks.
+data/raw/
+data/world/
+
+# Local run outputs (registered numbers live in experiments/registry.md)
+runs/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*:Zone.Identifier
+
+# Local copies of papers (third-party copyright; links live in notes/)
+papers/
+
+# Personal planning document and local tool configuration (not versioned)
+roadmap-*.md
+.claude/
+CLAUDE.md
