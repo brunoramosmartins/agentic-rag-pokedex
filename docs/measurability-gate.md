@@ -240,7 +240,7 @@ threshold or stratum.
 | Generator | Human audit (G3) |
 | Sufficiency labeler | Hand-built trajectories with known labels; 100% correct |
 | Grader | Audit of 100 outputs (gate 4) |
-| Token meter | Usage reported by the API on 10 calls |
+| Token meter | Usage reported by the API on 10 calls (`scripts/check_token_meter.py`): the meter's totals equal the raw API usage, and every local input count is within 5% or 10 tokens of the API's |
 | Power script | Reproduces the detectability table of the previous project's E-026 |
 | Identity probe | **Positive control:** real pages **with their own name masked** must be identified in ≥ 50% (threshold fixed here, before running); if not, the probe is broken, not the twin safe |
 | Classifier (v1.1) | Evaluated only on held-out templates and on real trajectory states |

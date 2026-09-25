@@ -179,3 +179,19 @@ design:
 The reviewer's refutation-power figure for SD = 1.0 (0.93) was recomputed
 before publishing and corrected to 0.99; the values for SD 1.5 and 2.0 (0.77,
 0.50) were confirmed.
+
+## 2026-09-24 — Token meter design
+
+`observability/tokens.py` and `observability/pricing.py` keep two numbers
+apart: the **pre-flight estimate** (local tokenizer count + assumed output and
+reasoning per call, printed before any LLM loop, which then waits for
+confirmation or `--yes`) and the **measured usage** (what the API reports per
+call — the only source for registered costs). Reasoning tokens are counted
+inside output tokens and never billed twice; a tier with no cached-input price
+bills cached tokens as uncached input.
+
+Gate 7 tolerance, fixed before the first call: the meter's totals must equal the
+raw API usage summed independently, and every local input count must be within
+5% or 10 tokens (whichever is larger) of the API's. The check makes 10 small
+Standard-tier calls (`scripts/check_token_meter.py`, well under US$ 0.01) and
+its result is logged here when it runs.
