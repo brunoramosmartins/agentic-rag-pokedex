@@ -67,7 +67,7 @@ cost instruction ("a wrong answer costs 4× not answering"), the caps
 | A2 | Fixed pipeline with typed expansion | Search → expand typed links from the pages found, up to B | v1.0 |
 | A3 | Agent, implicit detector | The model decides to stop / continue / abstain (ReAct-style) | v1.0 |
 | A4 | Agent, explicit detector | After each observation a judge answers only yes/no: "is this enough?" ([ADR-006](adr/adr-006-judge-outputs-boolean-only.md)) | v1.0 |
-| A4p | Depth placebo | A3's loop, forced to search until a step k drawn from A4's step distribution in the same stratum ([ADR-010](adr/adr-010-depth-placebo-and-release-slicing.md)) | v1.0 |
+| A4p | Depth placebo | A3's loop, forced to search until a step k assigned as a permutation of A4's realized step counts in the same stratum ([ADR-010](adr/adr-010-depth-placebo-and-release-slicing.md)) | v1.0 |
 | A5 | Agent, trained detector | A calibrated classifier over cheap state signals decides | v1.1 |
 | O1 | Evidence oracle | Receives exactly the gold units; ceiling of generation, measures P(correct \| sufficient) | v1.0 |
 | O2 | Stopping oracle | A3's search, stop decided by the gold label; the reference for "room" (not a strict ceiling under C) | v1.0 |

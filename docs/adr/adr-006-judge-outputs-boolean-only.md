@@ -23,9 +23,11 @@ The A4 judge (`detectors/explicit_judge.py`):
 - answers **only yes/no** ("the evidence is sufficient" / "not sufficient");
 - **puts nothing into the answering context** — no rationale, no summary, no
   missing-piece hint;
-- controls the loop and nothing else: yes → the agent answers; no → the agent
-  keeps searching; no at T_max, or the agent gives up while the judge says no →
-  abstain.
+- controls the loop and nothing else. It is called on **every** proposal the
+  agent makes after an observation (answer / search / abstain), and it can only
+  **veto an answer**: (answer, yes) → answer; (answer, no) → search; search and
+  abstain proposals pass through; at T_max, (answer, no) → abstain. The full
+  table, shared with A3 and A4p, is registered in E-001.
 
 Prompt discipline: at most **3 iterations on dev, group-A templates only**, each
 recorded; then frozen with its hash in E-001. **Parity:** the shared agent prompt

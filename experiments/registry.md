@@ -63,6 +63,22 @@ to stop** rather than to searching more or to sampling noise.
   `format-error` for the grader audit). An API failure after 3 retries on the
   same id scores **C = λ**, is counted per arm, and is never excluded.
 - **Judge output** other than yes/no is read as "no".
+- **Agent decision table** (A3, A3′, A4 and A4p run the same loop with the same
+  agent prompt; only the detector differs). After each observation the agent
+  proposes one of {answer, search, abstain}; the proposal is **logged before the
+  detector decides**.
+
+  | Proposal | A3 / A3′ (implicit) | A4: judge "yes" | A4: judge "no" | A4p before k | A4p at k |
+  |---|---|---|---|---|---|
+  | answer | answer | answer | search (**veto**) | search (**veto**) | answer |
+  | search | search | search | search | search | answer or abstain (the agent is asked to decide) |
+  | abstain | abstain | abstain | abstain | search (**veto**) | abstain |
+  | at T_max (search is not offered; the agent proposes answer or abstain) | as proposed | as proposed | abstain | — (k ≤ T_max) | — |
+
+  The A4 judge is called on **every** proposal. A **veto** is a detector
+  overriding an "answer" (or, for A4p, "abstain") proposal. The A4p agent is
+  never told about k; it proposes freely, and the vetoes are logged exactly as
+  for A4.
 - **S3 grading:** set equality after alias normalization; a partial or
   over-complete set is wrong.
 - **Pooled estimand:** the mean of D over S1–S4 with **equal weight per
@@ -113,6 +129,13 @@ S1–S4 as the criterion. Any stratum-specific instruction that enters the judge
 prompt (e.g. "check the version", "is the list complete?") is added verbatim to
 the shared agent prompt.
 
+**A2 sweep (Phase 4, dev group A):** grid k ∈ {2, 3, 5} × hybrid weight
+BM25/dense ∈ {0.3, 0.5, 0.7} × expansion depth ∈ {1, 2} × link-type order ∈
+{the E-002 order, its reverse}; criterion: mean C on dev S1–S4; ties go to the
+smaller k, then depth 1. The link-type set is defined in Phase 1 and appended
+here as a dated amendment before the sweep runs. The full grid, including what
+is not adopted, is published.
+
 **Run order:** A0, A1, A2, A3, A3′, A4, O1, O2, A6 → A4p (dose from A4;
 adherence checked before any result is read) → cue ablation on S3 (A3, A4 with
 total count and `(k/N)` markers). Batch API, idempotent per question id; a
@@ -120,8 +143,12 @@ failed job is re-run on the same ids, never re-drawn.
 
 **Depth placebo rules.**
 - If B binds before step k, A4p decides at that step; the question is flagged.
+- **Dose assignment:** within each stratum, A4p's k values are a seeded
+  random **permutation of A4's realized step counts** (not independent draws),
+  so the dose matches A4's distribution exactly by construction.
 - **Adherence:** total-variation distance ≤ 0.10, per stratum, between the
-  realized A4p step distribution and A4's. On failure, one re-run with a new
+  realized A4p step distribution and A4's; with the permutation it measures
+  only B binding and early termination. On failure, one re-run with a new
   registered seed; if it fails again, row 2 reads "placebo not delivered".
 
 **Fixed parameters:** λ = 4; T_max = 6 steps; B = 4,000 evidence tokens;
@@ -159,11 +186,13 @@ usage on 10 calls; identity probe positive control ≥ 50%.
 - **Primary contrasts:** H1 = D(A3 − A4) and H2 = D(A2 − A4), both on S1–S4
   pooled. The H2 population is **always S1–S4**; E-002 cannot change it.
 - **Inference.**
-  - p-values: paired **sign-flip randomization test** on D (10,000 flips, seed
-    in the manifest); Holm-adjusted p-values reported for {H1, H2}.
-  - Intervals: **BCa bootstrap** (10,000 resamples) at **97.5%** for both
-    contrasts (Bonferroni, conservative relative to Holm). The verdict uses
-    these intervals.
+  - The **verdict is decided by the intervals alone**: BCa bootstrap (10,000
+    resamples) at **97.5%** for both contrasts (Bonferroni over the family).
+  - p-values from a paired **sign-flip randomization test** on D (10,000
+    flips), raw and Holm-adjusted, are reported as **descriptive**; any
+    disagreement between a p-value and its interval is reported.
+  - All **secondary intervals** are 95% two-sided BCa (exact sign-flip for a
+    single stratum), pointwise, not adjusted for multiplicity.
 - **Three-valued verdict** per contrast:
   - **supported** — the interval excludes zero in favour of the treatment
     **and** the point estimate is ≥ 0.25;
@@ -174,16 +203,22 @@ usage on 10 calls; identity probe positive control ≥ 50%.
   discordant pairs**. Per-stratum readings are descriptive.
 
 **Mechanism quantities.**
-- **Mediated gain:** a question with C(A4) < C(A3) where, at some step labelled
-  insufficient, A4's **logged proposed action was "answer" and the judge
-  returned "no"**. The same count is computed for A4p vs A3 (the agent proposed
-  "answer" before step k and was forced to continue) as a placebo baseline. The
-  **published mediation figure is the difference** (A4 minus A4p), as a share
-  of the questions where C(A4) < C(A3), with its bootstrap interval.
-- **Gain decomposition by label state at the final action** (sufficient /
-  insufficient / abstained): A4's gain over A3 split by the transition between
-  the two arms' final label states. The **same decomposition for A3 vs A3′** is
-  the noise null: only the excess over A3 vs A3′ is attributed to the judge.
+- **Mediation.** m_X = number of questions with C(X) < C(A3) **and** at least
+  one detector veto of an "answer" proposal at a step labelled insufficient,
+  for X ∈ {A4, A4p}; g_A4 = number of questions with C(A4) < C(A3).
+  **Mediation = (m_A4 − m_A4p) / g_A4**, with a paired-bootstrap 95% interval.
+  - It can be negative: that reads as row 4, "forced search explains the
+    vetoes".
+  - If the placebo is not delivered or is harmful, rows 3–4 use the **gross**
+    mediation m_A4 / g_A4, labelled "not net of placebo".
+- **Gain decomposition.** Questions are classified by the transition of the
+  label state at the final action (sufficient / insufficient / abstained)
+  between A3 and the compared arm. For each transition cell, the net C-gain
+  is reported for **A4 vs A3, A4p vs A3 and A3′ vs A3**, on the same A3 run.
+  The share attributed to the judge in a cell is **(A4 − A4p)**, with a
+  paired-bootstrap interval; A3′ only calibrates how often each transition
+  happens by sampling noise. If A3′ is cut, the decomposition is published with
+  "no noise null".
 - **Placebo (H1b):** gain of A4 over A4p as a share of the gain of A4 over A3,
   with its bootstrap interval.
 - **Detector precision / recall per step**, against the exact label, by
@@ -217,16 +252,22 @@ the agent's cost multiplier next to every gain; A6 vs A1 on S3.
 
 | # | Condition | Published reading |
 |---|---|---|
-| 0 | **Gate 8 descriptive branch** (n\* > 640) | No verdict. Detector precision / recall by subtype with intervals; the README states the budget did not support a cost claim |
+| 0 | **Gate 8 descriptive branch** (n\* > n_max) | No verdict. Detector precision / recall by subtype with intervals; the README states the budget did not support a cost claim |
+| 0b | **Futility fired before the opening** (upper 80% limit of O2 − A3 on dev S1–S4 < 0.25) | "A gold-label stop applied to A3's search did not reach the threshold on dev." H1 on eval is descriptive only and cannot enter rows 1–7; H2 is read as usual |
 | 1 | **Falsifier fired**: H1 supported, the S0 gain is ≥ 50% of the pooled gain, **and** the S0 interval excludes zero in favour of A4 (≥ 10 discordant pairs) | "The gain exists but is not attributable to detection: it appears where there is nothing to detect." |
 | 2 | H1 supported, placebo delivered and not harmful (lower limit of C(A3) − C(A4p) > −0.25), and A4's gain over A4p is < 50% of its gain over A3 | "The gain comes from searching more, not from knowing when to stop." |
 | 3 | H1 supported and mediation ≥ 50% | **Thesis supported**: deliberate detection reduces cost, and the gain goes through correct stops |
 | 4 | H1 supported and mediation < 50% | "The judge helps, but by another path" — diagnosis by subtype and steps spent |
 | 5 | H1 refuted | "Deliberate detection does not pay for itself here." If A4 is worse: abstains too much, or stops too late? |
 | 6 | H1 inconclusive and the upper 95% limit of O2 − A3 is < 0.25 | "A gold-label stop applied to A3's search does not reach the threshold." |
-| 7 | H1 inconclusive otherwise | "There is room, and the explicit judge does not capture it" — motivates v1.1 |
+| 7 | H1 inconclusive and the lower 95% limit of O2 − A3 ≥ 0.25 | "There is room, and the explicit judge does not capture it" — motivates v1.1 |
+| 7b | H1 inconclusive otherwise | "Neither the gain nor the room is resolved at this n." |
 
 Notes on the rows:
+- O2 − A3 in rows 6–7 uses a 95% BCa interval on eval S1–S4.
+- Rows 2–4 are assigned on point estimates (the 50% share of row 2, the 50%
+  mediation of rows 3–4); the interval is printed next to the row, and the
+  assignment itself is not a significance test.
 - Placebo not delivered or harmful: row 2 cannot fire; it is stated next to
   rows 3–4 ("placebo uninformative").
 - If the S0 gain is large but H1 is not supported, the S0 reading is published
@@ -242,17 +283,22 @@ Notes on the rows:
 
 **Sizing, abort and futility (applied in Phase 6, before the opening):**
 - Power targets the event *supported* = {point ≥ 0.25 and lower limit > 0}.
-  Design effect **Δ_design = 0.35**; n\* = the smallest pooled n with
-  P(supported | Δ_design) ≥ 0.80 under the normal approximation.
+  Design effect **Δ_design = 0.35**, chosen for budget: 0.30 would need
+  n ≈ 638 at SD 1.5. True effects in [0.25, 0.35) have 50–88% power at the plan.
+  n\* = the smallest pooled n with P(supported | Δ_design) ≥ 0.80 under the
+  normal approximation.
 - SD_sup = upper limit of the 80% percentile-bootstrap interval of the SD of D
   on the dress-rehearsal S1–S4 questions, computed **separately for D(A3 − A4)
-  and D(A2 − A4)**; the larger n\* governs.
-- n\* ≤ 320 (SD_sup ≤ 2.03): keep the plan. 320 < n\* ≤ 640 (SD_sup ≤ 2.87): draw
-  more questions up to n\*, balanced by stratum, paid by the cut order.
-  n\* > 640: row 0.
+  and D(A2 − A4)**. **The larger n\* governs both contrasts** (intended: the two
+  share one eval-L1 draw).
+- **n_max** = the largest pooled S1–S4 n the v1.0 cap pays for after cuts
+  (1)–(3) of the cut order, computed with the **Phase 3 measured costs** and
+  written in the decision journal **before the dress rehearsal**.
+- n\* ≤ 320: keep the plan. 320 < n\* ≤ n_max: draw more questions up to n\*,
+  balanced by stratum. **n\* > n_max: row 0.** There is no cap increase after
+  the dress rehearsal.
 - **Futility:** if the upper 80% limit of O2 − A3 on dev S1–S4 is below 0.25,
-  H1 is declared without room before the opening (row 6 by rule). eval-L1 is
-  still opened, for H2 and for a descriptive H1.
+  row 0b applies. eval-L1 is still opened, for H2 and for a descriptive H1.
 
 ### Error taxonomy (fixed before the run; mostly mechanical)
 
@@ -282,8 +328,8 @@ rendered; no code is published as a count only.
 | S4 no answer | Tie (both wrong) | Answers from another version | **Large gain**, with more tokens | Abstention instead of invention |
 
 - **Placebo:** on S1, A4p between A3 and A4; on S2 and S4, A4p near A3.
-- **Mediation (A4 minus A4p):** ≥ 50%.
-- **Decomposition:** the A4 vs A3 transitions exceed the A3 vs A3′ null.
+- **Mediation (m_A4 − m_A4p) / g_A4:** ≥ 50%.
+- **Decomposition:** the (A4 − A4p) share is concentrated in the insufficient → sufficient/abstained cells.
 - **Overall:** outcome-space **row 3**; H2 supported; vs A3, λ\* case "tipping
   above λ\*" or "A4 dominates".
 
@@ -314,6 +360,22 @@ _Not run._
      withheld units removed globally.
   10. Definitions (step, stop, error handling, S3 grading), dev/eval
       separation, balanced template sampling.
+- **2026-09-24 — second red-team pass (before any code or data).** Changes:
+  1. Row 0b: futility fired before the opening keeps H1 descriptive.
+  2. Agent decision table registered (proposal × detector → action; veto
+     defined; A4p never told about k).
+  3. Gate 8 extra-questions branch capped at **n_max**, computed from Phase 3
+     costs before the dress rehearsal; n\* > n_max → row 0; no cap increase.
+  4. A4p dose as a permutation of A4's realized steps.
+  5. Mediation = (m_A4 − m_A4p) / g_A4, negative reading and gross fallback
+     defined.
+  6. Row 7 requires the lower limit of O2 − A3 ≥ 0.25; row 7b added.
+  7. Decomposition attributes (A4 − A4p) per transition cell; A3′ calibrates
+     noise only.
+  8. The verdict is decided by the intervals alone; p-values descriptive;
+     secondary intervals 95% BCa pointwise.
+  9. A2 sweep grid and criterion registered; the larger n\* governs both
+     contrasts; rows 2–4 print intervals; Δ_design rationale stated.
 
 ---
 

@@ -26,8 +26,8 @@ pipeline?"*
 
 Concrete consumers: (a) the README's recommendation; (b) whether to open a
 multi-agent follow-up project — it only makes sense if detecting insufficiency
-matters; (c) the v1.1 extension itself — if not even a perfect detector (O2)
-pays, the classifier loses its reason to exist.
+matters; (c) the v1.1 extension itself — if not even a gold-label stop on the agent's
+own search (O2) pays, the classifier loses its reason to exist.
 
 **Fails if:** two possible outcomes lead to the same recommendation. The
 outcome space below maps every combination to a different reading, and
@@ -48,16 +48,19 @@ BCa bootstrap interval (Bonferroni over the two primary contrasts):
 
 | # | Condition | Published reading |
 |---|---|---|
-| 0 | **Gate 8 descriptive branch** (n\* > 640) | No verdict: detector precision / recall by subtype, with intervals; the README states the budget did not support a cost claim |
+| 0 | **Gate 8 descriptive branch** (n\* > n_max) | No verdict: detector precision / recall by subtype, with intervals; the README states the budget did not support a cost claim |
+| 0b | **Futility fired before the opening** (gate 8) | "A gold-label stop applied to A3's search did not reach the threshold on dev." H1 on eval is descriptive only and cannot enter rows 1–7; H2 is read as usual |
 | 1 | **Falsifier fired**: H1 supported, the S0 gain is ≥ 50% of the pooled gain **and** the S0 interval excludes zero in favour of A4 (≥ 10 discordant pairs) | "The gain exists but is not attributable to detection: it appears where there is nothing to detect." |
 | 2 | **Placebo explains the gain**: H1 supported, placebo delivered and not harmful, and A4's gain over A4p is < 50% of its gain over A3 | "The gain comes from searching more, not from knowing when to stop." A4's token cost becomes the argument against it |
 | 3 | H1 supported and mediation ≥ 50% | **Thesis supported**: deliberate detection reduces cost, and the gain goes through correct stops |
 | 4 | H1 supported and mediation < 50% | "The judge helps, but by another path" — diagnosis by subtype and steps spent |
 | 5 | H1 refuted | "Deliberate detection does not pay for itself here." If A4 is worse, diagnosis by subtype: abstains too much? stops too late? |
 | 6 | H1 inconclusive and the upper 95% limit of O2 − A3 < 0.25 | "A gold-label stop applied to A3's search does not reach the threshold." A finding about the premise |
-| 7 | H1 inconclusive otherwise | "There is room, and the explicit judge does not capture it" — directly motivates v1.1 |
+| 7 | H1 inconclusive and the lower 95% limit of O2 − A3 ≥ 0.25 | "There is room, and the explicit judge does not capture it" — directly motivates v1.1 |
+| 7b | H1 inconclusive otherwise | "Neither the gain nor the room is resolved at this n." |
 
-Mediation counts the questions where A4 beats A3 and the judge overrode a
+Rows 2–4 are assigned on point estimates, with the interval printed next to the
+row. Mediation counts the questions where A4 beats A3 and the judge overrode a
 logged "answer" proposal at an insufficient step, **net of the same count for
 the placebo A4p**. The exact definitions, the placebo delivery rules and the
 A3′ noise null are registered in E-001 (`experiments/registry.md`).
@@ -103,8 +106,9 @@ typical |D| ≈ 3 gives **SD ≈ 1.64**.
 
 **Convention printed next to the number:** *n* is the number of **paired
 questions pooled over strata S1–S4**, not per stratum. Primary family of two
-contrasts (H1, H2) with Holm; sizing uses α = 0.025 two-sided (Bonferroni,
-conservative relative to Holm), power 0.80.
+contrasts (H1, H2). The **verdict is decided by 97.5% BCa intervals**
+(Bonferroni, α = 0.025 two-sided per contrast); sign-flip p-values, raw and
+Holm-adjusted, are reported as descriptive. Sizing uses the same α, power 0.80.
 
 Minimum detectable effect (in units of C), by pooled n and SD of D:
 
@@ -150,9 +154,21 @@ n\* for P(supported) ≥ 0.80 at Δ_design = 0.35: **78 / 175 / 311** pooled
 questions for SD 1.0 / 1.5 / 2.0. The plan of 320 holds up to SD ≈ 2.03. In
 words: the design is powered to call an effect of 0.35 *supported*; an effect of
 exactly 0.25 is a coin flip, and that is stated next to the verdict.
+**Δ_design = 0.35 is a budget choice**, not a relevance claim: 0.30 would need
+n ≈ 638 at SD 1.5. True effects in [0.25, 0.35) have 50–88% power at the plan.
+
+**Power to refute.** *Refuted* needs the upper limit below 0.25. At n = 320:
+
+| P(refuted) | SD = 1.0 | SD = 1.5 | SD = 2.0 |
+|---|---:|---:|---:|
+| true effect 0 | 0.99 | 0.77 | 0.50 |
+| true effect 0.10 | 0.67 | 0.33 | 0.18 |
+
+A null or small effect with a noisy D often lands in rows 6–7b rather than in
+row 5; the README says so when it happens.
 
 **Fails if:** the SD of D measured in the dress rehearsal (Phase 6) requires
-n > 640 → gate 8.
+n\* > n_max → gate 8.
 
 ---
 
@@ -200,11 +216,11 @@ descriptive interval and the falsifier rule.
   shortcut rate, closed-book accuracy on the twin, implicit-detector firing rate
   (descriptive).
 - **Phase 6 (dress rehearsal, dev):** every v1.0 arm on 60 questions.
-  Estimates the SD of D between A3 and A4 and uses the **upper limit of its 80%
-  interval** for the final sizing.
+  Estimates the SD of D for **both** contrasts (A3 − A4 and A2 − A4) and uses
+  the **upper limit of each 80% interval** for the final sizing (gate 8).
 
-The effect used for sizing is **always the 0.25 threshold**, never the
-difference observed on dev.
+The effect used for sizing is **always the registered design effect
+Δ_design = 0.35** (gate 3), never the difference observed on dev.
 
 Because the gold is generated, **the size of the evaluation split stays
 adjustable until its ids are frozen** in Phase 6: the instrument is not fixed
@@ -241,13 +257,17 @@ its registered check.
 the 80% percentile-bootstrap interval of the SD of D on the dress-rehearsal
 S1–S4 questions, computed **separately for D(A3 − A4) and D(A2 − A4)**. n\* =
 the smallest pooled n with P(supported | Δ_design = 0.35) ≥ 0.80; the larger of
-the two n\* governs.
+the two n\* governs both contrasts.
+
+**n_max** = the largest pooled S1–S4 n the v1.0 cap pays for after the cut
+order ([`contingency.md`](contingency.md), G5), computed with the **Phase 3
+measured costs** and written in the decision journal **before the dress
+rehearsal**. There is no cap increase after the dress rehearsal.
 
 - **n\* ≤ 320 (SD_sup ≤ 2.03):** keep the plan.
-- **320 < n\* ≤ 640 (SD_sup ≤ 2.87):** the generator draws more questions up to
-  n\*, balanced by stratum, and the extra cost is paid by the v1.0 cut order
-  ([`contingency.md`](contingency.md), G5).
-- **n\* > 640:** H1 and H2 stop being superiority tests (outcome-space row 0).
+- **320 < n\* ≤ n_max:** the generator draws more questions up to n\*, balanced
+  by stratum.
+- **n\* > n_max:** H1 and H2 stop being superiority tests (outcome-space row 0).
   The primary claim becomes **descriptive**: detector precision / recall by
   insufficiency subtype, with intervals, and the README states that the budget
   did not support a cost claim. Registered now, not negotiated later.
@@ -255,7 +275,7 @@ the two n\* governs.
 **Futility (Phase 6, before the opening):** if the **upper 80% limit** of the
 O2 − A3 difference on dev S1–S4 is below 0.25, a gold-label stop applied to
 A3's own search would not reach the threshold. H1 is declared without room
-before the opening (row 6 by rule). eval-L1 is still opened, for H2 and for a
+before the opening (outcome-space row 0b). eval-L1 is still opened, for H2 and for a
 descriptive H1. O2 is an oracle and is labelled as such wherever quoted; it is
 not a strict ceiling under C, because abstaining on sufficient but error-prone
 questions can beat it.

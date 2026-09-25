@@ -17,8 +17,10 @@ One long release in spare time risks ending with nothing shipped.
 
 ### Depth placebo A4p
 
-- Runs the A3 loop, but the agent **decides only at step k**; before k it must
-  search. k is **drawn from A4's step distribution in the same stratum**.
+- Runs the A3 loop, but the agent **decides only at step k**; before k every
+  answer or abstain proposal is vetoed. k is assigned as a seeded **permutation
+  of A4's realized step counts in the same stratum**, so the dose matches A4's
+  distribution by construction. The agent is never told about k.
 - At step k the model answers or abstains.
 - **Why the same stratum:** it is the hardest control possible. A4p knows how
   much to search, on average, for each kind of question — it just does not know
@@ -52,8 +54,8 @@ v1.0 is the product. Extensions are separate releases, decided with the
 
 ## Consequences
 
-- A4p is in the never-cut set of v1.0 (with A2, A3, A4): without it the mechanism
-  cannot be read.
+- A4p is in the never-cut set of v1.0 (with A2, A3, A4 and O2): without it the
+  mechanism cannot be read.
 - Placebo prediction registered in E-001: on S1, blind extra search recovers
   part of the missing hop (A4p between A3 and A4); on S2 and S4 extra search does
   not help reject near-certain evidence or recognize absence (A4p near A3). If

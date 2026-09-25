@@ -150,3 +150,32 @@ Documents updated the same day: `experiments/registry.md`,
 `docs/measurability-gate.md` (gates 1, 3, 7, 8), `docs/contingency.md`,
 `docs/hypothesis.md`, `docs/data-sources.md`, ADR-005, ADR-006, ADR-008,
 ADR-010.
+
+## 2026-09-24 — Second red-team pass applied; n_max replaces any cap increase
+
+A second adversarial pass verified the first revision (8 of 12 findings fully
+resolved, 4 partially) and found 3 blockers, 5 major and 6 minor issues. All
+were adopted; the E-001 Amendments list them. The decisions that change the
+design:
+
+- **n_max instead of a larger budget.** The gate 8 "draw more questions"
+  branch could not be paid for in the pessimistic scenario (~120 extra
+  questions after all cuts, not 320). n_max — the largest pooled n the US$ 13.5
+  cap pays for after the cut order — is computed from the Phase 3 measured
+  costs and logged **before the dress rehearsal**. If the dress rehearsal asks
+  for more, the verdict becomes descriptive (row 0). The cap is not raised.
+  Chosen over a contingency cap of ~US$ 16: a noisy D ends in an honest
+  descriptive result rather than in a budget negotiated after seeing dev noise.
+- **Futility has its own row (0b)**, so an H1 declared without room before the
+  opening can never be published as "thesis supported".
+- **The agent decision table is registered** (proposal × detector → action).
+  A3, A4 and A4p share one loop and one prompt; the detector can only veto;
+  the A4p agent is never told about k. Mediation is now
+  (m_A4 − m_A4p) / g_A4 over vetoes, and the placebo dose is a permutation of
+  A4's realized steps.
+- **The verdict is decided by the 97.5% BCa intervals alone**; p-values are
+  descriptive.
+
+The reviewer's refutation-power figure for SD = 1.0 (0.93) was recomputed
+before publishing and corrected to 0.99; the values for SD 1.5 and 2.0 (0.77,
+0.50) were confirmed.

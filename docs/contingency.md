@@ -12,7 +12,7 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
 | **G1 — Data and licenses** | Phase 0 | The PokéAPI CSV is unavailable, its license is not BSD-3, or the chosen game versions have learnset gaps | Swap the versions in scope for others with complete coverage; as a last resort, any CC0 graph (e.g. Wikidata) — the pipeline is domain-agnostic |
 | **G2 — The twin does not leak** | Phases 1 and 3 | Identity probe: the model recognizes the real entity from the renamed page in > 10% of 50 pages; or closed-book (A0) on the twin scores > 5% | Mask or remove the Pokédex flavor text (main suspect); if it persists, primary-population questions exclude the leaking templates, decided on dev and recorded |
 | **G3 — Generator correct** | Phase 2 | Human audit of 60 stratified questions finds < 58 correct gold answers | Fix and re-audit a **fresh** sample; after 3 iterations, remove the failing templates and record it |
-| **G4 — Power** | Phases 3 and 6 | The pooled n required, using the SD of D measured on dev, exceeds what the budget pays for | Abort criterion of [measurability gate 8](measurability-gate.md#gate-8--the-abort-criterion) |
+| **G4 — Power** | Phases 3 and 6 | The pooled n required, using the SD of D measured on dev, exceeds n_max (what the cap pays for after cuts) | Abort criterion of [measurability gate 8](measurability-gate.md#gate-8--the-abort-criterion) |
 | **G5 — Last exit** | Any | Motivation or budget collapses | v1.0 (Layer 1 verdict + release) is the product; the v1.1 and v1.2 extensions are separate releases, cuttable without losing the verdict |
 
 ---
@@ -65,9 +65,11 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   6–7 of the outcome space cannot be told apart.
 - **Pessimistic scenario:** with A3′ the v1.0 estimate is US$ 11.3 central /
   14.7 pessimistic against the 13.5 cap. Cutting A6 and the cue ablation saves
-  ~US$ 1.8 in the pessimistic case (→ ~12.9). If gate 8 also asks for extra
-  questions, A3′ is cut before any cap increase; a cap increase, if ever
-  needed, is a dated decision taken before Phase 6.
+  ~US$ 1.8 in the pessimistic case (→ ~12.9).
+- **n_max:** with Phase 3 measured costs, the largest pooled S1–S4 n the cap
+  pays for after all three cuts is computed and logged **before the dress
+  rehearsal**. If gate 8 asks for more than n_max, the verdict becomes
+  descriptive (row 0). **The cap is not raised.**
 - **Extension cut order:** (1) GPT-4o-mini replication, (2) MuSiQue, (3) real
   world, (4) the whole v1.1 — the last only by rule (outcome-space row 6, or the
   Phase 8 futility rule), never by fatigue.

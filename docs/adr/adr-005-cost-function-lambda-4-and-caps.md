@@ -36,8 +36,9 @@ errs less and abstains more:
 
 and A4 is worth it for every λ > λ\*. The four cases (A4 dominates; tipping above
 λ\*; tipping below λ\*; A4 dominated) are enumerated in E-001. λ\* is reported
-with a paired-bootstrap interval, next to each arm's operating point (error,
-abstention) on one chart. Sensitivity at λ ∈ {2, 4, 9} is also reported.
+with a paired-bootstrap interval **when the error difference is resolved** (see
+Consequences), next to each arm's operating point (error, abstention) on one
+chart. Sensitivity at λ ∈ {2, 4, 9} is also reported.
 
 **The owner's cost is a cap, not a weight:** **T_max = 6 steps** and **B = 4,000
 evidence tokens** per question, identical for all arms. LLM tokens spent are an
