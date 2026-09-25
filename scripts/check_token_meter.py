@@ -11,7 +11,7 @@ Prints the estimated cost and asks for confirmation before the first call.
 Writes the per-call results to ``runs/`` (gitignored); the summary goes into
 the decision journal by hand.
 
-Requires the `llm` extra and OPENAI_API_KEY:
+Requires the `llm` extra and OPENAI_API_KEY (environment, or `.env` as fallback):
 
     pip install -e ".[llm]"
     python scripts/check_token_meter.py
@@ -25,6 +25,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from agentic_pokedex.config import load_env
 from agentic_pokedex.observability.pricing import PRICES_AS_OF, Tier
 from agentic_pokedex.observability.tokens import (
     INPUT_TOLERANCE_ABS,
@@ -135,6 +136,7 @@ def main() -> int:
 
     from openai import OpenAI
 
+    load_env()
     client = OpenAI()
     meter = UsageMeter(model=args.model, tier=Tier.STANDARD)
     raw_sum = {"input": 0, "cached": 0, "output": 0, "reasoning": 0}

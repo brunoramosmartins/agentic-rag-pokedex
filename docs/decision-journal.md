@@ -219,3 +219,27 @@ the smallest n reaching 80% power is **153 / 343 / 609**. Fixed in
 per-stratum MDE, H3 n, P(supported), n\*, P(refuted), the SD thresholds 2.03
 and 2.87) now comes from `power.py` and is pinned by tests that also parse the
 document.
+
+## 2026-09-24 — Two test assertions corrected; services restart on their own
+
+The first test run (105 passed, 2 failed) exposed two claims of mine that were
+too strong, not bugs in `power.py`:
+
+- "*Supported* at a true effect of 0.25 is a coin flip whatever n is" is only
+  true once z·SE ≤ 0.25. Below that n the binding condition is "lower limit >
+  0" and the probability is slightly under one half (0.498 at n = 320,
+  SD = 2.0). Gate 3 now says "at most half"; the test checks both regimes.
+- "An interaction needs exactly 114 per group to match the simple floor at
+  n = 57" sits on a floating-point boundary (114 or 115). The test now checks
+  the SE identity and the 4× ratio, which are the actual claims.
+
+`docker-compose.yml`: both services get `restart: unless-stopped`. Phoenix had
+received a stop signal and exited cleanly while Neo4j kept running.
+
+## 2026-09-24 — Secrets come from the environment, with `.env` as fallback
+
+`agentic_pokedex.config.load_env()` reads the gitignored `.env` at the repo
+root without overriding variables already set. `docker compose` reads the same
+file, so the Neo4j password and the API key live in one place. A project-only
+API key with a provider-side spending limit is recommended, as a second guard
+on the v1.0 cap. Dependency added: `python-dotenv` (core).
