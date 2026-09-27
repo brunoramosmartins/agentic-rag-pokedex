@@ -15,11 +15,21 @@ Rule for surveys: every claim this project relies on must be traced to its
 primary source; the survey is a map, never a citation for a number.
 
 **Cross-refs used throughout:**
-- [`docs/adr/adr-001-theme-and-thesis.md`](../docs/adr/adr-001-theme-and-thesis.md) (planned)
+- [`docs/adr/adr-001-theme-and-thesis.md`](../docs/adr/adr-001-theme-and-thesis.md) — positioning (see its Updates)
 - `README.md` — "how this fits the literature" paragraph (Phase 7)
 - [`notes/yan-2024-crag.md`](yan-2024-crag.md), [`notes/jeong-2024-adaptive-rag.md`](jeong-2024-adaptive-rag.md) — the primary sources behind two taxonomy boxes
 
 **Legend.** 🔄 → `notes/phase0-synthesis.md`.
+
+**Reading material** (local extraction, gitignored; paths under
+`notes/sources/singh-2025-agentic-rag-survey/`; the extraction splits the
+survey into 105 small files): `manifest.json`, and per prompt block — T.1 →
+`sections/27`–`69` (taxonomy §5: router 28–30, multi-agent 31–36,
+hierarchical 37–42, **corrective 43–47**, **adaptive 48–52**, graph 53–63,
+document workflows 64–69) + `70` (comparative table); W.1 → `sections/22`
+(prompt chaining), `23` (routing), `26` (evaluator-optimizer); L.1 →
+`sections/89` and `93` (lessons), `96` (benchmarks), `99` (evaluation beyond
+output quality).
 
 ---
 
