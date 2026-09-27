@@ -36,6 +36,11 @@ stratum-specific instruction that enters the judge prompt ("check the
 version", "is the list complete?") is copied verbatim into the shared agent
 prompt. Otherwise H1 would measure the instruction, not the detector — the same
 reasoning that gives every arm the same cost instruction (ADR-005).
+*Amended 2026-09-26:* parity covers **every sufficiency-checking
+instruction** in the judge prompt, not only stratum-specific ones. For example,
+"list the facts the question needs" or "check assumptions implicit in the
+question" (a Joren-style decomposition) steers toward S2's version check. The
+only difference left between A3 and A4 is the separate call with veto power.
 
 ## Consequences
 

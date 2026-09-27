@@ -74,6 +74,39 @@ The price of Pokémon — contamination — is handled by the counterfactual twi
 - Honest framing: the twin controls the model's memory; it does not reproduce a
   company corpus. No business ROI is computed on the benchmark (see ADR-005).
 
+## Updates
+
+**2026-09-26 — Positioning check after reading Joren et al.** Work published
+after Joren et al. already **controls** multi-round retrieval with a
+sufficiency signal:
+- SIM-RAG (Yang et al., SIGIR 2025, arXiv:2505.02811) trains a sufficiency
+  Critic per round, labelled by whether the path reached the correct final
+  answer.
+- S2G-RAG (Li et al., 2026, arXiv:2604.23783) judges sufficiency and emits gap
+  items that become the next query.
+- Luo (2026, arXiv:2608.13237) adds an S2G-style stopping judge to Search-R1
+  on HotPotQA, without abstention or a cost for wrong answers.
+
+None **measures** stopping against an exact per-step label. The decision
+stands; the contribution is stated as measurement, not method:
+1. per-step labels exact by construction (not outcome-derived, not
+   LLM-rated);
+2. a detector that changes only the stop, with a depth placebo;
+3. contamination control through the twin;
+4. abstention priced into the outcome.
+
+The project does not claim to introduce sufficiency-driven iterative
+retrieval.
+
+**2026-09-26 — Open item resolved.** The sufficiency label is **coverage of a
+gold minimal sufficient set** by the units seen up to step t. Joren's
+definition ("a plausible answer exists given C") is strictly weaker: every
+state sufficient under the project's label is sufficient under Joren's, not
+conversely. The clean disagreement is S3 without truncation cues, where a
+partial list is a plausible answer. Joren-style wording may inform the A4 judge
+prompt, under the prompt-parity rule of E-001. The labeler specification goes
+into `docs/examiner.md` in Phase 2.
+
 ## Alternatives considered
 
 | Alternative | Why rejected |

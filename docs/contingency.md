@@ -10,7 +10,7 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
 | Gate | When | Fails if | Exit plan |
 |---|---|---|---|
 | **G1 — Data and licenses** | Phase 0 | The PokéAPI CSV is unavailable, its license is not BSD-3, or the chosen game versions have learnset gaps | Swap the versions in scope for others with complete coverage; as a last resort, any CC0 graph (e.g. Wikidata) — the pipeline is domain-agnostic |
-| **G2 — The twin does not leak** | Phases 1 and 3 | Identity probe: the model recognizes the real entity from the renamed page in > 10% of 50 pages; or closed-book (A0) on the twin scores > 5% | Mask or remove the Pokédex flavor text (main suspect); if it persists, primary-population questions exclude the leaking templates, decided on dev and recorded |
+| **G2 — The twin does not leak** | Phases 1 and 3 | Identity probe: the model recognizes the real entity from the renamed page in > 10% of 50 pages; or closed-book (A0) on the twin scores > 5% (open answer spaces; > chance + 5 points on small ones — see below) | Mask or remove the Pokédex flavor text (main suspect); if it persists, primary-population questions exclude the leaking templates, decided on dev and recorded |
 | **G3 — Generator correct** | Phase 2 | Human audit of 60 stratified questions finds < 58 correct gold answers | Fix and re-audit a **fresh** sample; after 3 iterations, remove the failing templates and record it |
 | **G4 — Power** | Phases 3 and 6 | The pooled n required, using the SD of D measured on dev, exceeds n_max (what the cap pays for after cuts) | Abort criterion of [measurability gate 8](measurability-gate.md#gate-8--the-abort-criterion) |
 | **G5 — Last exit** | Any | Motivation or budget collapses | v1.0 (Layer 1 verdict + release) is the product; the v1.1 and v1.2 extensions are separate releases, cuttable without losing the verdict |
@@ -37,7 +37,13 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
 - **Positive control** (fixed before running): real pages with their own name
   masked must be identified in ≥ 50%. If the control fails, the probe is broken
   and G2 is not evaluated until it is fixed.
-- **Closed-book check:** A0 on twin questions must stay ≤ 5% correct.
+- **Closed-book check:** A0 on twin questions must stay ≤ 5% correct on
+  templates with an open answer space (species, moves, abilities, sets).
+  Templates whose answer takes **≤ 20 admissible values** in the corpus
+  (e.g. a type, one of 18) are checked separately: A0's correct rate on each
+  must stay within 5 points of its uniform chance rate (1 / number of admissible
+  values). Guessing on a small answer space is not leakage. Per-template rates
+  are published. (Amended 2026-09-26.)
 - Checked first on the world build (Phase 1) and again on the pilot (Phase 3).
 
 ## G3 — Generator correct

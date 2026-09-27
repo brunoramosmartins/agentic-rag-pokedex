@@ -313,3 +313,100 @@ gains a shortcut scan checked on planted leaks (including one in flavor text),
 with its flags resolved and published N-of-M, and the G3 audit reads the
 flavor text of each audited chain; Phase 1's renderer must mark flavor units
 so the scan can find them. Open.
+
+## 2026-09-26 — Phase 0 close sweep: plan impacts; Joren et al. read
+
+**Reading.** Joren et al. 2025 read and its lit-note refined. Ferrazzi et al.
+2026 and Singh et al. 2025 are still to read; the synthesis note waits for
+them. The author wrote the phase note's Lessons Learned and Failed Attempts.
+
+**Sufficiency label fixed** (closes ADR-001's open item; recorded as an
+ADR-001 update). The label is coverage of a gold minimal sufficient set. Joren's
+"a plausible answer exists given C" is strictly weaker; the clean
+disagreement is S3 without truncation cues. Reason: the label must be exact and
+tied to the gold answer, because it scores stops; Joren's predicate is built for
+inference time, without the gold.
+
+**Positioning.** Later work controls multi-round retrieval with a sufficiency
+signal: SIM-RAG (SIGIR 2025; outcome-derived labels), S2G-RAG (2026; gap items
+feed the next query), Luo (2026; Search-R1 stopping judge, no abstention).
+None measures stopping against an exact per-step label. ADR-001 updated; the
+contribution is stated as measurement, not method. The author's earlier framing
+("the first iterative sufficiency system") is recorded as a failed attempt in
+the phase note.
+
+**E-001 amended** (draft; see Amendments): `correct-at-insufficient` code added
+(a lucky stop scores C = 0 and was invisible); prompt parity widened to every
+sufficiency-checking instruction (also noted in ADR-006).
+
+**G2 amended** (`docs/contingency.md`, noted in ADR-003): the closed-book check
+is chance-adjusted on templates with ≤ 20 admissible answers. Guessing a type
+(1 in 18 ≈ 5.6%) would otherwise fail the 5% threshold with no leak at all.
+
+**Plan impacts.** The close sweep found six findings from 2026-09-24/25 that
+change later phases and had no line. They are logged here, marked
+retrospective, with the author's agreement. PI-008 and PI-009 come from today's
+reading.
+
+**Plan impact PI-002** *(retrospective; finding of 2026-09-24, G1)*: Phase 1 —
+World and Phase 2 — Examiner — the version scope assumed 3–4 version groups
+chosen by coverage; the level differs in only 3% of (species, move) pairs
+between adjacent generations, and DLC groups are empty → Phase 1 picks base
+groups spanning generations, not adjacent ones; Phase 2's S2 filter keeps only
+pairs whose level differs from every other version group in the corpus
+(N-of-M published). Open.
+
+**Plan impact PI-003** *(retrospective; red-team of 2026-09-24)*: Phase 3 —
+Pilot gate — E-002 was planned with a decision rule removing strata where the
+fixed pipeline already delivers sufficient evidence (and, at 3 of 4 strata,
+removing H2 from the primary family) → that rule is gone: removing strata where
+A2 is strong would inflate H2. E-002 is descriptive and the H2 population is
+fixed at S1–S4. Phase 3's definition of done loses the E-002 rule. Open.
+
+**Plan impact PI-004** *(retrospective; red-team of 2026-09-24)*: Phases 3, 5,
+6 and the v1.0 budget — the A3′ noise-null rerun was added → the v1.0 estimate
+goes from US$ 10.2 / 13.2 to **11.3 / 14.7** (central / pessimistic), so the
+pessimistic scenario exceeds the US$ 13.5 cap. The cut order becomes A6 → cue
+ablation → A3′, and O2 is never cut (previously cut third, on S3/S4). Open.
+
+**Plan impact PI-005** *(retrospective; second red-team of 2026-09-24)*: Phase
+3 — Pilot gate and Phase 6 — Layer 1 verdict — sizing assumed a 320 / 640
+question ladder powered for "interval excludes zero" → power now targets
+*supported* at Δ_design = 0.35; extra questions are capped by n_max, computed
+from Phase 3 measured costs before the dress rehearsal, with no cap increase;
+n* > n_max → descriptive row 0; futility row 0b. Phase 3 gains the n_max
+computation. Open.
+
+**Plan impact PI-006** *(retrospective; red-team passes of 2026-09-24)*: Phases
+4–6 — design details registered in E-001 after planning → Phase 4: the A2 sweep
+grid (k × hybrid weight × depth × link order) and prompt-tuning parity (3
+recorded iterations per prompt); Phase 5: the agent decision table with veto,
+and A4p told nothing about k; Phase 6: A4p runs after A4 in the same opening,
+with a dose permuted from A4's realized steps and adherence checked before any
+result is read. Open.
+
+**Plan impact PI-007** *(found in today's sweep)*: Phases 4–5 and the v1.0
+budget — development tuning has no budget line. At central per-question costs
+(Batch) on the 120 dev questions in S1–S4:
+- A2 sweep: 36 × 120 × 0.0010 = 4.32;
+- agent prompt: 3 × 120 × 0.0035 = 1.26;
+- judge prompt: 3 × 120 × 0.0056 = 2.02;
+- A2 prompt: 3 × 120 × 0.0010 = 0.36;
+- total ≈ **US$ 8.0**, on top of the 11.3 central estimate.
+
+→ A plan revision must place it under the cap. Candidate: a two-stage A2 sweep —
+all 36 configurations screened by the labeler at zero API cost, then the top 3
+with the LLM (≈ 0.36) — bringing tuning to ≈ 4. Escalated: revise before the
+Phase 0 tag. Open.
+
+**Plan impact PI-008**: Phase 5 — Agent (readings) and Phase 7 — Release
+(README) — the positioning assumed that no work controls iterative retrieval
+with sufficiency → SIM-RAG and S2G-RAG join the Phase 5 readings next to CRAG;
+the README and write-up state the contribution as measurement, citing all three.
+ADR-001 already updated. Open.
+
+**Plan impact PI-009**: Phase 1 — World and Phase 3 — Pilot gate — the G2
+closed-book check assumed that any correct answer on the twin means leakage →
+Phases 1 and 3 compute the admissible-answer count per template and apply the
+chance-adjusted check; per-template rates are published. Rule already amended
+in `docs/contingency.md`. Open.

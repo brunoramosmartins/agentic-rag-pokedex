@@ -125,9 +125,11 @@ structured output `{answer, abstain}`):
 **Prompt tuning parity.** The A3 agent prompt (shared by A3, A3′, A4 and A4p),
 the A2 answer prompt and the A4 judge prompt get the **same tuning budget**: at
 most 3 recorded iterations each, on dev group-A templates, with mean C on dev
-S1–S4 as the criterion. Any stratum-specific instruction that enters the judge
-prompt (e.g. "check the version", "is the list complete?") is added verbatim to
-the shared agent prompt.
+S1–S4 as the criterion. Any sufficiency-checking instruction that enters the
+judge prompt — stratum-specific (e.g. "check the version", "is the list
+complete?") or generic (e.g. "list the facts the question needs", "check
+assumptions implicit in the question") — is added verbatim to the shared agent
+prompt.
 
 **A2 sweep (Phase 4, dev group A):** grid k ∈ {2, 3, 5} × hybrid weight
 BM25/dense ∈ {0.3, 0.5, 0.7} × expansion depth ∈ {1, 2} × link-type order ∈
@@ -316,6 +318,7 @@ Notes on the rows:
 | `never-reached` | Reached T_max without ever reaching sufficient evidence (search failure, not decision failure) | Automatic |
 | `generation-error` | Answered at a sufficient step and was wrong | Automatic code; **manual reading** for the cause |
 | `format-error` | Unparseable final output (scored C = λ) | Automatic; also audited against the grader (gate 4) |
+| `correct-at-insufficient` | Answered **correctly** at a step labelled insufficient (a lucky stop). **Not an error in C** (C = 0); a stopping miss with a correct outcome, counted per arm and per stratum | Automatic; manual sample for the source (guess on a small answer space, domain-general inference, or a labeler fault) |
 
 Every code that occurs gets a manual sample with prompt and completion
 rendered; no code is published as a count only.
@@ -387,6 +390,17 @@ _Not run._
      know about.
   2. Notes on the rows: the 50% cut of rows 2–4 is stated as a reading
      convention, not a statistical threshold. No row definition changes.
+- **2026-09-26 — after the Joren et al. reading (before any code or data).**
+  Changes:
+  1. Error taxonomy: `correct-at-insufficient` added, a counted non-error code.
+     Reason: C scores a lucky stop as 0, so a judge that correctly vetoes it can
+     raise C; the code makes those stops visible next to the mechanism metrics.
+  2. Prompt parity widened from stratum-specific to every sufficiency-checking
+     instruction in the judge prompt. Reason: a generic decomposition
+     instruction still steers toward S2's version check.
+  3. The sufficiency label is fixed as coverage of a gold minimal sufficient
+     set (ADR-001, update of 2026-09-26). This unblocks the labeler's golden
+     trajectories.
 
 ---
 
