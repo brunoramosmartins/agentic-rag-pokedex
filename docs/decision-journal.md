@@ -807,3 +807,33 @@ README will state that the benchmark measures sufficiency over a structured,
 rendered corpus.
 
 **Plan impact PI-015:** Phase 2 — S1 assumed the missing hop changes the answer → in 246 of 299 single-final evolution lines base and final share their hidden ability (an agent that skips the hop is right 82% of the time) → S1 templates filter to material hops (anchor's own answer ≠ gold) for the H1 pool, benign hops form a descriptive slice outside H1, S1 gets templates beyond hidden ability (53 material lines there), and a negative test proves every template's version-group filter. Open.
+
+## 2026-09-29 — Plan revised at the Phase 1 close
+
+The phase plan was revised before the Phase 1 tag, so the later phases start
+from the Phase 1 evidence. Retrospective impact found in the close sweep:
+
+**Plan impact PI-016 (retrospective, logged 2026-09-29):** Phase 2 — the generator's filters were planned before the world existed → the world design adds constraints: S3 templates avoid hubs whose gold set includes a withheld species; hidden-ability templates sample only species that have one; level-0 ("on evolution") and multi-level pairs are ambiguous answers; 19 evolution lines branch, so "final form" is ambiguous there; non-default forms have no learnsets. Open.
+
+The author decided three things:
+
+- **No calendar.** This is a personal project worked on sporadically; phase
+  sizes stay as relative effort estimates, not dates. Milestones lose their due
+  dates; Phase 8's three-week timebox becomes 15 partial days of effort, still
+  the guard against sunk cost. Author preference.
+- **The S1 benign slice** is 40 questions in eval-L1, run by A3, A4 and A4p
+  only, descriptive and outside H1; its size is confirmed against n_max in
+  Phase 3.
+- **PI-016** is accepted as above.
+
+Phase 2 grows by about one partial day (S1 material and benign, templates beyond
+hidden ability, the negative scope test, the concentration cap) and loses the
+flavor-text tasks; the surplus of Phase 1 pays for it. The measurability-gate
+answers are unchanged: the measured cost per arm arrives in Phase 3, which
+re-runs gates 3 and 8 with it, and the S1 material pool arrives in Phase 2.
+
+**Plan impact PI-014 resolved:** plan revised on 2026-09-29 — Phase 3 measures reasoning tokens per arm before n_max; every registered `max_completion_tokens` leaves headroom (≥ 4,000); if the measured cost binds, n shrinks and the treatment (`reasoning_effort`, T_max, B, prompts) stays as registered.
+
+**Plan impact PI-015 resolved:** plan revised on 2026-09-29 — Phase 2 builds material S1 (H1 pool) and a benign S1 slice (descriptive; 40 questions in eval-L1 for A3, A4, A4p), adds S1 templates beyond hidden ability, and proves the version-group filter with a negative test.
+
+**Plan impact PI-016 resolved:** plan revised on 2026-09-29 — the five constraints become Phase 2 generator filters, each with its N-of-M count in `docs/examiner.md`.

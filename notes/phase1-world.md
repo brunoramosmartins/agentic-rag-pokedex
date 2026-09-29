@@ -5,8 +5,8 @@ twin, sectioned pages whose sections are the evidence units, the fact → units
 registry, the index and the two tools. Freeze the version scope from measured
 coverage, not from preference.
 
-**Dates.** Opened 2026-09-29 · 8–11 partial working days (size L, weeks 2–3) ·
-no hard deadline.
+**Dates.** Opened and closed 2026-09-29 · size L (8–11 partial working days,
+as an estimate) · no calendar, no hard deadline.
 
 **Ends with.** Tag `v0.2-world` (no release): world built and rebuilt
 idempotently, twin round trip 100%, registry complete, preliminary G2 from the

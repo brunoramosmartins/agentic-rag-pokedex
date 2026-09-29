@@ -2,8 +2,9 @@
 # .github/setup/milestones.sh
 # Create one GitHub milestone per project phase (0..10).
 #
-# Due dates are soft targets from the effort estimate (week 1 starts
-# 2026-09-24, 6-10 h/week). The project has no hard deadline.
+# Milestones carry no due date: this is a personal project worked on
+# sporadically, with no hard deadline. Descriptions give the effort size
+# (S / M / L, in partial working days) as a relative estimate only.
 #
 # Requires: gh CLI (uses gh's built-in `-q` jq expression, not the jq binary).
 # Idempotent: skips titles that already exist on the repo.
@@ -29,7 +30,7 @@ echo "Target repo: $REPO"
 existing="$(gh api "repos/$REPO/milestones?state=all&per_page=100" -q '.[].title')"
 
 create_milestone() {
-  local title="$1" description="$2" due="$3"
+  local title="$1" description="$2"
 
   if grep -Fxq "$title" <<<"$existing"; then
     printf "  skip  %s (already exists)\n" "$title"
@@ -38,45 +39,33 @@ create_milestone() {
 
   gh api "repos/$REPO/milestones" -X POST \
     -f title="$title" \
-    -f description="$description" \
-    -f due_on="${due}T23:59:59Z" >/dev/null
+    -f description="$description" >/dev/null
   printf "  ok    %s\n" "$title"
 }
 
 echo "Creating milestones..."
 
 create_milestone "Phase 0 — Foundation" \
-  "Week 1. ADRs 001-010, G1, measurability gate, E-001 draft, scaffold. Tag: v0.1-foundation" \
-  "2026-09-30"
+  "Size S (3-5 partial days). ADRs 001-010, G1, measurability gate, E-001 draft, scaffold. Tag: v0.1-foundation"
 create_milestone "Phase 1 — World" \
-  "Weeks 2-3. PokéAPI -> graph -> twin -> pages -> index. Tag: v0.2-world" \
-  "2026-10-14"
+  "Size L (8-11). PokéAPI -> graph -> twin -> pages -> index; E-003 identity probe. Tag: v0.2-world"
 create_milestone "Phase 2 — Examiner" \
-  "Weeks 4-5. Generator, gold chains, step labels, G3 audit. Tag: v0.3-examiner (pre-release)" \
-  "2026-10-28"
+  "Size L (9-12). Generator, gold chains, step labels, G3 audit. Tag: v0.3-examiner (pre-release)"
 create_milestone "Phase 3 — Pilot Gate" \
-  "Week 6. E-002, pilot, preliminary G2 and G4. Tag: v0.4-pilot-gate" \
-  "2026-11-04"
+  "Size S (3-5). E-002, pilot, measured reasoning, preliminary G2 and G4, n_max. Tag: v0.4-pilot-gate"
 create_milestone "Phase 4 — Baselines" \
-  "Week 7. A0, A1, A2, A6, O1 tuned in good faith on group A. Tag: v0.5-baselines" \
-  "2026-11-11"
+  "Size M (5-7). A0, A1, A2, A6, O1 tuned in good faith on group A. Tag: v0.5-baselines"
 create_milestone "Phase 5 — Agent" \
-  "Weeks 8-9. A3, A4, A4p, O2 with per-step logs. Tag: v0.6-agent-detectors" \
-  "2026-11-25"
+  "Size L (8-11). A3, A4, A4p, O2 with per-step logs. Tag: v0.6-agent-detectors"
 create_milestone "Phase 6 — Layer 1 Verdict" \
-  "Weeks 10-11. Single opening of eval-L1. Tag: v0.7-layer1-verdict (pre-release)" \
-  "2026-12-09"
+  "Size M (5-7). Single opening of eval-L1. Tag: v0.7-layer1-verdict (pre-release)"
 create_milestone "Phase 7 — Release" \
-  "Week 12. Demo + README. Tag: v1.0.0 (stable)" \
-  "2026-12-16"
+  "Size M (<= 5, timebox). Demo + README. Tag: v1.0.0 (stable)"
 create_milestone "Phase 8 — Trained Detector" \
-  "Weeks 13-15 (3-week timebox). Calibrated sufficiency classifier and its registry entry." \
-  "2027-01-06"
+  "Timebox: 15 partial days of effort. Calibrated sufficiency classifier and its registry entry."
 create_milestone "Phase 9 — Layer 2 Verdict" \
-  "Week 16. Single opening of eval-L2. Tag: v1.1.0" \
-  "2027-01-13"
+  "Size S (3-5). Single opening of eval-L2. Tag: v1.1.0"
 create_milestone "Phase 10 — External Validity" \
-  "Weeks 17-18. MuSiQue, real world, second model. Tag: v1.2.0" \
-  "2027-01-27"
+  "Size M (5-7). MuSiQue, real world, second model. Tag: v1.2.0"
 
 echo "Done."
