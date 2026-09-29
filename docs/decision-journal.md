@@ -569,3 +569,28 @@ the graph and from the raw CSVs; the two agree in every cell. The author chose
   gold answer can never come from a group the corpus does not contain. The S2
   filter compares against the other two groups of the scope, and excludes
   level-0 ("on evolution") and multi-level pairs as ambiguous.
+
+## 2026-09-29 — The twin: pinned word list, name shapes, what free text rewrites
+
+`world/twin.py` builds the twin map with `TWIN_SEED = 20260929`. Decisions:
+
+- **Pinned word list.** The dictionary filter uses `words_alpha.txt` from
+  `dwyl/english-words` (Unlicense), pinned by commit and SHA-256 and fetched
+  with the CSVs. A system dictionary was the first idea and was dropped: it
+  differs between machines, so the published seed would not rebuild the same
+  twin.
+- **Names are drawn independently of the real name**, so no twin name carries
+  a trace of its entity. Look-alikes of any English real name (same first or
+  last four letters, one edit away, or containing it) are redrawn as well, so a
+  twin name does not evoke another real entity either. The first draw produced
+  unreadable names (up to 12 letters, "thh" clusters) and one profanity; words
+  are now 4–9 letters, never three consonants in a row, with a blocklist.
+- **Shapes are kept where they carry structure, not identity:** form names keep
+  "<qualifier> <species>" with a consistent pseudo-word per qualifier, and
+  version-group names are rebuilt from their versions.
+- **Free text** rewrites Title-case and upper-case names only. Lower-case prose
+  stays; the identity probe measures what it leaks. Version names are not
+  rewritten in prose, where "X" or "Sun" are ordinary words.
+
+Build on the real data: round trip identity for every name, no shared word,
+0 of 14,496 flavor texts still naming a real species (`docs/world.md`).

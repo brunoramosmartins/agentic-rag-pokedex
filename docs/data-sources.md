@@ -13,6 +13,7 @@ the gate definition.
 |---|---|---|---|---|
 | PokéAPI (CSV) | Species, forms, types, type efficacy, moves, abilities, evolution chains, learnsets per version group | World + gold | BSD-3-Clause (code and data files) | **ok-with-restriction** |
 | Pokédex flavor text (inside PokéAPI) | Game prose per species and version | Corpus realism | Game text copyrighted by Nintendo / Creatures / GAME FREAK | **ok-with-restriction** |
+| English word list (`dwyl/english-words`) | 370,105 English words | Filter for twin names (Phase 1) | Unlicense (public domain) | **ok** |
 | MuSiQue v1.0 | Multi-hop QA with answerable / unanswerable pairs | External calibration (v1.2) | CC BY 4.0 | **ok** |
 | Generated benchmark (this project's output) | Twin questions, answers, gold chains, step labels | Publishable asset | MIT (this repo) for what is published — see below | Decided below |
 
@@ -125,6 +126,22 @@ and demo), and the version scope must satisfy finding 2.
 
 **Verdict: ok-with-restriction** — local use only; never committed, never
 published, in real or renamed form.
+
+---
+
+## English word list (twin filter)
+
+- Source: `words_alpha.txt` from <https://github.com/dwyl/english-words>, pinned
+  at commit `8179fe68775df3f553ef19520db065228e65d1d3` (last change to the file
+  on 2025-01-05). SHA-256
+  `3ed0c94610d8bcf7c11bbb49c56aa49c7234d32b66824df91f554169e572da48`.
+- License: Unlicense (public domain).
+- Use: no twin pseudo-word may be an English word (`world/twin.py`). It is
+  fetched by `world/download.py` with the CSVs. A system dictionary would make
+  the twin depend on the machine; pinned, the published seed rebuilds the same
+  twin everywhere.
+
+**Verdict: ok.**
 
 ---
 

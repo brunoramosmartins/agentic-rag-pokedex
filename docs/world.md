@@ -21,9 +21,10 @@ chain shapes and one more source to validate.
 ## Build
 
 ```bash
-python -m agentic_pokedex.world.download     # 23 CSVs, SHA-256 checked
+python -m agentic_pokedex.world.download     # 23 CSVs + word list, SHA-256 checked
 python -m agentic_pokedex.world.load_graph   # replaces the Neo4j database
 python -m agentic_pokedex.world.coverage     # learnset coverage report
+python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json
 ```
 
 ## Graph
@@ -168,3 +169,56 @@ some group of the set.
 
 Pokédex flavor text is attached per species from whichever version has it,
 independently of the version scope (`docs/data-sources.md`).
+
+## Counterfactual twin
+
+`world/twin.py`, seed `TWIN_SEED = 20260929`. The map real → twin lives in
+`data/world/twin_map.json` (gitignored); only the seed is versioned.
+
+**What is renamed.** Species, Pokémon entries (forms), types, abilities, moves,
+versions, version groups and the word "Pokémon". Numbers are never touched.
+
+**How names are drawn.** Each name is a pronounceable pseudo-word (two or three
+syllables, 4–9 letters, never three consonants in a row) drawn from a seeded
+generator, independently of the real name it replaces. Moves and abilities get
+two words in about 40% of cases. A candidate is redrawn when it:
+
+| Test | Against |
+|---|---|
+| Real name | Every name PokéAPI lists in any language, their words, every identifier, and franchise terms (regions, "poke") |
+| Dictionary | 370,105 English words (`docs/data-sources.md`) |
+| Look-alike | English real names: same first or last four letters, one edit away, or containing one of five letters or more |
+| Profanity | A short blocklist of substrings |
+| Taken | Every twin word already drawn, of any kind |
+
+**Shapes kept.** A form name keeps its structure: the species part becomes the
+species' twin and every other word a consistent pseudo-word ("Mega Charizard
+X" → "<mega> <species> X"). A version-group name is rebuilt from its versions'
+twins ("Scarlet/Violet" → "<version>/<version>").
+
+**Free text.** Flavor text is rewritten at render time: every Title-case or
+upper-case occurrence of a species, form, type, ability or move name, or of
+"Pokémon", is replaced; when two kinds share a name ("Psychic"), the type wins
+over the move. Version names are not rewritten in prose ("X", "Sun"). Lower-case
+prose ("spits fire") is left as it is: that is the leak surface the identity
+probe measures (G2), and the first thing removed if the twin leaks.
+
+### Build (2026-09-29)
+
+| Kind | Distinct real names | Note |
+|---|---:|---|
+| species | 1,025 | |
+| pokemon | 1,343 | 1,351 entries; a few forms share an English name |
+| form_word | 156 | words of form names other than the species |
+| type | 18 | |
+| ability | 313 | 314 abilities; "As One" names two |
+| move | 833 | 479 one-word, 354 two-word twins |
+| version | 51 | 53 versions; two names repeat across regions |
+| version_group | 32 | rebuilt from versions |
+| term | 1 | "Pokémon" |
+
+- **Round trip** real → twin → real: identity for every name of every kind.
+- **Unique words:** no pseudo-word is shared by two names.
+- **Flavor text:** 5,797 of 14,496 English texts change; after rewriting, **0**
+  still name a real species, in any case.
+

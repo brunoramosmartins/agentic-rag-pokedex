@@ -90,3 +90,26 @@ def test_a_remote_mismatch_aborts_and_leaves_no_file(tmp_path: Path) -> None:
 
 def test_verify_reports_missing_files(tmp_path: Path) -> None:
     assert verify(tmp_path, TEST_MANIFEST) == {"a.csv": "missing", "b.csv": "missing"}
+
+
+def test_download_follows_a_custom_url_template(tmp_path: Path) -> None:
+    fetch = FakeFetch(FILES)
+    download(
+        tmp_path,
+        manifest=TEST_MANIFEST,
+        commit="abc123",
+        url_template="https://example.org/{commit}/{name}",
+        fetch=fetch,
+    )
+    assert fetch.urls == [
+        "https://example.org/abc123/a.csv",
+        "https://example.org/abc123/b.csv",
+    ]
+
+
+def test_word_list_is_pinned() -> None:
+    from agentic_pokedex.world.download import WORDLIST_COMMIT, WORDLIST_MANIFEST
+
+    assert len(WORDLIST_COMMIT) == 40
+    assert set(WORDLIST_MANIFEST) == {"words_alpha.txt"}
+    assert not set(WORDLIST_MANIFEST) & set(MANIFEST)

@@ -1,4 +1,4 @@
-"""Download the PokéAPI CSVs at a pinned commit, with SHA-256 checks.
+"""Download the PokéAPI CSVs and the word list at pinned commits, SHA-256 checked.
 
 The world is built from PokéAPI's ``data/v2/csv/`` at ``POKEAPI_COMMIT``, never
 from ``master``, so that every rebuild starts from the same bytes. Every file is
@@ -86,6 +86,18 @@ MANIFEST: Mapping[str, str] = {
 }
 """File name → SHA-256 at ``POKEAPI_COMMIT``. The single source of truth."""
 
+WORDLIST_COMMIT = "8179fe68775df3f553ef19520db065228e65d1d3"
+"""``dwyl/english-words`` (Unlicense), last change to the file on 2025-01-05."""
+
+WORDLIST_URL = "https://raw.githubusercontent.com/dwyl/english-words/{commit}/{name}"
+
+WORDLIST_MANIFEST: Mapping[str, str] = {
+    "words_alpha.txt":
+        "3ed0c94610d8bcf7c11bbb49c56aa49c7234d32b66824df91f554169e572da48",
+}
+"""English words the twin's pseudo-words must avoid (``world/twin.py``). Pinned
+like the CSVs, so the twin is the same on every machine."""
+
 Fetcher = Callable[[str], bytes]
 
 
@@ -142,6 +154,7 @@ def download(
     *,
     manifest: Mapping[str, str] = MANIFEST,
     commit: str = POKEAPI_COMMIT,
+    url_template: str = CSV_URL,
     fetch: Fetcher = fetch_url,
     force: bool = False,
 ) -> list[str]:
@@ -153,7 +166,8 @@ def download(
     Args:
         raw_dir: Destination directory (created if needed).
         manifest: File name → expected SHA-256.
-        commit: PokéAPI commit to fetch from.
+        commit: Commit to fetch from.
+        url_template: URL with ``{commit}`` and ``{name}`` placeholders.
         fetch: Callable that returns the body of a URL (injected in tests).
         force: Re-fetch every file, even those that already match.
 
@@ -169,7 +183,7 @@ def download(
         path = raw_dir / name
         if not force and path.is_file() and sha256_file(path) == expected:
             continue
-        data = fetch(CSV_URL.format(commit=commit, name=name))
+        data = fetch(url_template.format(commit=commit, name=name))
         actual = sha256_bytes(data)
         if actual != expected:
             raise HashMismatchError(
@@ -193,7 +207,15 @@ def main(argv: list[str] | None = None) -> int:
     if not args.check:
         fetched = download(args.raw_dir, force=args.force)
         print(f"PokéAPI @ {POKEAPI_COMMIT[:12]}: fetched {len(fetched)} file(s)")
-    status = verify(args.raw_dir)
+        fetched = download(
+            args.raw_dir,
+            manifest=WORDLIST_MANIFEST,
+            commit=WORDLIST_COMMIT,
+            url_template=WORDLIST_URL,
+            force=args.force,
+        )
+        print(f"Word list @ {WORDLIST_COMMIT[:12]}: fetched {len(fetched)} file(s)")
+    status = verify(args.raw_dir) | verify(args.raw_dir, WORDLIST_MANIFEST)
     bad = {name: s for name, s in status.items() if s != "ok"}
     for name, s in bad.items():
         print(f"  {s.upper():8} {name}")

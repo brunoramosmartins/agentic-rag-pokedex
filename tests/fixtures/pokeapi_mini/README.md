@@ -6,3 +6,6 @@ filter in `world/pokeapi.py`: a non-battle type, a non-main-series ability, a
 move nobody learns, a learned move of a non-battle type, a non-English name and
 flavor row, a Mega form with its own name, a form with only a form name, a
 level-up move at level 0 and a machine move.
+
+`words_alpha.txt` is a stand-in for the pinned English word list (CRLF line
+endings, like the real file).
