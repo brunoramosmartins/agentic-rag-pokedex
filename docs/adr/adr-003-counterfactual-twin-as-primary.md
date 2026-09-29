@@ -62,9 +62,12 @@ page in 27 of 50 cases when the renamed Pokédex notes were shown, and in 1 of
 50 when they were not; the positive control reached 48 of 50.
 Renaming every name was not enough: the flavor text's descriptions ("lives in
 caves… rusts easily") identify the species by themselves. As the exit plan
-says, the notes go: world v1 renders no notes, and the probe re-runs on the
-no-notes world with a fresh sample of species (E-003, run 2). The twin keeps
-every fact; it loses the prose that made its pages read like a wiki.
+says, the notes go: world v1 renders no notes. On that world, with a fresh
+sample of 50 species, the probe passes: control 48 of 50, twin 1 of 50 (E-003,
+run 2). The one species named was recognized from structure alone — a
+three-stage line with a Mega form — so a structural fingerprint remains for the
+most distinctive species; it is within the threshold and declared. The twin
+keeps every fact; it loses the prose that made its pages read like a wiki.
 
 ## Alternatives considered
 

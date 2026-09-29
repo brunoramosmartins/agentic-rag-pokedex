@@ -17,7 +17,9 @@ abilities with the hidden flag; level-up and other learnsets per version group.
 pages carry no notes: the identity probe (E-003) found that the renamed flavor
 text still names the species — the twin was recognized in 27 of 50 pages
 with notes and in 1 of 50 without — so G2's exit was taken
-(`docs/contingency.md`). `render --notes` restores them, for research only.
+(`docs/contingency.md`). On the no-notes world, a fresh sample of 50 species
+passes the probe (twin 1 of 50, control 48; E-003 run 2). `render --notes`
+restores the notes, for research only.
 
 **Out (parked):** encounters and locations, items, battle stats, evolution
 conditions, genus, height and weight, the trading card game. Each would add

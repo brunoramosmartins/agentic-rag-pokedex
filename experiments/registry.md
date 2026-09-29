@@ -29,7 +29,7 @@ filled only after the run, next to the date.
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
-| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | frozen | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without — G2 exit taken (no notes); run 2 frozen |
+| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
 
 ---
 
@@ -503,8 +503,9 @@ _Not run._
 ## E-003 — Identity probe: can the model name the real species behind a twin page?
 
 - **Phase:** 1 (world), before any question exists.
-- **Status:** frozen — registered 2026-09-29; configuration fixed by the run
-  manifest at 16:57:47 UTC, before submission (see Amendments).
+- **Status:** analyzed — registered 2026-09-29; run 1 frozen from its manifest
+  (16:57:47 UTC, before submission; see Amendments); run 2 frozen before
+  submission. Verdict: G2's identity half passes on world v1 (no notes).
 - **Hypothesis:** gating — the identity half of G2 (`docs/contingency.md`).
   The closed-book half runs in Phase 3.
 
@@ -622,6 +623,25 @@ no-notes condition lands close to the twin.
 | Batch | `batch_6abbee1579948190afda9a6ca6f4e60a`, submitted 16:57:58 UTC |
 
 ### Actual result
+
+**Run 2 (2026-09-29; world v1 without notes; 100 of 100 answers valid, no
+re-send).**
+
+| Condition | Identified | Wilson 95% CI | Exact | "unknown" |
+|---|---|---|---|---|
+| Control | **48 of 50** (96%) | 87–99% | 48 | 0 |
+| Twin | **1 of 50** (2%) | 0–10% | 1 | 22 |
+
+By generation, identified: control G1–G6 all, G7 4 of 5, G8 all, G9 4 of 5;
+twin G2 1 of 6, every other generation 0.
+
+**Decision: pass — G2's identity half passes** on world v1 (control ≥ 25, twin
+≤ 5 of 50). The one identified species is a generation-2 species with a
+three-stage evolution line and a Mega form, named at confidence 0.9 with no
+text on the page: a residual **structural** fingerprint, within the threshold
+and declared as a limitation. The other 49 twin answers were "unknown" (22) or
+a wrong species (27, mean confidence 0.61). Measured cost US$ 0.0545.
+Prediction: control about 45 (48); twin 1 or 2 (1).
 
 **Run 1, final (2026-09-29; 150 of 150 answers valid after the two registered
 re-sends and the 4,000-token re-send of 8).**

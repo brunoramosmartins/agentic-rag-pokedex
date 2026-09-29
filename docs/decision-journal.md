@@ -753,3 +753,15 @@ render made earlier the same day, and the index reused every cached vector.
 Run 2 was prepared on it (50 species, none of run 1's) and **frozen from its
 manifest before submission** — the order run 1 missed. The author's prediction
 for run 2: control about 45 of 50, twin 1 or 2.
+
+## 2026-09-29 — E-003 run 2: G2's identity half passes on world v1
+
+On the no-notes world, with 50 species none of which run 1 used: control 48 of
+50, twin 1 of 50 (22 "unknown", 27 wrong species at mean confidence 0.61). The
+author had predicted about 45 and 1–2. The one species named — at confidence
+0.9, with no text on the page — has a three-stage evolution line and a Mega
+form: identification from structure alone is possible for the most distinctive
+species. It is within the threshold and is declared as a limitation; it does
+not call for another exit. The closed-book half of G2 runs in Phase 3.
+
+**Plan impact PI-013 resolved:** contingency G2 taken — Pokédex notes removed from world v1 (the renderer's default; `--notes` for research), E-003 run 2 passes on the no-notes world. Phase 2 drops the shortcut scan's flavor-text planted leak and the G3 audit's flavor read, since no unit is free text; the README states the lost realism in Phase 7.
