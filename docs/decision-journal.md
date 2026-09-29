@@ -546,3 +546,26 @@ Found while reading: 4 English Pokémon names are shared by two entries
 ("10% Zygarde", "Koraidon", "Miraidon", "Mega Meowstic"). Titles must be unique
 for `open_page`, so the renderer disambiguates them; the graph keeps the
 PokéAPI identifier, which is unique.
+
+## 2026-09-29 — Version scope frozen: x-y, ultra-sun-ultra-moon, scarlet-violet
+
+The learnset coverage report (`docs/world.md`, Version scope) was computed from
+the graph and from the raw CSVs; the two agree in every cell. The author chose
+**x-y, ultra-sun-ultra-moon and scarlet-violet** (generations 6, 7 and 9).
+
+- **Evidence.** S2 material does not bind: every one-group-per-generation set
+  has more than 300 S2-usable pairs in its weakest group. This set is the most
+  balanced (weakest group 2,383 pairs), 486 Pokémon have a learnset in all
+  three groups, and 999 of 1,025 in at least one, generation 9 included.
+  Level-difference rates between the chosen groups: 24% (x-y vs
+  ultra-sun-ultra-moon), 56% (ultra-sun-ultra-moon vs scarlet-violet), 63%
+  (x-y vs scarlet-violet).
+- **Rejected.** x-y + ultra-sun-ultra-moon + sword-shield (more S2 pairs, but
+  generation 9 left without learnsets); sword-shield with scarlet-violet (1% of
+  levels differ); every four-group set (each adds a near-duplicate group).
+- **Consequences.** `VERSION_SCOPE` in `world/pokeapi.py`. The graph keeps
+  every version group; the renderer writes learnset sections only for the
+  scope, and every examiner template filters `LEARNS.version_group` to it, so a
+  gold answer can never come from a group the corpus does not contain. The S2
+  filter compares against the other two groups of the scope, and excludes
+  level-0 ("on evolution") and multi-level pairs as ambiguous.

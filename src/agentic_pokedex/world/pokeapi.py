@@ -37,6 +37,11 @@ Record = dict[str, Any]
 ENGLISH = "en"
 """``languages.identifier`` of the language whose names the real world uses."""
 
+VERSION_SCOPE: tuple[str, ...] = ("x-y", "ultra-sun-ultra-moon", "scarlet-violet")
+"""Base version groups of world v1 (generations 6, 7, 9), frozen on 2026-09-29
+from the coverage report (``docs/world.md``). The graph keeps every group; pages
+and questions use only these."""
+
 
 @dataclass
 class WorldTables:

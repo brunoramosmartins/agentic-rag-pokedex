@@ -124,3 +124,12 @@ def test_rows_from_csv_keep_default_level_up_rows_of_the_groups() -> None:
         (1, 1, "alpha-beta"), (1, 1, "gamma"), (2, 1, "alpha-beta"),
         (3, 1, "alpha-beta"), (4, 2, "alpha-beta"), (4, 2, "gamma"),
     }
+
+
+def test_version_scope_is_a_set_of_candidate_groups() -> None:
+    from agentic_pokedex.world.coverage import CANDIDATE_GROUPS
+    from agentic_pokedex.world.pokeapi import VERSION_SCOPE
+
+    assert 3 <= len(VERSION_SCOPE) <= 4
+    assert len(set(VERSION_SCOPE)) == len(VERSION_SCOPE)
+    assert set(VERSION_SCOPE) <= set(CANDIDATE_GROUPS)
