@@ -15,23 +15,93 @@ accepted, G1 decided, gate published, E-001 fully drafted.
 
 ## Phase readings (Joren 2025, Ferrazzi 2026, Singh 2025)
 
+Three lit-notes with the author's takes and refined write-ups, and a synthesis
+(`notes/phase0-synthesis.md`). Joren et al. fixed the label question: the
+project's label is **coverage of a gold minimal sufficient set**, strictly
+stronger than Joren's "a plausible answer exists" (decided 2026-09-26, ADR-001
+Updates). Ferrazzi et al. showed agents rarely retrieve again (10% of queries)
+at up to 3.6× the input tokens, with no label on whether their stops were
+justified. Singh et al. name the stopping decision but give it no taxonomy box.
+The positioning check found later work that already controls retrieval with a
+sufficiency signal (SIM-RAG, S2G-RAG, Luo 2026), so the contribution is stated
+as **measurement**, not method.
+
 ## Hypothesis, measurability gate and contingency (`docs/hypothesis.md`, `docs/measurability-gate.md`, `docs/contingency.md`)
+
+H1 (explicit judge vs implicit detector) and H2 (judge vs fixed pipeline) on
+the expected cost C = 0 / 1 / λ with λ = 4 as a scenario and λ\* as the
+headline; action threshold 0.25; strata S0–S4 with S0 as the falsifier. The
+eight measurability gates were answered before any code, and the contingency
+gates G1–G5 each carry a written exit.
 
 ## Data sources and licensing — G1 (`docs/data-sources.md`)
 
+**G1 passed.** PokéAPI (BSD-3) pinned to a commit with 14 CSVs hashed; MuSiQue
+(CC BY 4.0) hashed. Findings that shaped Phase 1: adjacent generations differ
+in only 3% of levels, so the version scope must span generations; DLC version
+groups are empty; MuSiQue's test split has no labels. The published benchmark
+is twin-side and fact-level only; the corpus is rebuilt locally.
+
 ## ADRs 001–010
+
+Drafted as Proposed, reviewed by the author on 2026-09-25 — all ten stand;
+five caveats checked. The review found one real gap: free text outside the
+registry could state a gold fact unseen by the labeler, so a **shortcut scan**
+validated on planted leaks was added (PI-001). ADR-008's scope was stated (one
+model configuration) and ADR-010's 50% cut declared a reading convention. All
+ten accepted the same day.
 
 ## Experiment registry — E-001 (full draft) and E-002 (typed expansion)
 
+E-001 drafted in full while no number existed: hypotheses, per-stratum
+predictions, threshold, falsifier, outcome space (rows 0 to 7b), error
+taxonomy, λ\* cases. Two adversarial passes (5 blockers, 4 major, 3 minor; then
+3 blockers, 5 major, 6 minor), all adopted. The ones that changed the design:
+power targets the *supported* verdict at Δ_design = 0.35 (n\* = 78 / 175 / 311
+for SD 1.0 / 1.5 / 2.0); **n_max** from measured costs instead of any budget
+increase; a futility row (0b); a registered agent decision table; the A4p dose
+as a permutation of A4's steps; the verdict decided by 97.5% BCa intervals
+alone. E-002 became descriptive.
+
 ## Outcome space checked by test (`tests/test_outcome_space.py`)
+
+Every combination of (H1, placebo, mediation, falsifier, O2 ceiling) and the
+four λ\* cases is enumerated and must fall in exactly one row of the outcome
+space — the previous project's Phase 11 lesson turned into a test.
 
 ## Power script reproducing P2's E-026 (`evaluation/power.py`)
 
+**Gate 7 passed:** at P2's pooled discordance it reproduces every published
+E-026 number (six floors, six interaction floors, eight "n needed"). The module
+generalizes the method from a binary paired difference to any SD of D and adds
+the verdict functions. One rounding error in an earlier journal line was found
+and corrected.
+
 ## Token meter and cost estimate before any loop
+
+**Gate 7 passed** on 10 real calls: the meter's totals equal the raw API usage,
+and 10 of 10 local input counts are within tolerance. Snapshot
+`gpt-5-mini-2025-08-07`. Reasoning on trivial prompts was small, so the 150 /
+400 reasoning scenarios stayed until Phase 3 — they later proved low (Phase 1,
+PI-014). Every LLM loop prints an estimate and supports `--limit N`.
 
 ## Scaffold, docker-compose (Neo4j + Phoenix) and CI
 
+src layout, optional extras per concern, docker-compose with Neo4j and Phoenix,
+CI with lint, unit tests on Python 3.11 and 3.12 and a Neo4j integration job,
+GitHub templates and setup scripts. Secrets come from the environment with
+`.env` as fallback and are never printed.
+
 ## Initial README with problem statement and trademark notice
+
+Problem statement, plan table, trademark notice and PokéAPI attribution.
+
+## Phase close
+
+The close sweep logged PI-001 to PI-009; the plan was revised on 2026-09-28
+before the tag. The v1.0 cost cap went from US$ 13.5 to **US$ 20 before any
+data**, with a two-stage A2 sweep; SIM-RAG and S2G-RAG joined the Phase 5
+readings. All nine impacts resolved.
 
 ---
 

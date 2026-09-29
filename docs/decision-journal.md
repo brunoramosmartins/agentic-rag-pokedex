@@ -858,3 +858,27 @@ answer-concentration cap with before/after tables (PI-012), no flavor-text case
 in the shortcut scan or the G3 audit (PI-013).
 
 **Scope decisions.** None taken at kickoff.
+
+## 2026-09-29 — Template design for the examiner
+
+Measured before deciding (`docs/examiner.md`). The author approved:
+
+- **S3 requires the gold set spread over at least two indexed units.** Of
+  1,504 candidate "type-T learners of M in V" sets of size 3–25, 1,181 fit in
+  one hub unit — one unit is sufficient there, nothing is truncated. 323 remain.
+  A hidden-ability holders template was dropped (24 sets span two units).
+- **S1 uses version-free relations only** (evolution, abilities, types, the
+  type chart). A hop through a learnset would mix a wrong-version trap into a
+  missing-hop question. Five templates; four evolution-based ones give ~320
+  material anchors; the fifth (a move's type multiplier against a species)
+  needs three facts and is material by construction.
+- **S4 keeps two templates**, below the planned three to five: every S4
+  question rests on a withheld learnset, and a third shape would be artificial.
+  S4 reuses S2's surface forms, so the wording never reveals the stratum.
+- **Partition:** the B template of each stratum is its most different shape
+  (S0-B1 type chart, S1-B1 move vs species, S2-B1 last move, S3-B1 level cap,
+  S4-B1 move at level).
+- **Surface forms** are hand-written, three per template; the author reviews
+  them.
+
+Also added: `world/explore.py`, a local tool to see any page in both namings.
