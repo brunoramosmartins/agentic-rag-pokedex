@@ -115,3 +115,18 @@ def test_moves_without_power_have_no_power_property(
 ) -> None:
     record = single(driver, "MATCH (m:Move {name: 'Soak'}) RETURN m.power AS power")
     assert record["power"] is None
+
+
+def test_coverage_reads_the_same_rows_from_graph_and_csv(
+    driver: Any, loaded: dict
+) -> None:
+    from agentic_pokedex.world.coverage import (
+        level_table,
+        rows_from_csv,
+        rows_from_graph,
+    )
+
+    groups = ("alpha-beta", "gamma")
+    from_graph = level_table(rows_from_graph(driver, groups), groups)
+    from_csv = level_table(rows_from_csv(RAW, groups)[0], groups)
+    assert from_graph == from_csv
