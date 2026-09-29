@@ -741,3 +741,15 @@ not in the facts. The author confirmed the consequences:
 PI-013 stays open until run 2 passes. The last re-send of run 1 (4,000
 tokens, 8 answers) completes its published counts; it cannot change the
 verdict, which both bounds already share.
+
+## 2026-09-29 — E-003 run 1 final; run 2 frozen before submission
+
+Run 1 closed with every answer valid after the registered re-sends: control 48
+of 50, twin with notes 27 of 50, twin without notes 1 of 50. Decision: fail —
+notes; the exit (no notes in world v1) stands. Total cost US$ 0.16.
+
+World v1 was re-rendered without notes: page hashes equal the ones of the test
+render made earlier the same day, and the index reused every cached vector.
+Run 2 was prepared on it (50 species, none of run 1's) and **frozen from its
+manifest before submission** — the order run 1 missed. The author's prediction
+for run 2: control about 45 of 50, twin 1 or 2.

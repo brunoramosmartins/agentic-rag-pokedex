@@ -29,7 +29,7 @@ filled only after the run, next to the date.
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
-| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | frozen | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Partial: twin ≥ 22 of 50, G2 identity fails; branch pending |
+| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | frozen | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without — G2 exit taken (no notes); run 2 frozen |
 
 ---
 
@@ -588,8 +588,20 @@ re-runs:
 - **Decision rule:** control < 25 of 50 → probe broken; control ≥ 25 and twin
   ≤ 5 of 50 → **G2's identity half passes**; twin > 5 of 50 → the leak is
   structural (the facts themselves) and rule 3's last branch applies.
-- **Expected result (author's prediction):** _to be written by the author
-  before the run._
+- **Expected result (author's prediction, 2026-09-29):** control about 45 of
+  50; twin 1 or 2 of 50.
+- **Freeze manifest** (from `runs/e003-run2/manifest.json`, prepared 17:41:13
+  UTC, **frozen before submission**):
+
+| Item | Value |
+|---|---|
+| Prompt SHA-256 | `f171878d75425a9f0de24c6d9dbd44244b0e32d38ff6b26d1f9e418e4c3efb3c` (as run 1) |
+| Real page file SHA-256 (no notes) | `a3e5179bca94149c79ae401c44a8fd3d865c511b13a646f069473f86ab104873` |
+| Twin page file SHA-256 (no notes) | `06b3c54b3984e706ee7437d90873ac10a9d36b7785ac853dd8f1a9fe68ab5f74` |
+| Registry SHA-256 | `11530e235001f022b786c119cef6cf2a5f6d1a58a5ce247bb2cf841aa754bf53` |
+| Seed; species | `20260930`; 50 species, none of run 1's (list in the run manifest) |
+| Model; `reasoning_effort`; max completion tokens | gpt-5-mini; low; 4,000 |
+| Requests; estimated cost | 100; US$ 0.025 central / 0.050 pessimistic |
 
 ### Expected result (author's prediction, 2026-09-29)
 
@@ -611,8 +623,28 @@ no-notes condition lands close to the twin.
 
 ### Actual result
 
+**Run 1, final (2026-09-29; 150 of 150 answers valid after the two registered
+re-sends and the 4,000-token re-send of 8).**
+
+| Condition | Identified | Wilson 95% CI | Exact | "unknown" |
+|---|---|---|---|---|
+| Control | **48 of 50** (96%) | 87–99% | 48 | 1 |
+| Twin (with notes) | **27 of 50** (54%) | 40–67% | 27 | 0 |
+| Twin, no notes | **1 of 50** (2%) | 0–10% | 1 | 27 |
+
+By generation, identified: control G1–G8 all, G9 3 of 5; twin G1 5/6, G2 3/6,
+G3 3/6, G4 3/6, G5 4/6, G6 3/5, G7 4/5, G8 2/5, G9 0/5; no notes: G1 1/6, all
+others 0.
+
+**Decision (rule 3): fail — notes.** The probe works; the twin with Pokédex
+notes leaks (27 of 50, far above 5); without notes it does not (1 of 50). The
+exit is taken: world v1 renders no notes, and run 2 tests that world. Measured
+cost, every call and re-send included: US$ 0.1614. Prediction: control about
+45 (48); twin 2–3 (27); notes weigh little (they carry nearly all of the leak).
+
 **First collection (2026-09-29, batch `batch_6abbee…`; partial — 29 of 150
-answers invalid, see Amendments).**
+answers invalid, see Amendments).** Kept for the record; superseded by the
+final counts above.
 
 | Condition | Identified (valid answers) | Bounds with the invalid ones | "unknown" |
 |---|---|---|---|

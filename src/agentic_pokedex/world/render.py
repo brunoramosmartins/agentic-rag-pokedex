@@ -33,8 +33,8 @@ indexed unit states the withheld levels. Machine, egg and tutor units of the
 same species stay: plausible, insufficient evidence.
 
 **No Pokédex notes in world v1.** E-003 found that the renamed flavor text
-still identifies the species (the twin was recognized in at least 26 of 50
-pages with notes, 1 to 4 without), so G2's exit was taken: the CLI renders no
+still identifies the species (the twin was recognized in 27 of 50 pages with
+notes, 1 of 50 without), so G2's exit was taken: the CLI renders no
 ``Notes`` unless ``--notes`` is passed, for research only.
 
 Out of scope, declared in ``docs/world.md``: learnsets of non-default forms,

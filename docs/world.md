@@ -15,8 +15,8 @@ abilities with the hidden flag; level-up and other learnsets per version group.
 
 **Pokédex flavor text is not in world v1.** It is loaded into the graph, but the
 pages carry no notes: the identity probe (E-003) found that the renamed flavor
-text still names the species — the twin was recognized in at least 26 of 50
-pages with notes and in 1 to 4 of 50 without — so G2's exit was taken
+text still names the species — the twin was recognized in 27 of 50 pages
+with notes and in 1 of 50 without — so G2's exit was taken
 (`docs/contingency.md`). `render --notes` restores them, for research only.
 
 **Out (parked):** encounters and locations, items, battle stats, evolution

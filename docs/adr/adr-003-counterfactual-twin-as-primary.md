@@ -58,8 +58,8 @@ entity renamed consistently, facts intact (`world/twin.py`).
 
 The identity probe (E-003, `experiments/registry.md`) confirmed the suspicion
 this ADR named. On 50 species, the model named the real species from the twin
-page in at least 26 of 50 cases when the renamed Pokédex notes were shown, and
-in 1 to 4 of 50 when they were not; the positive control reached 48 of 50.
+page in 27 of 50 cases when the renamed Pokédex notes were shown, and in 1 of
+50 when they were not; the positive control reached 48 of 50.
 Renaming every name was not enough: the flavor text's descriptions ("lives in
 caves… rusts easily") identify the species by themselves. As the exit plan
 says, the notes go: world v1 renders no notes, and the probe re-runs on the

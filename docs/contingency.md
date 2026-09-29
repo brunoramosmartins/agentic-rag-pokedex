@@ -57,7 +57,7 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   spaces).
 - Checked first on the world build (Phase 1) and again on the pilot (Phase 3).
 - **Status (2026-09-29):** identity half failed with the Pokédex notes (E-003,
-  run 1: twin recognized in at least 26 of 50 pages; 1 to 4 of 50 without
+  run 1: twin recognized in 27 of 50 pages; 1 of 50 without
   notes). Exit taken: world v1 renders no notes. The probe re-runs on the
   no-notes world with a fresh sample (E-003, run 2).
 
