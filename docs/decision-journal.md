@@ -512,3 +512,37 @@ Two conflicts found while opening Phase 1, both absorbed the same day.
 **Plan impact PI-010 resolved:** absorbed — `docs/data-sources.md` amended (documentation examples); the Phase 1 world-doc issue requires elided flavor units.
 
 **Plan impact PI-011 resolved:** absorbed — `notes/phase8-synthesis.md`, `notes/geifman-2017-selective-classification.md` and `.github/setup/milestones.sh` updated; no hours or deliverables change.
+
+## 2026-09-29 — Download and graph load: what enters the graph
+
+`world/download.py` fetches 23 PokéAPI CSVs at the pinned commit and keeps a
+file only if its SHA-256 matches the manifest. The 14 files hashed for G1 still
+match; 9 files are added for English names, move categories and forms
+(`docs/data-sources.md`).
+
+`world/load_graph.py` loads the **real** world; the twin is a renaming layer
+built on top of it. Scope filters, each counted in the load statistics:
+
+- **Types:** only types with rows in the efficacy table, i.e. the 18 battle
+  types. `unknown`, `shadow` and the Tera-only `stellar` go.
+- **Moves:** only moves some Pokémon learns, with a battle type (drops shadow
+  moves and the Z- and Max-move variants: 833 of 937 kept).
+- **Abilities:** main series only (314 of 374).
+- **Names and flavor text:** English only; flavor whitespace collapsed.
+- **Learnsets:** every version group and every learn method is loaded
+  (638,321 rows). The version scope is chosen from the coverage report and
+  applied when pages are rendered, so the coverage report and the S2 filter
+  read the same graph.
+- **Not loaded:** evolution conditions (level, item, trigger), stats, genus,
+  height and weight. Evolution enters as structure only (`EVOLVES_FROM`),
+  which is all the S1 templates need.
+
+A load replaces the whole database and then checks every node and relationship
+count against the records it wrote, because a `MATCH` that misses an endpoint
+writes nothing and raises nothing. Integration tests wipe the database, so they
+run only with `NEO4J_TEST_ALLOW_RESET=1` (set in CI).
+
+Found while reading: 4 English Pokémon names are shared by two entries
+("10% Zygarde", "Koraidon", "Miraidon", "Mega Meowstic"). Titles must be unique
+for `open_page`, so the renderer disambiguates them; the graph keeps the
+PokéAPI identifier, which is unique.

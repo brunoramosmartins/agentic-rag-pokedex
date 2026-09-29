@@ -28,10 +28,10 @@ are gitignored; everything arrives through a download script with hash checks.
 - **License:** BSD-3-Clause (`LICENSE.md`, SPDX `BSD-3-Clause` per the GitHub
   license API). The license file itself states that Pokémon and character
   names are trademarks of Nintendo.
-- **Pinned commit (candidate for Phase 1):**
-  `6bbd96bb8ef7356963b833074ca25672d23e41c4` (master, 2026-09-24). The
-  download script fetches from this commit, not from `master`, so the world is
-  reproducible.
+- **Pinned commit:** `6bbd96bb8ef7356963b833074ca25672d23e41c4` (master,
+  2026-09-24), confirmed in Phase 1. `world/download.py` fetches from this
+  commit, not from `master`, so the world is reproducible. Its `MANIFEST` is
+  the source of truth for every hash below.
 
 **SHA-256 of the files sampled for G1** (at the pinned commit):
 
@@ -51,6 +51,21 @@ are gitignored; everything arrives through a download script with hash checks.
 | `types.csv` | `37f039c8d722f47d51ba1c5c5ecf9b7007235b1a9a1af2827645c777b70307c8` |
 | `version_groups.csv` | `28da8d89d8eb4966941f81a9e62b3990510ed4d76dd774158246551a8e7707a7` |
 | `versions.csv` | `70083465865a6a69a9aad2be3fc3915078c6ff740f14a090b1367d8ec9cfc3cd` |
+
+**Added in Phase 1** (English names, move categories, forms), same commit. The
+14 hashes above were re-checked on 2026-09-29 and all match.
+
+| File | SHA-256 |
+|---|---|
+| `ability_names.csv` | `8acb80c42210f86ae747dc3347b060d69cd2574a9dbfaf74774ae632ca6348da` |
+| `languages.csv` | `fbb60019a6a461783d5671a995d5f590db61792a273e90faa0ed630d102a19b8` |
+| `move_damage_classes.csv` | `b7101ceca4dff152537a2fb5c439ca4030b05f86442c643812c0b7b6ccf16f1b` |
+| `move_names.csv` | `99e23ee38ea53d1473474d463b87651deac3cd4928750f8186feae66da45c147` |
+| `pokemon_form_names.csv` | `f496066d02fab12c18d10cce0af2f748d09cb7e296ecc784cc8682f8c4da8625` |
+| `pokemon_forms.csv` | `99bf8f7ad4dc1f2e291357a090cef6a575623ec3cbf9030d0e33656e6e608ae2` |
+| `pokemon_species_names.csv` | `820cde17074cdb1c2b0595c997fb8f998e773bd5da3bb525dec85703c86c5fd9` |
+| `type_names.csv` | `685230c51074cf2f723debcf827a4df4c36ab0ec7e929c806ad65a3e40958705` |
+| `version_names.csv` | `23e3e9062f98e1f83d475b9eeac57ddff4375b46c175948a65c4fe8d3e1d87b4` |
 
 ### Learnset coverage by version group
 

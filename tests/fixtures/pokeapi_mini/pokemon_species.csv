@@ -1,0 +1,5 @@
+id,identifier,generation_id,evolves_from_species_id,evolution_chain_id,color_id,shape_id,habitat_id,gender_rate,capture_rate,base_happiness,is_baby,hatch_counter,has_gender_differences,growth_rate_id,forms_switchable,is_legendary,is_mythical,order,conquest_order
+1,sprig,1,,1,5,1,1,1,45,50,0,20,0,4,0,0,0,1,
+2,sprout,1,1,1,5,1,1,1,45,50,0,20,0,4,0,0,0,2,
+3,sproutree,1,2,1,5,1,1,1,45,50,0,20,0,4,1,0,0,3,
+4,blaze,2,,2,8,1,1,4,3,0,0,120,0,1,0,1,0,4,
