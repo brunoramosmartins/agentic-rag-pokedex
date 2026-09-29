@@ -61,4 +61,24 @@ def fixture_world_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     for label, cues in (("real", False), ("real-cues", True)):
         texts = [render.render_text(u, world, names, cues=cues) for u in units]
         render.write_units(out / "pages" / f"{label}.jsonl", units, texts)
+    twin_names = render.Names.twin(world, fixture_twin_map())
+    texts = [render.render_text(u, world, twin_names) for u in units]
+    render.write_units(out / "pages" / "twin.jsonl", units, texts)
     return out
+
+
+def fixture_twin_map():
+    """The fixture world's twin map, drawn with the default seed."""
+    from agentic_pokedex.world.pokeapi import read_world
+    from agentic_pokedex.world.twin import (
+        NameFilter,
+        build_twin,
+        load_dictionary,
+        real_names,
+    )
+
+    forbidden, english = real_names(FIXTURE_RAW)
+    name_filter = NameFilter(
+        forbidden, load_dictionary(FIXTURE_RAW / "words_alpha.txt"), english
+    )
+    return build_twin(read_world(FIXTURE_RAW), name_filter)[0]
