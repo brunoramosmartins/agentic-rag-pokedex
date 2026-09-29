@@ -76,6 +76,34 @@ def test_cached_vectors_reuse_the_file(tmp_path: Path, fake_embedder) -> None:
     assert fake_embedder.passage_calls == 2
 
 
+def test_the_cache_is_per_unit(tmp_path: Path, fake_embedder) -> None:
+    cached_vectors(["a text", "b text", "c text"], fake_embedder, tmp_path)
+    fake_embedder.embedded.clear()
+    # A re-rendered corpus: one unit gone, one new, order changed.
+    vectors = cached_vectors(["c text", "d text", "a text"], fake_embedder, tmp_path)
+    assert fake_embedder.embedded == ["d text"]
+    order = ("c text", "d text", "a text")
+    expected = np.stack([fake_embedder._vector(t) for t in order])
+    assert np.allclose(vectors, expected)
+
+
+def test_a_whole_corpus_cache_file_is_imported(tmp_path: Path, fake_embedder) -> None:
+    from agentic_pokedex.world.index import _corpus_key
+
+    texts = ["a text", "b text"]
+    legacy = np.stack([fake_embedder._vector(t) for t in texts])
+    np.save(tmp_path / f"{_corpus_key(fake_embedder.name, texts)}.npy", legacy)
+    vectors = cached_vectors(texts, fake_embedder, tmp_path)
+    assert fake_embedder.embedded == []  # nothing re-embedded
+    assert np.allclose(vectors, legacy)
+    assert (tmp_path / "store.npz").is_file()
+
+
+def test_no_cache_dir_embeds_everything(fake_embedder) -> None:
+    cached_vectors(["a", "b"], fake_embedder, None)
+    assert fake_embedder.embedded == ["a", "b"]
+
+
 def test_hybrid_search_is_deterministic(fake_embedder) -> None:
     units = [
         unit("a", "Species: Sprig · Section: Profile\nTypes: [[Moss]]"),

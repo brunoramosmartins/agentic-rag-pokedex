@@ -23,6 +23,7 @@ class FakeEmbedder:
     def __init__(self, dims: int = 32) -> None:
         self.dims = dims
         self.passage_calls = 0
+        self.embedded: list[str] = []
 
     def _vector(self, text: str) -> np.ndarray:
         v = np.zeros(self.dims, dtype=np.float32)
@@ -33,6 +34,7 @@ class FakeEmbedder:
 
     def passages(self, texts: Sequence[str]) -> np.ndarray:
         self.passage_calls += 1
+        self.embedded += list(texts)
         return np.stack([self._vector(t) for t in texts])
 
     def query(self, text: str) -> np.ndarray:

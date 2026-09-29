@@ -33,6 +33,25 @@ CONTROL, TWIN, TWIN_NO_NOTES = "control", "twin", "twin_no_notes"
 CONDITIONS = (CONTROL, TWIN, TWIN_NO_NOTES)
 MASK = "[MASKED]"
 
+
+@dataclass(frozen=True)
+class RunConfig:
+    """One registered run of the probe."""
+
+    run: int
+    seed: int
+    conditions: tuple[str, ...]
+    notes_expected: bool
+    exclude_run: int | None = None
+
+
+RUNS: Mapping[int, RunConfig] = {
+    1: RunConfig(1, PROBE_SEED, CONDITIONS, notes_expected=True),
+    # G2 exit (rule 3): world rendered without notes, a fresh sample of species
+    # disjoint from run 1; the no-notes condition is the twin itself.
+    2: RunConfig(2, 20260930, (CONTROL, TWIN), notes_expected=False, exclude_run=1),
+}
+
 CONTROL_MIN_RATE = 0.50
 """Below this, the probe is broken, not the twin safe."""
 TWIN_MAX_RATE = 0.10
@@ -76,16 +95,27 @@ def eligible_species(world: World) -> list[int]:
 
 
 def sample_species(
-    world: World, quotas: Mapping[int, int] = QUOTAS, seed: int = PROBE_SEED
+    world: World,
+    quotas: Mapping[int, int] = QUOTAS,
+    seed: int = PROBE_SEED,
+    exclude: Iterable[int] = (),
 ) -> list[int]:
     """Draw the probe's species, stratified by generation.
+
+    Args:
+        world: The world model.
+        quotas: Species per generation.
+        seed: Sampling seed.
+        exclude: Species that may not be drawn (an earlier run's sample).
 
     Raises:
         ValueError: A generation has fewer eligible species than its quota.
     """
+    excluded = set(exclude)
     by_generation: dict[int, list[int]] = defaultdict(list)
     for sid in eligible_species(world):
-        by_generation[world.species[sid]["generation"]].append(sid)
+        if sid not in excluded:
+            by_generation[world.species[sid]["generation"]].append(sid)
     rng = random.Random(seed)
     chosen: list[int] = []
     for generation in sorted(quotas):
@@ -150,9 +180,10 @@ def condition_page(
     return serve(units, counter)
 
 
-def custom_id(condition: str, sid: int) -> str:
-    """Stable request id: ``e003-{condition}-{species}``."""
-    return f"e003-{condition}-{sid}"
+def custom_id(condition: str, sid: int, run: int = 1) -> str:
+    """Stable request id, e.g. ``e003-twin-25`` (run 1) or ``e003r2-twin-25``."""
+    prefix = "e003" if run == 1 else f"e003r{run}"
+    return f"{prefix}-{condition}-{sid}"
 
 
 def parse_custom_id(value: str) -> tuple[str, int]:
@@ -281,13 +312,16 @@ def decide(summary: Mapping[str, ConditionSummary]) -> str:
 
     Returns:
         ``"probe broken"``, ``"pass"``, ``"fail: notes"`` (the twin leaks, the
-        no-notes condition does not) or ``"fail: structural"``.
+        no-notes condition does not) or ``"fail: structural"``. A run without
+        the no-notes condition (run 2: the world already has no notes) can only
+        fail structurally.
     """
     if summary[CONTROL].rate < CONTROL_MIN_RATE:
         return "probe broken"
     if summary[TWIN].rate <= TWIN_MAX_RATE:
         return "pass"
-    if summary[TWIN_NO_NOTES].rate <= TWIN_MAX_RATE:
+    no_notes = summary.get(TWIN_NO_NOTES)
+    if no_notes is not None and no_notes.rate <= TWIN_MAX_RATE:
         return "fail: notes"
     return "fail: structural"
 

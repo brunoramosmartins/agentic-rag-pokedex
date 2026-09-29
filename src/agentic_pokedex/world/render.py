@@ -13,7 +13,8 @@ Pages:
 
 - **Species:** ``Profile`` (types, abilities, the whole evolution line, forms);
   one ``Form`` unit per non-default entry (types, abilities); ``Notes`` (up to
-  two Pokédex texts, free text, outside the registry); one ``Learnset`` unit per
+  two Pokédex texts, free text, outside the registry — **off in world v1**,
+  see below); one ``Learnset`` unit per
   learn method and version group of the scope.
 - **Move:** ``Profile`` (type, category, power); ``Learned by`` per version
   group, level-up only, each entry with the learner's types (S3 filters on
@@ -30,6 +31,11 @@ every group of the scope. Their level-up ``Learnset`` units leave the index,
 and their entries are left out of that group's ``Learned by`` hubs, so no
 indexed unit states the withheld levels. Machine, egg and tutor units of the
 same species stay: plausible, insufficient evidence.
+
+**No Pokédex notes in world v1.** E-003 found that the renamed flavor text
+still identifies the species (the twin was recognized in at least 26 of 50
+pages with notes, 1 to 4 without), so G2's exit was taken: the CLI renders no
+``Notes`` unless ``--notes`` is passed, for research only.
 
 Out of scope, declared in ``docs/world.md``: learnsets of non-default forms,
 learn methods other than level-up, machine, egg and tutor.
@@ -352,7 +358,8 @@ def build_units(
     Args:
         world: The world model.
         withheld: Pairs from ``choose_withheld``.
-        notes: Render Pokédex notes (``False`` is the G2 exit plan).
+        notes: Render Pokédex notes. The CLI leaves them out: world v1 has no
+            notes since G2's exit was taken (E-003).
 
     Returns:
         Units ordered by page kind, entity id, section, method, group, chunk.
@@ -839,7 +846,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW_DIR)
     parser.add_argument("--twin-map", type=Path, default=DEFAULT_MAP_PATH)
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
-    parser.add_argument("--no-notes", action="store_true", help="drop Pokédex notes")
+    parser.add_argument(
+        "--notes", action="store_true",
+        help="include Pokédex notes (off in world v1: they leak identity, E-003)",
+    )
     parser.add_argument("--cues", action="store_true", help="S3 ablation variant")
     args = parser.parse_args(argv)
 
@@ -850,7 +860,7 @@ def main(argv: list[str] | None = None) -> int:
     learn_rows = list(iter_learnsets(args.raw_dir, tables))
     world = build_world(tables, learn_rows, VERSION_SCOPE)
     withheld = choose_withheld(world)
-    units = build_units(world, withheld, notes=not args.no_notes)
+    units = build_units(world, withheld, notes=args.notes)
     registry = build_registry(world, units, withheld)
     registry.save(args.out_dir / "registry.json")
 

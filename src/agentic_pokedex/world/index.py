@@ -212,31 +212,68 @@ class DenseIndex:
         return [Hit(self.unit_ids[i], float(sims[i])) for i in order[:k]]
 
 
+STORE_FILE = "store.npz"
+
+
+def text_key(model: str, text: str) -> str:
+    """Cache key of one passage: model and text."""
+    return hashlib.sha256(f"{model}\x00{text}".encode()).hexdigest()[:32]
+
+
+def _corpus_key(model: str, texts: Sequence[str]) -> str:
+    """Key of the earlier whole-corpus cache files (``{key}.npy``)."""
+    digest = hashlib.sha256()
+    digest.update(model.encode())
+    for text in texts:
+        digest.update(b"\x00" + text.encode("utf-8"))
+    return digest.hexdigest()[:24]
+
+
+def _load_store(path: Path) -> dict[str, np.ndarray]:
+    if not path.is_file():
+        return {}
+    data = np.load(path)
+    return dict(zip(data["keys"].tolist(), data["vectors"], strict=True))
+
+
+def _save_store(path: Path, store: dict[str, np.ndarray]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    keys = sorted(store)
+    np.savez(path, keys=np.array(keys), vectors=np.stack([store[k] for k in keys]))
+
+
 def cached_vectors(
     texts: Sequence[str], embedder: Embedder, cache_dir: Path | None
 ) -> np.ndarray:
-    """Passage vectors, reused from ``cache_dir`` when model and texts match."""
-    digest = hashlib.sha256()
-    digest.update(embedder.name.encode())
-    for text in texts:
-        digest.update(b"\x00" + text.encode("utf-8"))
-    key = digest.hexdigest()[:24]
-    path = cache_dir / f"{key}.npy" if cache_dir else None
-    if path and path.is_file():
-        return np.load(path)
-    print(
-        f"Embedding {len(texts):,} units with {embedder.name} (first run only; "
-        "minutes on CPU)...",
-        file=sys.stderr,
-        flush=True,
-    )
-    started = time.monotonic()
-    vectors = embedder.passages(texts)
-    print(f"Embedded in {time.monotonic() - started:.0f} s", file=sys.stderr)
-    if path:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        np.save(path, vectors)
-    return vectors
+    """Passage vectors, embedding only the texts the cache does not hold.
+
+    The cache is per passage (model + text), so re-rendering the world
+    re-embeds only the units whose text changed. A whole-corpus file written
+    by the earlier cache is imported when the corpus matches it.
+    """
+    if cache_dir is None:
+        return embedder.passages(texts)
+    store_path = cache_dir / STORE_FILE
+    store = _load_store(store_path)
+    keys = [text_key(embedder.name, t) for t in texts]
+    legacy = cache_dir / f"{_corpus_key(embedder.name, texts)}.npy"
+    if legacy.is_file() and any(k not in store for k in keys):
+        store.update(zip(keys, np.load(legacy), strict=True))
+        _save_store(store_path, store)
+    missing = sorted({i for i, k in enumerate(keys) if k not in store})
+    if missing:
+        print(
+            f"Embedding {len(missing):,} of {len(texts):,} units with "
+            f"{embedder.name} (cached per unit; minutes on CPU the first time)...",
+            file=sys.stderr,
+            flush=True,
+        )
+        started = time.monotonic()
+        vectors = embedder.passages([texts[i] for i in missing])
+        print(f"Embedded in {time.monotonic() - started:.0f} s", file=sys.stderr)
+        store.update(zip((keys[i] for i in missing), vectors, strict=True))
+        _save_store(store_path, store)
+    return np.stack([store[k] for k in keys]) if keys else np.empty((0, 0))
 
 
 # --- Hybrid -----------------------------------------------------------------

@@ -68,6 +68,21 @@ def test_registered_quotas_total_fifty() -> None:
     assert sum(probe.QUOTAS.values()) == 50
 
 
+def test_sample_excludes_an_earlier_run(world: World) -> None:
+    sample = probe.sample_species(world, {1: 2}, seed=7, exclude=[1])
+    assert sorted(sample) == [2, 3]
+    with pytest.raises(ValueError, match="generation 1"):
+        probe.sample_species(world, {1: 3}, seed=7, exclude=[1])
+
+
+def test_registered_runs() -> None:
+    first, second = probe.RUNS[1], probe.RUNS[2]
+    assert first.conditions == probe.CONDITIONS and first.notes_expected
+    assert second.conditions == (CONTROL, TWIN) and not second.notes_expected
+    assert (second.seed, second.exclude_run) == (20260930, 1)
+    assert second.seed != first.seed
+
+
 # --- Pages ------------------------------------------------------------------
 
 
@@ -119,6 +134,16 @@ def test_pages_respect_the_token_cap(world, units) -> None:
 def test_custom_ids_round_trip() -> None:
     for condition in probe.CONDITIONS:
         assert probe.parse_custom_id(probe.custom_id(condition, 25)) == (condition, 25)
+        second = probe.custom_id(condition, 25, run=2)
+        assert second.startswith("e003r2-")
+        assert probe.parse_custom_id(second) == (condition, 25)
+
+
+def test_without_the_no_notes_condition_a_fail_is_structural() -> None:
+    summary = summary_of({CONTROL: (45, 50), TWIN: (9, 50)})
+    assert probe.decide(summary) == "fail: structural"
+    summary = summary_of({CONTROL: (45, 50), TWIN: (4, 50)})
+    assert probe.decide(summary) == "pass"
 
 
 # --- Grading ----------------------------------------------------------------

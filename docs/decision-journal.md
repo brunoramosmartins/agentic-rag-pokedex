@@ -718,3 +718,26 @@ ways, and only a verdict both cases share is taken. The branch of the exit plan
 Both were escalated the same day: PI-013 touches the phase in progress and a
 `docs/contingency.md` exit; PI-014 touches the budget behind the sizing. The
 probe itself cost US$ 0.09, above its pessimistic estimate of 0.076.
+
+## 2026-09-29 — G2's exit taken: world v1 renders no Pokédex notes
+
+After the two registered re-sends, E-003 run 1 reads, in both bounds of its
+remaining invalid answers: twin 26–31 of 50, twin without notes 1–4 of 50,
+control 48 of 50. Rule 3's branch is "notes": the leak is in the flavor text,
+not in the facts. The author confirmed the consequences:
+
+- **World v1 has no notes.** The renderer's CLI leaves them out by default;
+  `--notes` restores them for research. 12,452 units (12,332 indexed), the
+  same 144,861 facts; registry check PASS; byte-identical on a forced rebuild.
+- **E-003 run 2** is registered before it runs: a fresh sample of 50 species
+  (seed 20260930, excluding run 1's), control and twin on the no-notes world,
+  the 4,000-token cap from the start.
+- **The vector cache is per unit.** Re-rendering re-embeds only units whose
+  text changed; the earlier whole-corpus file was imported, so the no-notes
+  index needed no embedding at all (12,332 vectors reused).
+- **Documents:** `docs/world.md`, `docs/data-sources.md`, `docs/contingency.md`
+  (G2 status), and Updates sections in ADR-002 and ADR-003.
+
+PI-013 stays open until run 2 passes. The last re-send of run 1 (4,000
+tokens, 8 answers) completes its published counts; it cannot change the
+verdict, which both bounds already share.

@@ -568,6 +568,29 @@ can detect identification at all.
    themselves), and primary-population questions exclude the leaking species'
    templates, decided on dev and recorded.
 
+### Run 2 — the G2 exit (registered 2026-09-29, before its run)
+
+Rule 3 applies: run 1 found the twin leaking and the no-notes condition within
+the threshold in both bounds. World v1 is rendered without notes and the probe
+re-runs:
+
+- **World:** the default render, no `Notes` units (the preparation step refuses
+  a world that has them); registry and page-file hashes recorded in the run
+  manifest.
+- **Sample:** 50 species, the same stratification, seed `20260930`, **excluding
+  run 1's 50 species**.
+- **Conditions** (100 calls): **control** (the real page, now without notes,
+  masked as before) and **twin** (the twin page, now without notes). The
+  no-notes condition is the twin itself.
+- **Everything else as run 1**, with the amendment of 2026-09-29 in force from
+  the start: `max_completion_tokens` 4,000; up to two re-sends of invalid
+  answers; first valid answer kept; residual invalid answers counted both ways.
+- **Decision rule:** control < 25 of 50 → probe broken; control ≥ 25 and twin
+  ≤ 5 of 50 → **G2's identity half passes**; twin > 5 of 50 → the leak is
+  structural (the facts themselves) and rule 3's last branch applies.
+- **Expected result (author's prediction):** _to be written by the author
+  before the run._
+
 ### Expected result (author's prediction, 2026-09-29)
 
 Control: about 45 of 50. Twin: 2 or 3 of 50. The notes weigh little: the

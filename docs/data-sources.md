@@ -123,6 +123,10 @@ and demo), and the version scope must satisfy finding 2.
 - Used **only in the local corpus**, renamed through the twin map. It is also
   the first suspect for identity leakage (G2) and the first thing removed if the
   twin leaks.
+- **Not in world v1 (2026-09-29).** The identity probe (E-003) confirmed the
+  leak: renamed flavor text still let the model name the species. The pages
+  carry no notes; the file is still downloaded, to reproduce E-003 and for the
+  renderer's research option `--notes`.
 
 **Verdict: ok-with-restriction** — local use only; never committed, never
 published, in real or renamed form.

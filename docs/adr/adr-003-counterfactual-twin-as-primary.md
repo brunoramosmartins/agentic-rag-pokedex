@@ -52,6 +52,20 @@ entity renamed consistently, facts intact (`world/twin.py`).
   README must not pitch it as "safe for your private data".
 - Aliases for exact match come only from the twin map (keeps the grader tight).
 
+## Updates
+
+### 2026-09-29 — G2's exit taken: no Pokédex notes in world v1
+
+The identity probe (E-003, `experiments/registry.md`) confirmed the suspicion
+this ADR named. On 50 species, the model named the real species from the twin
+page in at least 26 of 50 cases when the renamed Pokédex notes were shown, and
+in 1 to 4 of 50 when they were not; the positive control reached 48 of 50.
+Renaming every name was not enough: the flavor text's descriptions ("lives in
+caves… rusts easily") identify the species by themselves. As the exit plan
+says, the notes go: world v1 renders no notes, and the probe re-runs on the
+no-notes world with a fresh sample of species (E-003, run 2). The twin keeps
+every fact; it loses the prose that made its pages read like a wiki.
+
 ## Alternatives considered
 
 | Alternative | Why rejected |

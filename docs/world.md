@@ -11,8 +11,13 @@ built.
 
 **In:** species and forms; the 18 battle types and their efficacy table;
 evolution chains (structure only); moves with type, power and category;
-abilities with the hidden flag; level-up and other learnsets per version group;
-Pokédex flavor text (local only, never published).
+abilities with the hidden flag; level-up and other learnsets per version group.
+
+**Pokédex flavor text is not in world v1.** It is loaded into the graph, but the
+pages carry no notes: the identity probe (E-003) found that the renamed flavor
+text still names the species — the twin was recognized in at least 26 of 50
+pages with notes and in 1 to 4 of 50 without — so G2's exit was taken
+(`docs/contingency.md`). `render --notes` restores them, for research only.
 
 **Out (parked):** encounters and locations, items, battle stats, evolution
 conditions, genus, height and weight, the trading card game. Each would add
@@ -27,7 +32,7 @@ python -m agentic_pokedex.world.coverage     # learnset coverage report
 python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json
 python -m agentic_pokedex.world.render       # pages + registry → data/world/
 python -m agentic_pokedex.world.answer_space # values per answer slot
-python -m agentic_pokedex.world.examples     # example pages, notes elided
+python -m agentic_pokedex.world.examples     # example pages (twin only)
 ```
 
 ## Graph
@@ -203,8 +208,8 @@ twins ("Scarlet/Violet" → "<version>/<version>").
 upper-case occurrence of a species, form, type, ability or move name, or of
 "Pokémon", is replaced; when two kinds share a name ("Psychic"), the type wins
 over the move. Version names are not rewritten in prose ("X", "Sun"). Lower-case
-prose ("spits fire") is left as it is: that is the leak surface the identity
-probe measures (G2), and the first thing removed if the twin leaks.
+prose ("spits fire") is left as it is: that was the leak surface the identity
+probe measured, and it leaked — the reason world v1 has no notes (E-003).
 
 ### Build (2026-09-29)
 
@@ -223,7 +228,8 @@ probe measures (G2), and the first thing removed if the twin leaks.
 - **Round trip** real → twin → real: identity for every name of every kind.
 - **Unique words:** no pseudo-word is shared by two names.
 - **Flavor text:** 5,797 of 14,496 English texts change; after rewriting, **0**
-  still name a real species, in any case.
+  still name a real species, in any case. Renaming the names was not enough:
+  the descriptions themselves identify the species (E-003).
 
 ## Pages and evidence units
 
@@ -252,7 +258,7 @@ Move: Kresto · Section: Learned by · Version: Diprok/Kastoxgi
 
 | Page | Sections (units) |
 |---|---|
-| Species | `Profile` (types, abilities, the whole evolution line, forms); one `Form` per non-default entry (types, abilities); `Notes` (up to 2 Pokédex texts, free text); one `Learnset` per learn method and version group |
+| Species | `Profile` (types, abilities, the whole evolution line, forms); one `Form` per non-default entry (types, abilities); one `Learnset` per learn method and version group; `Notes` (up to 2 Pokédex texts, free text) only with `--notes` — off in world v1 |
 | Move | `Profile` (type, category, power); `Learned by` per version group, level-up only, each entry with the learner's types, split every 20 entries |
 | Ability | `Holders`, split every 20 entries, hidden ones marked |
 | Type | `Matchups`: attacking and defending, by damage factor |
@@ -276,7 +282,8 @@ Move: Kresto · Section: Learned by · Version: Diprok/Kastoxgi
    and tutor units stay. Examiner consequence: S3 templates avoid hubs whose
    gold set includes a withheld species.
 5. **Notes:** up to 2 distinct Pokédex texts per species, most recent versions
-   first; `--no-notes` drops them all (the G2 exit plan).
+   first — **off in world v1** since E-003 (G2's exit); `--notes` restores
+   them for research.
 6. **Titles are unique:** abilities sharing a name ("As One") are one page;
    forms sharing a display name get " (2)".
 
@@ -290,13 +297,14 @@ scope), and the rare learn methods (`light-ball-egg`, `form-change`,
 ### Example pages (twin, as rendered)
 
 One page of each kind, exactly as the renderer writes it and the index serves
-it, regenerated with `python -m agentic_pokedex.world.examples`. Pokédex notes
-are elided (`docs/data-sources.md`); everything else is PokéAPI fact content
-under twin names. The species page shows a form, three learn methods, and a
+it, regenerated with `python -m agentic_pokedex.world.examples`. World v1 has
+no Pokédex notes; had a page any, the generator would elide them
+(`docs/data-sources.md`). Everything shown is PokéAPI fact content under twin
+names. The species page shows a form, three learn methods, and a
 machine learnset split into two units that share one header with no
 pagination marker (ADR-009). The move's hub shows each learner's types.
 
-#### Species page: Humzam (7 units)
+#### Species page: Humzam (6 units)
 
 ```
 Species: Humzam · Section: Profile
@@ -310,11 +318,6 @@ Forms: [[Salleken Humzam]]
 Species: Humzam · Section: Form · Form: Salleken Humzam
 Types: [[Laigrel]] / [[Lolmax]]
 Abilities: [[Dralfas]], [[Dunuszaik]] · Hidden ability: [[Teipomde]]
-```
-
-```
-Species: Humzam · Section: Notes
-[flavor text — 2 texts, local only]
 ```
 
 ```
@@ -392,16 +395,15 @@ A fact id carries its full content (`learn:{pokemon}:{move}:{group}:{method}:{le
 `ptype:{pokemon}:{slot}:{type}`, …; `world/registry.py`). Every body line is
 generated from registered facts, and the check parses each unit's text back into
 fact ids and compares them with the registry — so a wrong value, a missing line
-or an extra line fails it. Pokédex notes are free text, outside the registry,
-and are marked as such for the shortcut scan.
+or an extra line fails it. Pokédex notes, when rendered (`--notes`), are free
+text outside the registry, marked as such.
 
-### Build (2026-09-29)
+### Build (2026-09-29, world v1: no notes)
 
 | Section | Units |
 |---|---:|
 | species / Profile | 1,025 |
 | species / Form | 326 |
-| species / Notes (free text) | 1,025 |
 | species / Learnset / level-up | 2,261 (120 withheld) |
 | species / Learnset / machine | 2,914 |
 | species / Learnset / egg | 1,054 |
@@ -410,13 +412,13 @@ and are marked as such for the shortcut scan.
 | move / Learned by | 2,761 |
 | ability / Holders | 362 |
 | type / Matchups | 18 |
-| **Total** | **13,477** (13,357 indexed) |
+| **Total** | **12,452** (12,332 indexed) |
 
 - **Facts:** 144,861, every one stated by at least one unit; no unit states an
   unregistered fact; every unit's text parses back to exactly its registered
   facts, in the twin and in the real naming (`REGISTRY CHECK: PASS`).
-- **Size** (indexed units, estimated as characters / 4): mean 92 tokens, p90
-  178, max 223; about 1.23 million tokens in total. The largest unit is well
+- **Size** (indexed units, estimated as characters / 4): mean 94 tokens, p90
+  180, max 223; about 1.16 million tokens in total. The largest unit is well
   under the ~700 tokens a tool call returns.
 - **Idempotence:** a forced rebuild writes byte-identical page files (same
   SHA-256), in both namings.
