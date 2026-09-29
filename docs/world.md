@@ -26,6 +26,7 @@ python -m agentic_pokedex.world.load_graph   # replaces the Neo4j database
 python -m agentic_pokedex.world.coverage     # learnset coverage report
 python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json
 python -m agentic_pokedex.world.render       # pages + registry → data/world/
+python -m agentic_pokedex.world.answer_space # values per answer slot
 ```
 
 ## Graph
@@ -319,4 +320,64 @@ and are marked as such for the shortcut scan.
   under the ~700 tokens a tool call returns.
 - **Idempotence:** a forced rebuild writes byte-identical page files (same
   SHA-256), in both namings.
+
+## Index and tools
+
+**Index** (`world/index.py`) — indexed units only; withheld units never enter.
+
+- **BM25**, adapted from the previous project: `k1 = 1.2`, `b = 0.75`, ties by
+  unit id. Twin names are pseudo-words no embedding model has seen, so the
+  lexical half carries the names.
+- **Dense:** `BAAI/bge-small-en-v1.5` through `fastembed` (ONNX, CPU, the
+  `retrieval` extra), exact cosine search in numpy. Passage vectors are cached
+  in `data/world/index/`, keyed by model and texts.
+- **Fusion:** reciprocal rank fusion (`k = 60`) over the top 50 of each.
+
+**Tools** (`tools/`) — the same for every arm.
+
+| Call | Returns |
+|---|---|
+| `search(query, k ≤ 5)` | The best units, with headers |
+| `open_page(title)` | The page from the top |
+| `open_page(title, section)` | Units whose section line contains `section` (`"level-up"`, `"Learned by · Version: …"`) |
+| `open_page(title, section, offset)` | The same, skipping the first `offset` units; `"No more units."` past the end |
+
+At most **700 tokens of units per call** (`o200k_base`), packed in rank or page
+order, the first unit always. In the main condition nothing says how many units
+matched or remain; in the cue condition (S3 ablation) both tools state the
+count, and the cue page file carries `Part k/N`. Every result records the ids
+of the units it showed, for the labeler.
+
+In the real naming a type and a move can share a name ("Psychic");
+`open_page` then returns both pages, species before move before ability before
+type. Twin titles are all unique.
+
+## Answer spaces
+
+`world/answer_space.py`. For each slot an answer can fill: how many values it
+admits, the **uniform** chance of a blind guess (1 / n), and the **modal
+share** — the score of always guessing the most common value, which needs no
+leak at all. Populations are world-level, in scope; a template's own
+population is known only once questions exist. Counts are the same in the twin
+and in the real naming.
+
+| Slot | Population | Values (n) | Uniform chance | Modal share | Space |
+|---|---|---:|---:|---:|---|
+| type of a Pokémon (primary) | Pokémon entries (1,351) | 18 | 5.6% | 11.8% | small |
+| type of a Pokémon (any slot) | Pokémon type facts (2,116) | 18 | 5.6% | 9.1% | small |
+| type of a move | moves (833) | 18 | 5.6% | 22.6% | small |
+| move category | moves (833) | 3 | 33.3% | 40.3% | small |
+| move power | moves with power (546) | 32 | 3.1% | 13.0% | open |
+| damage factor | type pairs (324) | 4 | 25.0% | 63.0% | small |
+| learn level | answerable level-up pairs in scope (31,019) | 96 | 1.0% | 21.3% | open |
+| learn level (S2-usable) | S2-usable pairs in scope (8,350) | 93 | 1.1% | 4.4% | open |
+| ability | Pokémon ability facts (2,943) | 312 | 0.3% | 1.6% | open |
+| hidden ability | hidden-ability facts (988) | 166 | 0.6% | 2.5% | open |
+| species | species (1,025) | 1,025 | 0.1% | 0.1% | open |
+| move | moves (833) | 833 | 0.1% | 0.1% | open |
+
+*Small* = at most 20 values. Several slots are skewed well beyond uniform
+chance: a move's type is Normal 22.6% of the time, a damage factor is ×1 63% of
+the time, and a learnable level is 1 in 21.3% of answerable pairs (4.4% among
+S2-usable pairs, whose levels differ between groups by construction).
 
