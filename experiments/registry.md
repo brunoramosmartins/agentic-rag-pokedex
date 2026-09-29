@@ -29,7 +29,7 @@ filled only after the run, next to the date.
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
-| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | draft | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | — |
+| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | frozen | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | — |
 
 ---
 
@@ -503,7 +503,8 @@ _Not run._
 ## E-003 — Identity probe: can the model name the real species behind a twin page?
 
 - **Phase:** 1 (world), before any question exists.
-- **Status:** draft — registered 2026-09-29.
+- **Status:** frozen — registered 2026-09-29; configuration fixed by the run
+  manifest at 16:57:47 UTC, before submission (see Amendments).
 - **Hypothesis:** gating — the identity half of G2 (`docs/contingency.md`).
   The closed-book half runs in Phase 3.
 
@@ -567,15 +568,34 @@ can detect identification at all.
    themselves), and primary-population questions exclude the leaking species'
    templates, decided on dev and recorded.
 
-### Expected result (author's prediction)
+### Expected result (author's prediction, 2026-09-29)
 
-_To be written by the author before the run._
+Control: about 45 of 50. Twin: 2 or 3 of 50. The notes weigh little: the
+no-notes condition lands close to the twin.
+
+### Freeze manifest (2026-09-29)
+
+| Item | Value |
+|---|---|
+| Prompt `identity_probe` SHA-256 | `f171878d75425a9f0de24c6d9dbd44244b0e32d38ff6b26d1f9e418e4c3efb3c` |
+| Real page file SHA-256 | `630f5e0a31707d3bb3f857392de93276c4304d099c7f610f007ff2ba4459c0fa` |
+| Twin page file SHA-256 | `187637561f7e7cd2faeb57a7d7769795972720efd09bd4bb33910f4709d66931` |
+| Seed; species | `20260929`; 50 species (list in the run manifest) |
+| Model; `reasoning_effort`; max completion tokens | gpt-5-mini; low; 1,000 |
+| Requests | 150 (50 species × 3 conditions) |
+| Estimated cost | US$ 0.038 central / 0.076 pessimistic |
+| Batch | `batch_6abbee1579948190afda9a6ca6f4e60a`, submitted 16:57:58 UTC |
 
 ### Actual result
 
-_Not run._
+_Batch submitted; not collected._
 
 ### Amendments
 
-_None._
+- **2026-09-29 — freeze recorded after submission.** The protocol freezes an
+  entry before its run; here the freeze is written from the run manifest
+  (`runs/e003/manifest.json`), which the preparation step wrote at 16:57:47
+  UTC, 11 seconds before the batch was submitted and before any answer existed.
+  Every item above is copied from that manifest; nothing in the configuration
+  changed after it. Recorded so the order of events is visible.
 
