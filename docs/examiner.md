@@ -5,7 +5,7 @@ sufficiency labels are generated from the Neo4j graph (ADR-007) and the fact →
 units registry (`docs/world.md`). This document is the specification, written
 before the generator; the counts sections are filled as the filters run.
 
-**Status:** specification (Phase 2, 2026-09-29). Counts: pending.
+**Status:** specification and first generation (Phase 2, 2026-09-29).
 
 ## Principles
 
@@ -72,12 +72,14 @@ Group A templates are visible to all tuning; group B templates are held out
 
 | ID | Question | Pool |
 |---|---|---:|
-| S3-A1 | Species of type T that learn M by level-up in V | 323 |
+| S3-A1 | Species of type T that learn M by level-up in V | 1,961 (see Counts) |
 | S3-B1 | Species of type T that learn M by level-up in V at or below level L | to count |
 
 - The gold set has 3–25 members **and is spread over at least two indexed
-  units**: 1,181 of 1,504 candidate sets fit in one hub unit, where one unit is
-  sufficient and nothing is truncated.
+  units**: a set that one hub unit holds entirely is not truncated (2,115 such
+  sets dropped). An early estimate of 323 excluded every hub touching a
+  withheld species; the rule is narrower — only sets whose *members* include
+  one (PI-016) — and leaves 1,961.
 - "Of type T" means T is one of the species' types.
 - A hidden-ability holders template was dropped: 24 sets spread over two
   units.
@@ -111,7 +113,8 @@ measures generalization rather than a paraphrase.
 
 Three per template, hand-written (no LLM paraphrase in v1). Placeholders are
 filled with twin names in the twin population and real names in eval-L3.
-`{TERM}` is the twin's word for "Pokémon" (its plural takes an `s`).
+`{TERM}` is the world's word for "Pokémon", the same in singular and plural
+(as "Pokémon" is).
 
 | ID | Surface forms |
 |---|---|
@@ -127,8 +130,8 @@ filled with twin names in the twin population and real names in eval-L3.
 | S2-A1, S4-A1 | At what level does {X} learn {M} in {V}? · In {V}, at which level does {X} learn {M}? · {X} learns {M} by leveling up in {V}. At what level? |
 | S2-A2, S4-B1 | Which move does {X} learn at level {L} in {V}? · In {V}, what move does {X} learn upon reaching level {L}? · Name the move {X} learns at level {L} in {V}. |
 | S2-B1 | What is the last move {X} learns by leveling up in {V}? · In {V}, which move does {X} learn at the highest level? · Which level-up move does {X} learn last in {V}? |
-| S3-A1 | Which {T}-type {TERM}s learn {M} by leveling up in {V}? · List every {T}-type {TERM} that learns {M} by level-up in {V}. · In {V}, which {TERM}s of type {T} learn {M} by leveling up? |
-| S3-B1 | Which {T}-type {TERM}s learn {M} by leveling up in {V} at or below level {L}? · List every {T}-type {TERM} that learns {M} by level {L} or earlier in {V}. · In {V}, which {TERM}s of type {T} learn {M} by leveling up no later than level {L}? |
+| S3-A1 | Which {T}-type {TERM} learn {M} by leveling up in {V}? · List every {T}-type {TERM} that learns {M} by level-up in {V}. · In {V}, which {TERM} of type {T} learn {M} by leveling up? |
+| S3-B1 | Which {T}-type {TERM} learn {M} by leveling up in {V} at or below level {L}? · List every {T}-type {TERM} that learns {M} by level {L} or earlier in {V}. · In {V}, which {TERM} of type {T} learn {M} by leveling up no later than level {L}? |
 
 ## Filters
 
@@ -146,8 +149,10 @@ Applied in this order; each publishes N-of-M per template.
 4. **Stratum conditions.** S1 material/benign tag; S2 distractor present;
    S3 size 3–25 and spread over ≥ 2 units; S4 answer fact only in withheld
    units and a plausible distractor present.
-5. **Single-unit shortcut** (MuSiQue): for S1–S3, if one indexed unit covers
-   every gold fact, the question is discarded — it is not multi-hop.
+5. **Single-unit shortcut** (MuSiQue): for S1 and S3, if one indexed unit
+   covers every gold fact, the question is discarded — it is not multi-hop.
+   S0 is one unit by design, and S2 is one fact by nature: its difficulty is
+   the wrong-version distractor, not a hop.
 6. **Answer concentration (PI-012).** Each template's majority-answer rate is
    at most max(10%, 1.5 × uniform chance); the answer distribution before and
    after the cap is published.
@@ -197,4 +202,40 @@ Ids and seeds only are versioned (`data/splits/`).
 
 ## Counts
 
-_Filled when the generator runs._
+Generated 2026-09-29 (`python -m agentic_pokedex.examiner.generate`; the
+question file is byte-identical across runs). **33,719 questions** before
+splitting.
+
+| Template | Candidates | After filters | Kept (after cap) | Majority before → after | S1 material / benign |
+|---|---:|---:|---:|---|---|
+| S0-A1 | 856 | 856 | 856 | 3% → 3% (cap 10%) |  |
+| S0-A2 | 546 | 546 | 527 | 13% → 10% (cap 10%) |  |
+| S0-A3 | 833 | 833 | 833 | 40% → 40% (cap 50%) |  |
+| S0-A4 | 833 | 833 | 713 | 23% → 10% (cap 10%) |  |
+| S0-B1 | 324 | 324 | 192 | 63% → 38% (cap 38%) |  |
+| S1-A1 | 434 | 405 | 405 | 3% → 3% (cap 10%) | 70 / 335 |
+| S1-A2 | 434 | 434 | 434 | 6% → 6% (cap 10%) | 104 / 330 |
+| S1-A3 | 438 | 405 | 405 | 2% → 2% (cap 10%) | 57 / 348 |
+| S1-B1 | 41,000 | 41,000 | 12,740 | 57% → 25% (cap 25%) | 12,740 / 0 |
+| S2-A1 | 28,443 | 7,897 | 7,897 | 4% → 4% (cap 10%) |  |
+| S2-A2 | 24,618 | 2,893 | 2,893 | 1% → 1% (cap 10%) |  |
+| S2-B1 | 2,141 | 337 | 337 | 5% → 5% (cap 10%) |  |
+| S3-A1 | 12,730 | 1,961 | 1,961 | 0% → 0% (cap 10%) |  |
+| S3-B1 | 12,730 | 1,068 | 1,068 | 0% → 0% (cap 10%) |  |
+| S4-A1 | 1,662 | 1,479 | 1,479 | exempt (S4 answer: abstain) |  |
+| S4-B1 | 1,431 | 979 | 979 | exempt (S4 answer: abstain) |  |
+
+Drops by reason:
+
+- **S1-A1:** final form has no single hidden ability 29
+- **S1-A3:** next form has no single hidden ability 33
+- **S2-A1:** ambiguous: level 0 or several levels 1,962; another group has the same level 16,986; no distractor: other groups do not list the move 1,375; no other group lists this learnset 223
+- **S2-A2:** ambiguous: level 0 or several moves at the level 2,162; another group has the same move at the level 13,407; no distractor: other groups list nothing at the level 5,933; no other group lists this learnset 223
+- **S2-B1:** ambiguous: several moves at the top level 73; another group has the same last move 1,508; no other group lists this learnset 223
+- **S3-A1:** a member's learnset is withheld 1,977; set size outside 3-25 6,677; single-unit shortcut 2,115
+- **S3-B1:** a member's learnset is withheld 1,977; set size outside 3-25 2; single-unit shortcut 1,244; the level cap removes no learner 399; too few learners for a level cap 8,040
+- **S4-A1:** ambiguous: level 0 or several levels 104; no distractor: other groups do not list the move 79
+- **S4-B1:** ambiguous: level 0 or several moves at the level 136; no distractor: other groups list nothing at the level 316
+
+The shortcut scan (filter 7) and the splits are not applied yet.
+

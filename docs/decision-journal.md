@@ -903,3 +903,28 @@ case — the old Charmander example was benign), ADR-002 (Updates) and a note in
 E-003 updated.
 
 **Plan impact PI-017 resolved:** absorbed — the world was re-rendered within Phase 2, S1 keeps four templates (S1-A1 to A3 and S1-B1), no hours or deliverables change.
+
+## 2026-09-29 — Examiner templates and the first generation
+
+`examiner/templates.py` (Cypher per template), `examiner/surfaces.py` and
+`examiner/generate.py` generate 33,719 questions from the graph, byte-identical
+across runs; counts per template and per drop reason in `docs/examiner.md`.
+Decisions made while building, none changing the approved design:
+
+- **The single-unit shortcut filter applies to S1 and S3 only.** S0 is one
+  unit by design and S2 is one fact by nature — its difficulty is the
+  wrong-version distractor; the specification said "S1–S3" and was corrected.
+- **Gold facts are the facts the answer is derived from.** For "the last move
+  X learns" that is the whole learnset, so only the learnset unit covers it; a
+  hub entry naming the move at the top level does not prove it is the last.
+- **S4 is exempt from the concentration cap:** its correct answer is always to
+  abstain, so no guess can be lucky.
+- **"Pokémon" takes no plural `s`**, in the twin as in English, so real and
+  twin questions stay parallel.
+- **S3 pool:** 1,961 sets, not the 323 first estimated; the estimate excluded
+  every hub touching a withheld species, the rule excludes only sets whose
+  members include one.
+- **S1-B1** samples 40 damaging moves (seeded) against every species.
+- **Question ids** carry PokéAPI ids and are local. The published benchmark
+  must use opaque ids: a PokéAPI species id maps a twin name back to its real
+  species.

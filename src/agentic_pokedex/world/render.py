@@ -124,6 +124,7 @@ class World:
     types: dict[int, Record]
     moves: dict[int, Record]
     abilities: dict[int, str]
+    ability_key: dict[int, int]
     group_names: dict[str, str]
     pokemon_types: dict[int, list[tuple[int, int]]]
     pokemon_abilities: dict[int, list[tuple[int, int, bool]]]
@@ -217,6 +218,7 @@ def build_world(
         types={t["id"]: t for t in sorted(tables.types, key=lambda r: r["id"])},
         moves={m["id"]: m for m in sorted(tables.moves, key=lambda r: r["id"])},
         abilities={k: a for a, k in canonical.items()},
+        ability_key=ability_key,
         group_names={g["identifier"]: g["name"] for g in tables.version_groups},
         pokemon_types=dict(pokemon_types),
         pokemon_abilities=dict(pokemon_abilities),
