@@ -195,3 +195,37 @@ def test_decide(control: int, twin: int, no_notes: int, verdict: str) -> None:
     for condition, k in ((CONTROL, control), (TWIN, twin), (TWIN_NO_NOTES, no_notes)):
         summary |= probe.summarize(rows(condition, k, 50))
     assert probe.decide(summary) == verdict
+
+
+def summary_of(counts: dict[str, tuple[int, int]]) -> dict[str, ConditionSummary]:
+    summary: dict[str, ConditionSummary] = {}
+    for condition, (k, n) in counts.items():
+        summary |= probe.summarize(rows(condition, k, n))
+    return summary
+
+
+def test_decide_bounded_takes_a_shared_verdict() -> None:
+    # The first E-003 collection: twin fails either way.
+    summary = summary_of({CONTROL: (48, 50), TWIN: (22, 34), TWIN_NO_NOTES: (1, 37)})
+    invalid = {CONTROL: 0, TWIN: 16, TWIN_NO_NOTES: 13}
+    assert probe.decide_bounded(summary, invalid) == (
+        "undetermined: fail: structural / fail: notes"
+    )
+    few = {CONTROL: 0, TWIN: 16, TWIN_NO_NOTES: 2}
+    summary = summary_of({CONTROL: (48, 50), TWIN: (22, 34), TWIN_NO_NOTES: (1, 48)})
+    assert probe.decide_bounded(summary, few) == "fail: notes"
+
+
+def test_decide_bounded_without_invalid_equals_decide() -> None:
+    summary = summary_of({CONTROL: (45, 50), TWIN: (2, 50), TWIN_NO_NOTES: (1, 50)})
+    none = dict.fromkeys(probe.CONDITIONS, 0)
+    assert probe.decide_bounded(summary, none) == probe.decide(summary) == "pass"
+
+
+def test_invalid_control_answers_count_against_the_probe() -> None:
+    summary = summary_of({CONTROL: (25, 45), TWIN: (0, 50), TWIN_NO_NOTES: (0, 50)})
+    invalid = {CONTROL: 5, TWIN: 0, TWIN_NO_NOTES: 0}
+    # worst: 25 of 50 → valid probe; best: 30 of 50 → valid probe → pass
+    assert probe.decide_bounded(summary, invalid) == "pass"
+    summary = summary_of({CONTROL: (22, 45), TWIN: (0, 50), TWIN_NO_NOTES: (0, 50)})
+    assert probe.decide_bounded(summary, invalid) == "undetermined: probe broken / pass"

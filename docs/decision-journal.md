@@ -692,3 +692,29 @@ The author chose among alternatives:
 The prompt tells the model it is looking at a renamed Pokémon: the hardest
 test for the twin. Cost under US$ 0.10. The author's prediction goes into the
 entry before the run.
+
+## 2026-09-29 — E-003 first collection: the twin leaks through the Pokédex notes
+
+The identity probe (E-003) ran on 50 species. The control identified 48 of 50,
+so the probe works. The twin identified 22 of 34 valid answers — at least 22 of
+50 counting every invalid answer as a miss — so **G2's identity half fails**.
+Without the Pokédex notes the twin identified 1 of 37: the flavor text, still
+readable in lower-case prose after renaming ("lives in caves… rusts easily"),
+carries the leak, as ADR-003 suspected. The author had predicted 2–3 of 50 and
+little weight for the notes.
+
+29 answers were invalid: 28 truncated at the registered 1,000-token output cap,
+spent on reasoning. With the author's agreement, E-003 is amended (dated,
+decided after the rates were seen): the two allowed re-sends keep the
+registered cap and the first valid answer per request is kept; what stays
+invalid is re-sent once at 4,000; residual invalid answers are counted both
+ways, and only a verdict both cases share is taken. The branch of the exit plan
+(notes vs structural) waits for those re-sends.
+
+**Plan impact PI-013:** Phase 2 — the corpus was assumed to keep Pokédex notes (flavor units marked for the shortcut scan, flavor text read in the G3 audit) → E-003 finds the notes leak identity (twin 22 of 34 valid, ≥ 22 of 50; without notes 1 of 37); if the no-notes branch holds, pages carry no notes, the shortcut scan's flavor-text planted leak and the G3 flavor read are dropped, and the README states the lost realism. Open.
+
+**Plan impact PI-014:** Phase 3 — the budget assumed 150 (central) / 400 (pessimistic) reasoning tokens per call → on twin pages gpt-5-mini at low effort used a median of 512–576, and 28 of 100 twin calls hit a 1,000-token cap → the pilot measures reasoning per arm before n_max, and every registered run's `max_completion_tokens` leaves headroom (≥ 4,000). Open.
+
+Both were escalated the same day: PI-013 touches the phase in progress and a
+`docs/contingency.md` exit; PI-014 touches the budget behind the sizing. The
+probe itself cost US$ 0.09, above its pessimistic estimate of 0.076.

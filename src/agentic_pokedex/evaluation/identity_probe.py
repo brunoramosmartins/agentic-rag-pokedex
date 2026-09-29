@@ -40,7 +40,9 @@ TWIN_MAX_RATE = 0.10
 
 MODEL = "gpt-5-mini"
 REASONING_EFFORT = "low"
-MAX_COMPLETION_TOKENS = 1_000
+MAX_COMPLETION_TOKENS = 4_000
+"""Output cap, reasoning included. 1,000 in the first run; 28 of 100 twin calls
+spent it all on reasoning (amendment of 2026-09-29)."""
 VISIBLE_OUTPUT_TOKENS = 25
 RESPONSE_FORMAT = {
     "type": "json_schema",
@@ -288,3 +290,39 @@ def decide(summary: Mapping[str, ConditionSummary]) -> str:
     if summary[TWIN_NO_NOTES].rate <= TWIN_MAX_RATE:
         return "fail: notes"
     return "fail: structural"
+
+
+def _with_invalid(
+    s: ConditionSummary, invalid: int, identified: bool
+) -> ConditionSummary:
+    return ConditionSummary(
+        condition=s.condition,
+        valid=s.valid + invalid,
+        identified=s.identified + (invalid if identified else 0),
+        exact=s.exact,
+        unknown=s.unknown,
+        by_generation=s.by_generation,
+    )
+
+
+def decide_bounded(
+    summary: Mapping[str, ConditionSummary], invalid: Mapping[str, int]
+) -> str:
+    """The decision rule when some answers stayed invalid (amendment 2026-09-29).
+
+    Invalid answers are not missing at random — they are the calls where the
+    model reasoned longest — so they are counted both ways. **Worst case for
+    the twin:** every invalid twin answer identified, every invalid control
+    answer a miss; best case: the opposite. A verdict both cases share is
+    taken; otherwise the result reads "undetermined: worst / best".
+    """
+    worst = {
+        c: _with_invalid(s, invalid.get(c, 0), identified=(c != CONTROL))
+        for c, s in summary.items()
+    }
+    best = {
+        c: _with_invalid(s, invalid.get(c, 0), identified=(c == CONTROL))
+        for c, s in summary.items()
+    }
+    low, high = decide(worst), decide(best)
+    return low if low == high else f"undetermined: {low} / {high}"

@@ -29,7 +29,7 @@ filled only after the run, next to the date.
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
-| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | frozen | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | — |
+| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | frozen | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Partial: twin ≥ 22 of 50, G2 identity fails; branch pending |
 
 ---
 
@@ -581,14 +581,37 @@ no-notes condition lands close to the twin.
 | Real page file SHA-256 | `630f5e0a31707d3bb3f857392de93276c4304d099c7f610f007ff2ba4459c0fa` |
 | Twin page file SHA-256 | `187637561f7e7cd2faeb57a7d7769795972720efd09bd4bb33910f4709d66931` |
 | Seed; species | `20260929`; 50 species (list in the run manifest) |
-| Model; `reasoning_effort`; max completion tokens | gpt-5-mini; low; 1,000 |
+| Model; `reasoning_effort`; max completion tokens | gpt-5-mini; low; 1,000 (4,000 for the last re-send and later runs; Amendments) |
 | Requests | 150 (50 species × 3 conditions) |
 | Estimated cost | US$ 0.038 central / 0.076 pessimistic |
 | Batch | `batch_6abbee1579948190afda9a6ca6f4e60a`, submitted 16:57:58 UTC |
 
 ### Actual result
 
-_Batch submitted; not collected._
+**First collection (2026-09-29, batch `batch_6abbee…`; partial — 29 of 150
+answers invalid, see Amendments).**
+
+| Condition | Identified (valid answers) | Bounds with the invalid ones | "unknown" |
+|---|---|---|---|
+| Control | **48 of 50** (96%; Wilson 95% CI 87–99%), all exact | — (0 invalid) | 1 |
+| Twin | **22 of 34** (65%; 48–79%), all exact | 22–38 of 50 | 0 |
+| Twin, no notes | **1 of 37** (3%; 0–14%) | 1–14 of 50 | 21 |
+
+By generation, identified of valid: control G1–G8 all, G9 3 of 5; twin G1 4/4,
+G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
+
+- The probe works (control 96%).
+- **The twin leaks**: at least 22 of 50 (44%) even if every invalid twin answer
+  were a miss — above 10% in every case. G2's identity half fails.
+- **The Pokédex notes carry the leak**: 65% with them, 3% without. Whether the
+  no-notes condition is at most 5 of 50 — which selects the branch of rule 3 —
+  depends on its 13 invalid answers: undetermined until they are re-sent.
+- Invalid answers: 28 truncated (the model spent the whole 1,000-token output
+  cap on reasoning) and 1 error, all in the two twin conditions. Median
+  reasoning tokens of valid answers: control 128, twin 512, twin no-notes 576.
+- Measured cost: US$ 0.0905 (estimate: 0.038 central / 0.076 pessimistic).
+- Prediction: control about 45 (actual 48); twin 2–3 (actual ≥ 22); notes weigh
+  little (they carry almost all of the leak).
 
 ### Amendments
 
@@ -598,4 +621,23 @@ _Batch submitted; not collected._
   UTC, 11 seconds before the batch was submitted and before any answer existed.
   Every item above is copied from that manifest; nothing in the configuration
   changed after it. Recorded so the order of events is visible.
+- **2026-09-29 — output cap and invalid answers (decided after the first
+  collection, with its rates seen).** 28 answers were truncated at the
+  registered cap of 1,000 output tokens, reasoning included; invalid answers are
+  the calls where the model reasoned longest, so excluding them is not neutral.
+  Changes:
+  1. The two re-sends the entry allows ran with the registered cap (batches
+     `batch_6abbf235…` and `batch_6abbf246…`, the same 29 requests). Per request
+     the **first valid answer in submission order** is kept; a later one never
+     replaces it.
+  2. Answers still invalid after those two are re-sent once more with
+     `max_completion_tokens` = **4,000** (the rewritten request file is kept).
+     Every later run of this probe uses 4,000.
+  3. Residual invalid answers are counted both ways: worst case for the twin
+     (invalid twin answers identified, invalid control answers missed) and best
+     case. A verdict both cases share is taken; otherwise the result is
+     "undetermined" and the branch of rule 3 is not taken on it.
+  The decision rule and its thresholds are unchanged. Reason: truncation is a
+  defect of the instrument (the cap was set without a measurement), not an
+  outcome. The raw batch outputs are now kept in `runs/e003/outputs/`.
 

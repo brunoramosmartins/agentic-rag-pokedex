@@ -139,14 +139,22 @@ def cmd_submit(args: argparse.Namespace) -> int:
 
     load_env()
     path = RUN_DIR / args.file
-    metadata = {"experiment": "E-003", "file": args.file}
+    if args.max_completion_tokens:
+        # Amendment of 2026-09-29: re-sends may raise the output cap. The
+        # rewritten file is kept beside the original for the audit trail.
+        rows = read_jsonl(path)
+        for row in rows:
+            row["body"]["max_completion_tokens"] = args.max_completion_tokens
+        path = path.with_name(f"{path.stem}-mct{args.max_completion_tokens}.jsonl")
+        write_jsonl(path, rows)
+    metadata = {"experiment": "E-003", "file": path.name}
     batch_id = submit(OpenAI(), path, metadata=metadata)
     batches_path = RUN_DIR / "batches.json"
     batches = json.loads(batches_path.read_text()) if batches_path.is_file() else []
-    batches.append({"id": batch_id, "file": args.file,
+    batches.append({"id": batch_id, "file": path.name,
                     "submitted_at": datetime.now(UTC).isoformat()})
     batches_path.write_text(json.dumps(batches, indent=2) + "\n")
-    print(f"Batch {batch_id} submitted ({args.file}). Run `collect` when it ends.")
+    print(f"Batch {batch_id} submitted ({path.name}). Run `collect` when it ends.")
     return 0
 
 
@@ -156,16 +164,24 @@ def cmd_collect(args: argparse.Namespace) -> int:
     load_env()
     client = OpenAI()
     batches = json.loads((RUN_DIR / "batches.json").read_text())
+    meter = UsageMeter(model=probe.MODEL, tier=Tier.BATCH)
     results: dict[str, BatchResult] = {}
     pending = []
+    # Batches in submission order; per request, the FIRST valid answer is kept
+    # (a later one never replaces it), so no answer is chosen after the fact.
     for batch in batches:
-        status, rows = fetch(client, batch["id"])
+        status, raw = fetch(client, batch["id"])
         batch["status"] = status
         if status not in ("completed", "failed", "expired", "cancelled"):
             pending.append(batch["id"])
-        for row in rows:
+            continue
+        write_jsonl(RUN_DIR / "outputs" / f"{batch['id']}.jsonl", raw)
+        for row in raw:
             result = parse_output_line(row)
-            if result.ok or result.custom_id not in results:
+            if result.usage:
+                meter.record(f"{batch['id']}:{result.custom_id}", result.usage)
+            kept = results.get(result.custom_id)
+            if kept is None or (not kept.ok and result.ok):
                 results[result.custom_id] = result
     (RUN_DIR / "batches.json").write_text(json.dumps(batches, indent=2) + "\n")
     if pending:
@@ -174,11 +190,8 @@ def cmd_collect(args: argparse.Namespace) -> int:
 
     world = load_world()
     manifest = json.loads((RUN_DIR / "manifest.json").read_text())
-    meter = UsageMeter(model=probe.MODEL, tier=Tier.BATCH)
     rows, invalid = [], []
     for cid, result in sorted(results.items()):
-        if result.usage:
-            meter.record(cid, result.usage)
         parsed = probe.parse_guess(result.content) if result.ok else None
         if parsed is None:
             invalid.append(cid)
@@ -206,9 +219,21 @@ def cmd_collect(args: argparse.Namespace) -> int:
               f"unknown {s.unknown}")
         per_gen = "  ".join(f"G{g} {k}/{n}" for g, (k, n) in s.by_generation.items())
         print(f"  {'':<14} {per_gen}")
+    invalid_by_condition = {c: 0 for c in probe.CONDITIONS}
+    for cid in invalid + missing:
+        invalid_by_condition[probe.parse_custom_id(cid)[0]] += 1
+    for condition, k in invalid_by_condition.items():
+        s = summary.get(condition)
+        if k and s:
+            total = s.valid + k
+            print(f"  {condition:<14} bounds with {k} invalid: identified "
+                  f"{s.identified}–{s.identified + k} of {total}")
     complete = all(c in summary for c in probe.CONDITIONS)
-    verdict = probe.decide(summary) if complete else "incomplete"
-    print(f"Measured cost: US$ {meter.cost:.4f}")
+    verdict = (
+        probe.decide_bounded(summary, invalid_by_condition) if complete
+        else "incomplete"
+    )
+    print(f"Measured cost (every call, retries included): US$ {meter.cost:.4f}")
     print(f"DECISION RULE: {verdict}")
 
     (RUN_DIR / "results.json").write_text(json.dumps({
@@ -216,6 +241,7 @@ def cmd_collect(args: argparse.Namespace) -> int:
         "manifest": manifest,
         "verdict": verdict,
         "measured_cost_usd": meter.cost,
+        "invalid_by_condition": invalid_by_condition,
         "invalid": invalid,
         "missing": missing,
         "rows": [r.__dict__ for r in rows],
@@ -231,6 +257,10 @@ def main() -> int:
     add_cost_guard_args(prepare)
     submit_parser = sub.add_parser("submit", help="upload a request file as a batch")
     submit_parser.add_argument("--file", default="requests.jsonl")
+    submit_parser.add_argument(
+        "--max-completion-tokens", type=int, default=None,
+        help="rewrite the output cap before submitting (amendment of 2026-09-29)",
+    )
     sub.add_parser("collect", help="download results, grade, report")
     args = parser.parse_args()
     RUN_DIR.mkdir(parents=True, exist_ok=True)
