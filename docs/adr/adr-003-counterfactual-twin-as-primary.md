@@ -36,8 +36,9 @@ entity renamed consistently, facts intact (`world/twin.py`).
 
 - Gate **G2 — the twin does not leak** (Phases 1 and 3): an identity probe
   must not recognize the real entity from the renamed page in > 10% of 50 pages,
-  and closed-book (A0) on the twin must stay ≤ 5% — measured against chance
-  on small answer spaces (amended 2026-09-26; rule in
+  and closed-book (A0) on the twin must stay within 5 points of each
+  template's chance rate — its majority-answer rate, never below uniform
+  (amended 2026-09-26 and 2026-09-29; rule in
   [`contingency.md`](../contingency.md), G2). The probe has a positive
   control: real pages with their own name masked must be identified in ≥ 50%, or
   the probe is broken.

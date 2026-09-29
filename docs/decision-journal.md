@@ -643,3 +643,29 @@ Three decisions, taken by the author before any code:
 
 The 700-token cap per call is now written into E-001's fixed parameters,
 counted with `o200k_base` (amendment of 2026-09-29).
+
+## 2026-09-29 — Answer spaces; the G2 chance rate becomes the majority-answer rate
+
+The answer-space count (`docs/world.md`, Answer spaces) shows skewed slots: a
+move's type is Normal 22.6% of the time, a damage factor is ×1 63% of the time,
+a move's power is 80 in 13% of moves, and a learnable level is 1 in 21.3% of
+answerable pairs. The G2 closed-book rule compared A0 with uniform chance on
+spaces of at most 20 values and with a flat 5% elsewhere, so a model that knows
+only the answer distribution — no leak — would fail it. Escalated the same day
+because it touches a `docs/contingency.md` criterion; decided before any A0
+run.
+
+**Plan impact PI-012:** Phase 3 — the G2 closed-book check compares A0 with uniform chance on small answer spaces and with a flat 5% on open ones, but answer slots are skewed (always guessing the modal value scores 22.6% on a move's type, 63% on a damage factor, 13% on move power, 21.3% on a learn level, with no leak) → chance becomes each template's majority-answer rate (the share of its most common gold answer among its generated questions, never below uniform), for every template, small or open; the 5-point margin stays; Phase 2 reports each template's majority-answer rate. Open.
+
+The author approved the change and added a generation cap: each template's
+majority-answer rate is at most max(10%, 1.5 × its uniform chance). Reason: an
+agent that stops early and guesses the modal answer would otherwise score
+lucky correct answers (`correct-at-insufficient`) in E-001 as well as in G2.
+Cost: answer distributions per template are no longer the world's natural ones.
+
+**Plan impact PI-012 resolved:** absorbed — `docs/contingency.md` G2 amended
+(chance = majority-answer rate, never below uniform; generation cap
+max(10%, 1.5 × uniform)); ADR-003's consequence and `docs/hypothesis.md` (A0 ≈
+chance on the twin) updated. Phase 2's generator enforces the cap and reports
+each template's majority-answer rate; Phase 3's closed-book check uses it. No
+hours or dates change.

@@ -62,7 +62,7 @@ cost instruction ("a wrong answer costs 4× not answering"), the caps
 
 | Id | Arm | What changes | Release |
 |---|---|---|---|
-| A0 | Closed-book | No tools; measures contamination (≈ 0 on the twin) | v1.0 |
+| A0 | Closed-book | No tools; measures contamination (≈ chance on the twin) | v1.0 |
 | A1 | Single-shot | One hybrid search, k tuned on dev | v1.0 |
 | A2 | Fixed pipeline with typed expansion | Search → expand typed links from the pages found, up to B | v1.0 |
 | A3 | Agent, implicit detector | The model decides to stop / continue / abstain (ReAct-style) | v1.0 |
