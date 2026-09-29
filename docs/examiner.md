@@ -156,9 +156,10 @@ Applied in this order; each publishes N-of-M per template.
 6. **Answer concentration (PI-012).** Each template's majority-answer rate is
    at most max(10%, 1.5 × uniform chance); the answer distribution before and
    after the cap is published.
-7. **Shortcut scan** (gate 7): a unit naming the anchor together with the
-   answer outside the gold units flags the question; flags are inspected and
-   resolved. Validated first on planted leaks.
+7. **Shortcut scan** (gate 7): a statement naming every anchor together with
+   the answer outside the gold units flags the question; flags are inspected
+   and resolved by class. Validated first on planted leaks, in every run. See
+   "Shortcut scan" below.
 
 ## The question record
 
@@ -279,5 +280,60 @@ Drops by reason:
 - **S4-A1:** ambiguous: level 0 or several levels 104; no distractor: other groups do not list the move 79
 - **S4-B1:** ambiguous: level 0 or several moves at the level 136; no distractor: other groups list nothing at the level 316
 
-The shortcut scan (filter 7) and the splits are not applied yet.
+The splits are not applied yet.
+
+## Shortcut scan
+
+`python -m agentic_pokedex.examiner.shortcuts` (`examiner/shortcuts.py`). The
+label trusts the registry; the scan checks that trust by reading text only.
+
+- **Statement.** One body line of a structured unit read with the unit's
+  header line, or a whole free-text unit. A unit is too coarse: a
+  pre-evolution's Profile names the anchor on one line ("Evolves into") and
+  its own hidden ability on another, two facts that a unit-level scan reads
+  as one. Measured on the first scan: 2,064 questions flagged at unit level,
+  1,286 at statement level, the difference all of that kind.
+- **Match.** Every anchor of the question (species, move, types, version
+  group, level) and the answer, outside the question's gold units. Names match
+  as whole token sequences, numbers as whole digit tokens, categories and
+  damage factors as their rendered phrase. Withheld units are not scanned: no
+  agent can see them.
+- **Naming.** The twin pages, which the agents read. Real names collide
+  lexically ("Fire" inside "Fire Punch") — noise of the scan, not a leak.
+- **Planted leaks.** Every run plants two leaks (a prose note and a structured
+  line) for 5 sampled questions per template and requires all flagged.
+- **Resolution.** Flags are grouped by class (template, section, line kind);
+  each class is read with rendered examples and given a verdict, `coincidence`
+  (the question is kept) or `leak` (discarded). A class without a verdict
+  fails the scan.
+- **Not scannable:** S1-B1 questions whose multiplier is ×4 or ×0.25; no page
+  writes those values.
+
+First scan, 2026-09-29: planted leaks flagged **160 of 160**; **1,286 of
+33,719** questions flagged, in 18 classes, all read and resolved as
+coincidence; **0 discarded**. S1-B1: 1,461 of 12,740 not scannable.
+
+| Template | Flagged | Classes (questions) | What the flagged statement says |
+|---|---:|---|---|
+| S0-A1 | 80 of 856 | Form · Abilities (80); Holders · entry (31) | a form of the anchor has the answer ability |
+| S0-A2 | 20 of 527 | Learned by · entry (20); Learnset · Level N (20) | a learn level equals the move's power |
+| S0-A3 | 0 of 833 | | |
+| S0-A4 | 611 of 713 | Learned by · entry (611) | a learner of the move has the move's type |
+| S0-B1 | 149 of 192 | six Matchups line kinds (22–72 each) | a third type's line lists both types |
+| S1-A1 | 16 of 405 | Form · Abilities (13); Holders · entry (7) | a form's, or the anchor's own, hidden ability (benign 14, material 2) |
+| S1-A2 | 249 of 434 | Learned by · entry (240); Form · Types (17) | the anchor's own types in a learner list (benign 240); a form's types (material 6) |
+| S1-A3 | 18 of 405 | Form · Abilities (14); Holders · entry (8) | as S1-A1 (material 2) |
+| S1-B1 | 0 of 12,740 | | 1,461 not scannable |
+| S2-A1, S2-A2 | 0 of 7,897; 0 of 2,893 | | |
+| S2-B1 | 143 of 337 | Learnset · Moves (143) | the same move learned by machine or tutor |
+| S3-A1, S3-B1 | 0 of 1,961; 0 of 1,068 | | |
+| S4-A1, S4-B1 | 0 of 1,479; 0 of 979 | | |
+
+A question can fall in more than one class. The S1 flags in Form classes on
+material questions (10) include regional forms that are what actually evolves
+(Galarian Corsola is Ghost-type, like its evolution Cursola); the graph records
+evolution per species, so the form's line is not a statement of the gold
+chain. Verdicts and their reasons are in `VERDICTS`; per-question status is
+written to `data/world/examiner/shortcuts.json` (local), which the splits
+read.
 

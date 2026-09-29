@@ -92,6 +92,20 @@ agent that reaches it has evidence that the line ends there. To find a
 pre-evolution, the agent searches. The corpus is shaped for question validity
 here, and says so (PI-017).
 
+### 2026-09-29 — The shortcut scan reads statements, not units
+
+The scan above flags "any unit that mentions the anchor together with the
+answer". Built on the rendered pages, that reads two facts on different lines
+as one: a pre-evolution's Profile names the anchor ("Evolves into") and its own
+hidden ability, and the unit-level scan flagged 2,064 questions, the extra 778
+all of that kind. The scan now reads **statements** — a body line with its
+unit's header, or a whole free-text unit, so prose is still read as a block —
+and scans the twin pages, since real names collide lexically. Flags are
+resolved by class with a written verdict; the first scan flagged 1,286
+questions in 18 classes, all coincidences, and discarded none. Every run plants
+leaks first, one of them in prose, and requires all flagged
+(`docs/examiner.md`, "Shortcut scan").
+
 ## Alternatives considered
 
 | Alternative | Why rejected |

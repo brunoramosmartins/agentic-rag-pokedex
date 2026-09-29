@@ -37,6 +37,11 @@ refusals (`tests/fixtures/golden_trajectories.json`).
 
 ## Shortcut scan with planted leaks
 
+Done 2026-09-29. Statement-level lexical scan on the twin pages: planted leaks
+160 of 160 flagged; 1,286 of 33,719 questions flagged in 18 classes, all read
+and resolved as coincidences, 0 discarded; S1-B1 at ×4 or ×0.25 (1,461) not
+scannable. Unit level would have flagged 2,064.
+
 ## Splits and the template partition (`examiner/splits.py`)
 
 ## G3 audit — 60 stratified questions

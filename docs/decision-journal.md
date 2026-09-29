@@ -956,3 +956,33 @@ observation showed; specification in `docs/examiner.md`. Decisions:
 - **Golden trajectories run on the fixture world**, with labels written by
   hand from its rendered units: 9 trajectories covering every stratum and
   subtype, and 6 refusals.
+
+## 2026-09-29 — Shortcut scan: statements, the twin, verdicts by class
+
+`examiner/shortcuts.py` implements filter 7. The first run, on the approved
+design, planted 160 leaks and flagged all of them, then flagged 1,286 of
+33,719 questions. The author approved four points after reading the classes
+with rendered examples:
+
+- **Statements, not units.** A statement is a body line with its unit's
+  header (a free-text unit is one statement). At unit level the scan flagged
+  2,064 questions; the extra 778 were two facts on different lines of one
+  unit, such as a pre-evolution's Profile naming the anchor and its own hidden
+  ability. ADR-002 updated.
+- **The twin pages only.** Real names collide lexically ("Fire" inside "Fire
+  Punch", "Porygon" inside "Porygon-Z"): noise of the scan, not a leak of the
+  registry.
+- **All 18 classes are coincidences; 0 questions discarded.** A form of the
+  anchor (its own entry, with its own ability or types); the anchor's own value
+  in S1 (the benign case, already tracked by the material tag); another fact
+  with the same names (a learner's types in a move's hub, a third type's
+  matchup line, the same move by machine or tutor); a learn level equal to a
+  move's power. Verdicts with reasons live in `VERDICTS`; a class seen for the
+  first time fails the scan until it is read.
+- **S1-B1 at ×4 or ×0.25 is not scannable** (1,461 of 12,740): no page writes
+  those values. Published N-of-M.
+
+S2-A1, S2-A2, S3 and S4 have no flag at all. Noted while reading: some
+material S1 questions have a regional form that is what actually evolves
+(Galarian Corsola, Ghost-type, evolves into Cursola); the graph records
+evolution per species, so this is a world quirk, not a leak.
