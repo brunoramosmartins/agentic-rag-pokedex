@@ -669,3 +669,26 @@ max(10%, 1.5 × uniform)); ADR-003's consequence and `docs/hypothesis.md` (A0 �
 chance on the twin) updated. Phase 2's generator enforces the cap and reports
 each template's majority-answer rate; Phase 3's closed-book check uses it. No
 hours or dates change.
+
+## 2026-09-29 — E-003 registered: the identity probe
+
+The identity half of G2 is registered as E-003 (draft) before any code for it.
+The author chose among alternatives:
+
+- **Model:** gpt-5-mini only — the probe asks whether the model of the runs
+  recognizes the twin. GPT-4o-mini belongs to the v1.2 extension, where the
+  probe can be repeated.
+- **Input:** the page as `open_page(title)` serves it, which is what an agent
+  sees on one hop, plus a descriptive third condition without the Pokédex notes
+  (50 more calls), so a leak can be attributed to the flavor text — the exit
+  G2 already names — without a second run.
+- **Match rule:** any species or form of the same evolution line counts as
+  identified. Knowing the family is enough to answer S1 from memory, so this is
+  the conservative rule for the twin. Exact species is descriptive.
+- **Sample:** 50 species stratified by generation (6 per generation 1–5, 5 per
+  generation 6–9), the same species in every condition. Popularity falls with
+  generation, so a simple random draw could miss the most memorized species.
+
+The prompt tells the model it is looking at a renamed Pokémon: the hardest
+test for the twin. Cost under US$ 0.10. The author's prediction goes into the
+entry before the run.

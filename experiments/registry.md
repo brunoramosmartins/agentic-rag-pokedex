@@ -29,6 +29,7 @@ filled only after the run, next to the date.
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
+| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | draft | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | — |
 
 ---
 
@@ -496,3 +497,85 @@ _Not run._
     claimed all insufficiency strata.
   k = 5 now governs, and the link-type order must be registered before the
   run.
+
+---
+
+## E-003 — Identity probe: can the model name the real species behind a twin page?
+
+- **Phase:** 1 (world), before any question exists.
+- **Status:** draft — registered 2026-09-29.
+- **Hypothesis:** gating — the identity half of G2 (`docs/contingency.md`).
+  The closed-book half runs in Phase 3.
+
+### Objective
+
+Measure how often the primary model, told that a page describes a renamed
+Pokémon species, names the real species — on twin pages, against a positive
+control of real pages with the species' own name masked, which shows the probe
+can detect identification at all.
+
+### Configuration
+
+- **Sample:** 50 species, stratified by generation — 6 from each of
+  generations 1–5 and 5 from each of generations 6–9 — drawn with seed
+  `20260929` among the species whose default entry has a level-up learnset in
+  the version scope (999 species; the pool questions will come from).
+  **The same 50 species in every condition** (paired).
+- **Conditions** (150 calls):
+
+| Condition | Page shown | Role |
+|---|---|---|
+| **Control** | Real page, served as `open_page(title)` returns it (≤ 700 tokens), with every occurrence of the species' own name masked as `[MASKED]` (title, evolution line, form names, notes; case-insensitive, whole word) | Positive control |
+| **Twin** | Twin page, served as `open_page(title)` returns it | The G2 measurement |
+| **Twin, no notes** | Twin page served with its `Notes` unit removed (the freed budget goes to the next units) | Descriptive: attributes a leak to the Pokédex text |
+
+- **Prompt** (identical in every condition, loaded by name from `prompts/`,
+  hash logged): "The page below describes a Pokémon species. Its name — and, on
+  some pages, every other name — has been replaced. Which real Pokémon species
+  is it? Answer with its English name, or 'unknown'." Telling the model what
+  to look for makes this the hardest test for the twin.
+- **Output:** structured, `{"guess": string, "confidence": number 0–1}`. An
+  invalid output is re-sent up to twice; a residual invalid output is excluded
+  and reported N-of-M.
+- **Model:** gpt-5-mini, Batch API, `reasoning_effort` low (as E-001).
+- **Cost:** printed before the run by the token meter; under US$ 0.10 even at
+  the pessimistic reasoning assumption. The script supports `--limit N`.
+
+### Measurement
+
+- **Identified (governs):** the guess, normalized (ASCII letters, lower case),
+  equals the English name of **any species or form in the same evolution line**
+  as the page's species. Knowing the family is enough to answer an S1 question
+  from memory.
+- **Descriptive:** exact species (or one of its forms); per-generation rates;
+  mean confidence of identified and unidentified guesses; "unknown" rate.
+- Counts are published N-of-50, with Wilson 95% intervals. At n = 50 the
+  interval around 10% spans roughly 4–21%: the rule below is a registered
+  count, not a precise estimate.
+
+### Decision rule
+
+1. **Control identified in < 25 of 50** (< 50%): the probe is broken, not the
+   twin safe. No G2 verdict; the masking or prompt is fixed as a dated
+   amendment here, and the probe re-runs on the same 50 species.
+2. **Control ≥ 25 and twin identified in ≤ 5 of 50** (≤ 10%): the identity half
+   of G2 passes (preliminary; Phase 3 completes G2).
+3. **Twin identified in > 5 of 50:** G2 fails; the exit plan applies
+   (`docs/contingency.md`). If the no-notes condition is ≤ 5 of 50, the world
+   is rendered without notes (`--no-notes`) and the probe re-runs on a fresh
+   sample of 50 species. Otherwise the leak is structural (the facts
+   themselves), and primary-population questions exclude the leaking species'
+   templates, decided on dev and recorded.
+
+### Expected result (author's prediction)
+
+_To be written by the author before the run._
+
+### Actual result
+
+_Not run._
+
+### Amendments
+
+_None._
+
