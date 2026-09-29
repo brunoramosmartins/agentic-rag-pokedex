@@ -62,7 +62,10 @@ counterfactual twin.
 
 An LLM judge can be useful as the experimental treatment, but it should not also
 define the primary outcome. The project therefore separates A4, which predicts
-sufficiency during the loop, from O2, which provides the exact stopping label.
+sufficiency during the loop, from the labeler, which provides the exact
+sufficiency label for every step of every arm. O2 is the oracle arm that stops
+on that label; it measures the room for improvement, not the correctness of
+other arms' stops.
 
 This makes it possible to ask whether the detector is correct instead of
 implicitly assuming that its own judgment is the ground truth.
@@ -117,7 +120,11 @@ Joren's definition allows a context to be sufficient when it supports a
 plausible answer, even when that answer is wrong relative to the gold answer.
 
 The project initially approached the definitions as if they were directly
-interchangeable. The S2 and S4 cases exposed the difference.
+interchangeable. S3 without truncation cues exposed the difference most
+clearly: a partial list is itself a plausible answer, so Joren's definition
+calls that context sufficient while the project's label does not. S2 and S4
+first looked like the obvious cases, but they depend on how careful the rater
+is, not on the definition.
 
 The project therefore defines sufficiency operationally through minimal
 sufficient sets for the gold answer. This is a stronger, experiment-specific
