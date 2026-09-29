@@ -45,6 +45,7 @@ mk_issue() {
 }
 
 M0="Phase 0 — Foundation"
+M1="Phase 1 — World"
 
 echo "Creating issues..."
 
@@ -166,6 +167,149 @@ Scaffold with a 5-day timebox against over-engineering.
 
 ## References
 - Milestone: Phase 0
+BODY
+
+# ============================================================================
+# Phase 1 — opened 2026-09-29
+# ============================================================================
+
+mk_issue "[Phase 1] Download PokéAPI with hash checks and load the graph" \
+  "$M1" "phase:1,type:feat" <<'BODY'
+## Context
+The world starts from the pinned PokéAPI commit recorded in `docs/data-sources.md`. Raw CSVs are never committed.
+
+## Tasks
+- [ ] `world/download.py`: fetch the CSVs at the pinned commit into `data/raw/`, verify SHA-256 against `docs/data-sources.md`
+- [ ] `world/load_graph.py`: CSV → Neo4j (species, forms, types and efficacy, evolution chains, moves, abilities with the hidden flag, learnsets per version group, flavor text)
+- [ ] Load statistics: counts per node label and relationship type
+- [ ] `graph` extra in `pyproject.toml`; integration tests marked `@pytest.mark.integration`
+
+## Definition of Done
+- [ ] A hash mismatch aborts the download; load statistics printed and recorded in `docs/world.md`.
+
+## References
+- Milestone: Phase 1 · `docs/data-sources.md`
+BODY
+
+mk_issue "[Phase 1] Learnset coverage report and choice of base version groups" \
+  "$M1" "phase:1,type:research,gate:g1" <<'BODY'
+## Context
+Adjacent generations differ in only ~3% of move levels (G1), which would leave S2 without pairs. The version scope is frozen from measured coverage (PI-002).
+
+## Tasks
+- [ ] Coverage report per version group (DLC groups excluded: they are empty)
+- [ ] Choose 3-4 base groups **spanning different generations**
+- [ ] Report the rate of (species, move) pairs whose level differs between the chosen groups
+
+## Definition of Done
+- [ ] Choice and its numbers in `docs/world.md`; the frozen scope recorded in the decision journal.
+
+## References
+- Milestone: Phase 1 · `docs/data-sources.md` (learnset coverage) · PI-002
+BODY
+
+mk_issue "[Phase 1] Counterfactual twin with seeded renaming and round-trip test" \
+  "$M1" "phase:1,type:feat,gate:g2" <<'BODY'
+## Context
+The twin renames and never changes facts, so parametric memory cannot substitute for evidence (ADR-003).
+
+## Tasks
+- [ ] `world/twin.py`: seeded pronounceable pseudo-words for species, forms, moves, abilities, types and version names; numbers untouched
+- [ ] Filter against real names and a dictionary; uniqueness across all twin names
+- [ ] Renaming carried through free text (flavor text rewritten with the same map)
+- [ ] Round-trip test
+
+## Definition of Done
+- [ ] Round trip = identity on 100% of entities; no collision with a real name or between twin names.
+
+## References
+- Milestone: Phase 1 · ADR-003 · Gate: G2
+BODY
+
+mk_issue "[Phase 1] Renderer and fact-to-units registry" \
+  "$M1" "phase:1,type:feat" <<'BODY'
+## Context
+Sections are the evidence units; the registry knows every copy of every fact, so the sufficiency label stays exact under redundancy (ADR-002, ADR-009).
+
+## Tasks
+- [ ] `world/render.py`: one page per entity, sections of ~100-400 tokens with a metadata header, typed links
+- [ ] Controlled redundancy (e.g. learnset on the species page and "Learned by" on the move page)
+- [ ] Hubs split into several units with the **same header** and no pagination marker; cue variant (`(k/N)`) only behind the ablation option
+- [ ] Withheld units (for S4) left out of the index and recorded
+- [ ] `world/registry.py`: fact → units, all copies; **free-text (flavor) units marked** for the Phase 2 shortcut scan (PI-001)
+
+## Definition of Done
+- [ ] 100% of graph facts in ≥ 1 unit; registry complete; no cue in the main condition (tested).
+
+## References
+- Milestone: Phase 1 · ADR-002 · ADR-009 · PI-001
+BODY
+
+mk_issue "[Phase 1] Index and the two tools" \
+  "$M1" "phase:1,type:feat" <<'BODY'
+## Context
+Every arm gets the same tool contract. The main condition shows no total-hit count.
+
+## Tasks
+- [ ] `world/index.py`: BM25 + local dense index (`retrieval` extra)
+- [ ] `tools/search.py` (`k ≤ 5`, units with headers, no total count; count only as the ablation option)
+- [ ] `tools/open_page.py` (exact title, optional section)
+- [ ] Each call returns at most ~700 tokens
+
+## Definition of Done
+- [ ] Unit tests for the contract, including the absence of the count in the main condition.
+
+## References
+- Milestone: Phase 1 · ADR-009
+BODY
+
+mk_issue "[Phase 1] Identity probe — preliminary G2" \
+  "$M1" "phase:1,type:experiment,gate:g2" <<'BODY'
+## Context
+Can the model name the real entity behind a twin page? The positive control keeps a broken probe from reading as a safe twin.
+
+## Tasks
+- [ ] Probe protocol registered in `experiments/registry.md` **before the run** (model, prompt, match rule, page sample, seed)
+- [ ] 50 twin pages + 50 real pages with the entity's own name masked (positive control)
+- [ ] Script supports `--limit N` and prints the estimated cost first
+
+## Definition of Done
+- [ ] Positive control identified in ≥ 50% (else the probe is broken); twin identified in ≤ 10% → preliminary G2, published N-of-M.
+
+## References
+- Milestone: Phase 1 · `docs/contingency.md` (G2) · `docs/measurability-gate.md` (gate 7)
+BODY
+
+mk_issue "[Phase 1] Admissible answers per answer slot" \
+  "$M1" "phase:1,type:statistics,gate:g2" <<'BODY'
+## Context
+The closed-book check of G2 is chance-adjusted on small answer spaces (PI-009).
+
+## Tasks
+- [ ] Count admissible answers per answer slot in the corpus (type: 18; level: observed range; species/move: open)
+
+## Definition of Done
+- [ ] Counts in `docs/world.md`, ready for the Phase 3 closed-book check.
+
+## References
+- Milestone: Phase 1 · `docs/contingency.md` (G2) · PI-009
+BODY
+
+mk_issue "[Phase 1] Idempotent rebuild and docs/world.md" \
+  "$M1" "phase:1,type:docs" <<'BODY'
+## Context
+Idempotence is proven, not presumed. The world doc is the reference for Phase 2.
+
+## Tasks
+- [ ] Forced rebuild changes zero units (test)
+- [ ] `docs/world.md`: scope, twin, renderer, registry, load statistics, coverage choice, answer-space counts
+- [ ] One rendered page of each type (species, move, ability, type)
+
+## Definition of Done
+- [ ] Rebuild diff is empty; `docs/world.md` published.
+
+## References
+- Milestone: Phase 1
 BODY
 
 echo "Done."

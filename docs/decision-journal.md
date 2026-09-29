@@ -469,3 +469,23 @@ contribution as measurement and cites the three later works.
 **Plan impact PI-009 resolved:** plan revised on 2026-09-28 — Phase 1 counts
 admissible answers per template; Phases 1 and 3 apply the chance-adjusted
 closed-book check.
+
+## 2026-09-29 — Phase 1 opened
+
+**Scope.** Phase 1 — The World: PokéAPI → graph → twin → pages. 8–11 partial
+working days (weeks 2–3). Ends with tag `v0.2-world` (no release).
+
+**Gate check.** Every Phase 0 deliverable is present; PR #9 merged with CI
+green and `v0.1-foundation` pushed. The eight Phase 0 issues were still open
+(one of them, "ADRs 001–010", duplicated) and are closed as part of the
+opening.
+
+**Open plan impacts.** None: PI-001 to PI-009 were resolved on 2026-09-28. The
+ones that shape this phase are already in its tasks: free-text units marked in
+the registry (PI-001), base version groups spanning generations with the
+level-difference rate reported (PI-002), and admissible answers counted per
+answer slot for the chance-adjusted closed-book check (PI-009).
+
+**Carry-overs.** None.
+
+**Scope decisions.** None taken at kickoff.
