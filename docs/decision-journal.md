@@ -594,3 +594,32 @@ the graph and from the raw CSVs; the two agree in every cell. The author chose
 
 Build on the real data: round trip identity for every name, no shared word,
 0 of 14,496 flavor texts still naming a real species (`docs/world.md`).
+
+## 2026-09-29 — Page and unit design
+
+The author reviewed the page design before any code; one decision changed in
+the discussion.
+
+- **All learn methods on species pages (changed).** The first proposal kept
+  level-up only, to keep the corpus small. The author's objection, from a
+  concrete use (building a competitive team needs machine, egg and tutor moves
+  too), exposed what that loses: a machine unit listing a move is plausible,
+  insufficient evidence for a question about its level — a wrong-method
+  distractor that strengthens S2 and S4 without touching the label, since the
+  registry knows the unit states no level. Species pages now carry one unit
+  per method and version group; hubs stay level-up only (a machine hub would
+  list most of the corpus). Cost: 13,477 units instead of about 8,800.
+- **Forms:** types and abilities only; their learnsets are out of v1.
+- **Hub entries carry the learner's types**, so S3 keeps its type filter
+  within T_max.
+- **S4:** 120 withheld (species, version group) pairs, seeded; their entries
+  also leave the hubs of that group, so no indexed unit states a withheld
+  level. The examiner's S3 templates must avoid hubs touching them.
+- **Notes:** two Pokédex texts per species at most; `--no-notes` is the G2 exit.
+- **Unique titles:** one page per ability name; " (2)" for repeated form names.
+
+Parked with the author's agreement: "can X learn Y?" — a negative answer is
+sufficient only after every learn method has been seen (`notes/open-ideas.md`).
+
+Build on the real data: 144,861 facts, 13,357 indexed units, registry check
+PASS in both namings, forced rebuild byte-identical (`docs/world.md`).

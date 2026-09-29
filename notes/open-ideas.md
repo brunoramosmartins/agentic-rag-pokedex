@@ -15,6 +15,7 @@ their status changes.
 | Pokémon TCG as a second source | Theme brainstorm | External validity, after the verdict | Dormant |
 | Real wiki prose as corpus | Corpus discussion (ADR-002) | External validity of rendered text; NC-SA license | Dormant |
 | False-premise questions (evidence of absence) | S4 design | Stratum S5 in a v2 | Dormant |
+| "Can X learn Y?" — a negative answer is sufficient only after every learn method (level-up, machine, egg, tutor) of X in that version has been seen; completeness of a *no*, close to the previous row | Page design, when all learn methods entered the species pages (2026-09-29) | A new stratum in a v2; the pages already hold one unit per method and version, so the evidence exists | Parked |
 | Locations, encounters, items | World scope | More chain shapes in a v2 | Dormant |
 | LLM paraphrase of questions | Generator design (ADR-007) | Surface robustness; risk of changing the meaning | Dormant |
 | ML literature via OpenAlex | Theme debate (ADR-001) | Career-aligned project after the trilogy | Registered alternative |

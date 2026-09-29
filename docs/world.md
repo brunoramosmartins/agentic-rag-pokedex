@@ -25,6 +25,7 @@ python -m agentic_pokedex.world.download     # 23 CSVs + word list, SHA-256 chec
 python -m agentic_pokedex.world.load_graph   # replaces the Neo4j database
 python -m agentic_pokedex.world.coverage     # learnset coverage report
 python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json
+python -m agentic_pokedex.world.render       # pages + registry → data/world/
 ```
 
 ## Graph
@@ -221,4 +222,101 @@ probe measures (G2), and the first thing removed if the twin leaks.
 - **Unique words:** no pseudo-word is shared by two names.
 - **Flavor text:** 5,797 of 14,496 English texts change; after rewriting, **0**
   still name a real species, in any case.
+
+## Pages and evidence units
+
+`world/render.py` and `world/registry.py`. One page per species, move, ability
+and type; every section is an evidence unit whose first line is a metadata
+header. The examples below use made-up twin names.
+
+```
+Species: Kedros · Section: Profile
+Types: [[Ranze]] / [[Sonzu]]
+Abilities: [[Thalso]], [[Vihom]] · Hidden ability: [[Daikpil]]
+Evolution: [[Floupei]] → [[Kedros]]; [[Kedros]] → [[Nemzaiva]], [[Resbas]]
+Forms: [[Poukzai Kedros]]
+```
+```
+Species: Kedros · Section: Learnset · Method: level-up · Version: Diprok/Kastoxgi
+Level 1: [[Kresto]], [[Polvun]]
+On evolution: [[Fleilavu]]
+Level 16: [[Laikpan Naisgol]]
+```
+```
+Move: Kresto · Section: Learned by · Version: Diprok/Kastoxgi
+[[Floupei]] (Ranze/Sonzu) — level 12
+[[Skahis]] (Dasme) — level 30
+```
+
+| Page | Sections (units) |
+|---|---|
+| Species | `Profile` (types, abilities, the whole evolution line, forms); one `Form` per non-default entry (types, abilities); `Notes` (up to 2 Pokédex texts, free text); one `Learnset` per learn method and version group |
+| Move | `Profile` (type, category, power); `Learned by` per version group, level-up only, each entry with the learner's types, split every 20 entries |
+| Ability | `Holders`, split every 20 entries, hidden ones marked |
+| Type | `Matchups`: attacking and defending, by damage factor |
+
+**Design decisions** (journal, 2026-09-29):
+
+1. **Every learn method on species pages** — level-up, machine, egg and tutor,
+   one unit per method and version group. A machine unit that lists a move
+   is plausible, insufficient evidence for a question about its level (a
+   wrong-method distractor, beside the wrong-version one). Hubs stay level-up
+   only: a machine hub would list most of the corpus.
+2. **Non-default forms** carry types and abilities only; their learnsets are
+   out of v1, and hubs list default entries only.
+3. **Hub entries show the learner's types**, so S3 ("which T-type learn M by
+   level-up in V?") is a gather-and-filter over the hub's units.
+4. **120 withheld pairs** (species, version group), 40 per group, seeded
+   (`WITHHELD_SEED`), among the species with a level-up learnset in all three
+   groups; a species is withheld in one group at most. Their level-up
+   `Learnset` unit leaves the index **and their entries leave that group's
+   hubs**, so no indexed unit states the withheld levels. Their machine, egg
+   and tutor units stay. Examiner consequence: S3 templates avoid hubs whose
+   gold set includes a withheld species.
+5. **Notes:** up to 2 distinct Pokédex texts per species, most recent versions
+   first; `--no-notes` drops them all (the G2 exit plan).
+6. **Titles are unique:** abilities sharing a name ("As One") are one page;
+   forms sharing a display name get " (2)".
+
+Split units share one header with no pagination marker (ADR-009). The cue
+variant for the S3 ablation (`--cues`) adds `Part k/N`.
+
+**Out of v1, declared:** learnsets of non-default forms (23,098 rows in the
+scope), and the rare learn methods (`light-ball-egg`, `form-change`,
+`zygarde-cube`: 9 rows).
+
+### The registry
+
+A fact id carries its full content (`learn:{pokemon}:{move}:{group}:{method}:{level}`,
+`ptype:{pokemon}:{slot}:{type}`, …; `world/registry.py`). Every body line is
+generated from registered facts, and the check parses each unit's text back into
+fact ids and compares them with the registry — so a wrong value, a missing line
+or an extra line fails it. Pokédex notes are free text, outside the registry,
+and are marked as such for the shortcut scan.
+
+### Build (2026-09-29)
+
+| Section | Units |
+|---|---:|
+| species / Profile | 1,025 |
+| species / Form | 326 |
+| species / Notes (free text) | 1,025 |
+| species / Learnset / level-up | 2,261 (120 withheld) |
+| species / Learnset / machine | 2,914 |
+| species / Learnset / egg | 1,054 |
+| species / Learnset / tutor | 898 |
+| move / Profile | 833 |
+| move / Learned by | 2,761 |
+| ability / Holders | 362 |
+| type / Matchups | 18 |
+| **Total** | **13,477** (13,357 indexed) |
+
+- **Facts:** 144,861, every one stated by at least one unit; no unit states an
+  unregistered fact; every unit's text parses back to exactly its registered
+  facts, in the twin and in the real naming (`REGISTRY CHECK: PASS`).
+- **Size** (indexed units, estimated as characters / 4): mean 92 tokens, p90
+  178, max 223; about 1.23 million tokens in total. The largest unit is well
+  under the ~700 tokens a tool call returns.
+- **Idempotence:** a forced rebuild writes byte-identical page files (same
+  SHA-256), in both namings.
 
