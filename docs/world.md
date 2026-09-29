@@ -27,6 +27,7 @@ python -m agentic_pokedex.world.coverage     # learnset coverage report
 python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json
 python -m agentic_pokedex.world.render       # pages + registry → data/world/
 python -m agentic_pokedex.world.answer_space # values per answer slot
+python -m agentic_pokedex.world.examples     # example pages, notes elided
 ```
 
 ## Graph
@@ -285,6 +286,105 @@ variant for the S3 ablation (`--cues`) adds `Part k/N`.
 **Out of v1, declared:** learnsets of non-default forms (23,098 rows in the
 scope), and the rare learn methods (`light-ball-egg`, `form-change`,
 `zygarde-cube`: 9 rows).
+
+### Example pages (twin, as rendered)
+
+One page of each kind, exactly as the renderer writes it and the index serves
+it, regenerated with `python -m agentic_pokedex.world.examples`. Pokédex notes
+are elided (`docs/data-sources.md`); everything else is PokéAPI fact content
+under twin names. The species page shows a form, three learn methods, and a
+machine learnset split into two units that share one header with no
+pagination marker (ADR-009). The move's hub shows each learner's types.
+
+#### Species page: Humzam (7 units)
+
+```
+Species: Humzam · Section: Profile
+Types: [[Laigrel]] / [[Lolmax]]
+Abilities: [[Dralfas]], [[Dunuszaik]] · Hidden ability: [[Teipomde]]
+Evolution: [[Humzam]] → [[Fesouk]]
+Forms: [[Salleken Humzam]]
+```
+
+```
+Species: Humzam · Section: Form · Form: Salleken Humzam
+Types: [[Laigrel]] / [[Lolmax]]
+Abilities: [[Dralfas]], [[Dunuszaik]] · Hidden ability: [[Teipomde]]
+```
+
+```
+Species: Humzam · Section: Notes
+[flavor text — 2 texts, local only]
+```
+
+```
+Species: Humzam · Section: Learnset · Method: level-up · Version: Karek/Zistamdu
+Level 1: [[Lerkodok]], [[Zesleilge Vailnis]]
+Level 6: [[Trenpa]]
+Level 12: [[Faimteik Gamosix]]
+Level 18: [[Goukpo]]
+Level 24: [[Gaismes]]
+Level 30: [[Grukvin Bommor]]
+Level 36: [[Gakvur]]
+Level 42: [[Dresvol]]
+Level 48: [[Venlus Fleilon]]
+Level 54: [[Dastesnou Krirsain]]
+Level 60: [[Namdazun]]
+Level 66: [[Kraknas Brirmos]]
+```
+
+```
+Species: Humzam · Section: Learnset · Method: machine · Version: Karek/Zistamdu
+Moves: [[Sheifam Pazox]], [[Koumlile Vartade]], [[Fixro Praxve]], [[Krapum]], [[Domgoul Stulsek]], [[Kraknas Brirmos]], [[Nomfei]], [[Koxme Gusgekram]], [[Gaisfai]], [[Drimse]], [[Fosdo]], [[Rekkes Slaihin]], [[Pairak Thokaxvar]], [[Begax]], [[Prondan]], [[Makroux]], [[Dimvouk]], [[Trourdes]], [[Zeishu Diksus]], [[Skaxtim]], [[Zesleilge Vailnis]], [[Bivolgoux Promon]], [[Lailul Naipofek]], [[Flikel]], [[Goukpo]], [[Gakvur]], [[Venlus Fleilon]], [[Shouvain]], [[Peprordei]], [[Loukmil]], [[Dadei Krakreis]], [[Dastesnou Krirsain]], [[Festei]], [[Kimpam]], [[Gratros]], [[Kraixrus]], [[Nemkotror]], [[Zosathem]], [[Grukvin Bommor]], [[Gese]]
+```
+
+```
+Species: Humzam · Section: Learnset · Method: machine · Version: Karek/Zistamdu
+Moves: [[Mouxtampe]], [[Gaismes]], [[Sokra]], [[Githai]], [[Feiskouvu]]
+```
+
+```
+Species: Humzam · Section: Learnset · Method: egg · Version: Karek/Zistamdu
+Moves: [[Druli Brolha]], [[Gramfem]], [[Brolek]]
+```
+
+#### Move page: Pramnulpu (2 units)
+
+```
+Move: Pramnulpu · Section: Profile
+Type: [[Ranze]] · Category: physical · Power: 70
+```
+
+```
+Move: Pramnulpu · Section: Learned by · Version: Karek/Zistamdu
+[[Nepreisvo]] (Ranze) — level 44
+[[Tukfer]] (Ranze) — level 49
+[[Radahos]] (Shulkem/Laigrel) — level 47
+[[Nosox]] (Shulkem/Laigrel) — level 47
+[[Vudi]] (Shulkem/Laigrel) — level 47
+```
+
+#### Ability page: Slaire (1 unit)
+
+```
+Ability: Slaire · Section: Holders
+[[Brendail]] (hidden)
+[[Zugro]] (hidden)
+[[Moushi]] (hidden)
+```
+
+#### Type page: Sonzu (1 unit)
+
+```
+Type: Sonzu · Section: Matchups
+Attacking — super effective against: [[Bomgu]], [[Rexmok]]
+Attacking — not very effective against: [[Stikrar]], [[Sonzu]], [[Lolmax]]
+Attacking — no effect on: [[Thoba]]
+Attacking — normal damage against: [[Dadeis]], [[Duszogaik]], [[Slomdei]], [[Shogeksas]], [[Ranze]], [[Tratreix]], [[Laigrel]], [[Dasme]], [[Dobem]], [[Krergak]], [[Paxrou]], [[Shulkem]]
+Defending — weak to: [[Thoba]]
+Defending — resists: [[Bomgu]], [[Laigrel]], [[Sonzu]]
+Defending — normal damage from: [[Dadeis]], [[Duszogaik]], [[Slomdei]], [[Shogeksas]], [[Ranze]], [[Tratreix]], [[Dasme]], [[Rexmok]], [[Stikrar]], [[Dobem]], [[Krergak]], [[Lolmax]], [[Paxrou]], [[Shulkem]]
+```
 
 ### The registry
 
