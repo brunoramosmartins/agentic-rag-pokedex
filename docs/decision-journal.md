@@ -489,3 +489,26 @@ answer slot for the chance-adjusted closed-book check (PI-009).
 **Carry-overs.** None.
 
 **Scope decisions.** None taken at kickoff.
+
+## 2026-09-29 — Rendered examples in docs; the identity probe takes E-003
+
+Two conflicts found while opening Phase 1, both absorbed the same day.
+
+- **Rendered pages in docs.** `docs/data-sources.md` listed "rendered pages or
+  any unit text" as never published, yet `docs/world.md` is meant to show one
+  rendered page per entity type. The IP risk is the Pokédex prose, not the
+  PokéAPI facts under twin names. `docs/data-sources.md` now allows twin-side
+  examples in docs with every flavor-text unit elided; the benchmark files
+  still carry unit ids only.
+- **Registry id.** Registry ids are monotonic. The identity probe is the first
+  experiment to run and is registered as E-003; the Phase 8 entry takes the
+  next free id. The two Phase 8 reading notes and the milestone description now
+  refer to "the Phase 8 entry".
+
+**Plan impact PI-010:** Phase 1 — the published-material rule excludes rendered pages and unit text, yet `docs/world.md` shows one rendered page per type → twin-side pages may appear in docs with every flavor-text unit elided; `docs/data-sources.md` amended to say so, and later case renders follow the same rule. Open.
+
+**Plan impact PI-011:** Phase 8 — its registry entry was assumed to be E-003 → it takes the next free id; the Phase 8 reading notes refer to it as "the Phase 8 entry". Open.
+
+**Plan impact PI-010 resolved:** absorbed — `docs/data-sources.md` amended (documentation examples); the Phase 1 world-doc issue requires elided flavor units.
+
+**Plan impact PI-011 resolved:** absorbed — `notes/phase8-synthesis.md`, `notes/geifman-2017-selective-classification.md` and `.github/setup/milestones.sh` updated; no hours or deliverables change.

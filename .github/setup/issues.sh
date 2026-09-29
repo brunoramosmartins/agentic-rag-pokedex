@@ -269,7 +269,7 @@ mk_issue "[Phase 1] Identity probe — preliminary G2" \
 Can the model name the real entity behind a twin page? The positive control keeps a broken probe from reading as a safe twin.
 
 ## Tasks
-- [ ] Probe protocol registered in `experiments/registry.md` **before the run** (model, prompt, match rule, page sample, seed)
+- [ ] Probe protocol registered as E-003 in `experiments/registry.md` **before the run** (model, prompt, match rule, page sample, seed)
 - [ ] 50 twin pages + 50 real pages with the entity's own name masked (positive control)
 - [ ] Script supports `--limit N` and prints the estimated cost first
 
@@ -303,7 +303,7 @@ Idempotence is proven, not presumed. The world doc is the reference for Phase 2.
 ## Tasks
 - [ ] Forced rebuild changes zero units (test)
 - [ ] `docs/world.md`: scope, twin, renderer, registry, load statistics, coverage choice, answer-space counts
-- [ ] One rendered page of each type (species, move, ability, type)
+- [ ] One rendered twin-side page of each type (species, move, ability, type), every flavor-text unit elided (`docs/data-sources.md`)
 
 ## Definition of Done
 - [ ] Rebuild diff is empty; `docs/world.md` published.

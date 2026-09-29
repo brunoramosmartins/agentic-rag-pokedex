@@ -153,6 +153,15 @@ Anyone can reproduce the corpus with the pinned commit + the generator + the
 seeds. Twin names are seeded pseudo-words filtered against real names, which
 also keeps trademarks out of the published files.
 
+**Documentation examples (amended 2026-09-29).** Docs and the README may show
+a few twin-side rendered pages or units as examples (`docs/world.md` shows one
+page per entity type; later phases render cases of prompt, evidence and
+completion). Every flavor-text unit in them is elided and replaced by a marker
+such as `[flavor text — 2 units, local only]`. What remains is PokéAPI fact
+content under twin names. Real-name pages, the twin → real name map and
+Pokédex text, real or renamed, are never shown. The benchmark files themselves
+still carry unit ids only.
+
 ---
 
 ## LLM prices (verified 2026-09-24)

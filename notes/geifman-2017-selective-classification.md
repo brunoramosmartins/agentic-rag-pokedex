@@ -19,7 +19,7 @@ answer vs keep searching / abstain. Read before Guo 2017 (calibration).
 **Cross-refs used throughout:**
 - [`docs/evaluation.md`](../docs/evaluation.md) — v1.1 metrics: risk-coverage, AURC, λ tipping point (planned)
 - `src/agentic_pokedex/evaluation/selective.py`, `classifier/policy.py`
-- `experiments/registry.md` — E-003 (registered on Phase 8 day 1)
+- `experiments/registry.md` — the Phase 8 entry (registered on Phase 8 day 1)
 - [`notes/joren-2025-sufficient-context.md`](joren-2025-sufficient-context.md) — §5.1 selective generation
 
 **Legend.** 🔄 → `notes/phase8-synthesis.md`.
@@ -57,7 +57,7 @@ answer vs keep searching / abstain. Read before Guo 2017 (calibration).
   eval-L2 (groups A and B)?
 - Compare with the project's theoretical threshold
   ≈ (1 − 1/λ) / P(correct | sufficient). One is a risk guarantee, the other a
-  cost optimum. Which one goes into E-003?
+  cost optimum. Which one goes into the Phase 8 entry?
 
 **My take.**
 

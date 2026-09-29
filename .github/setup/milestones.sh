@@ -70,7 +70,7 @@ create_milestone "Phase 7 — Release" \
   "Week 12. Demo + README. Tag: v1.0.0 (stable)" \
   "2026-12-16"
 create_milestone "Phase 8 — Trained Detector" \
-  "Weeks 13-15 (3-week timebox). Calibrated sufficiency classifier, E-003." \
+  "Weeks 13-15 (3-week timebox). Calibrated sufficiency classifier and its registry entry." \
   "2027-01-06"
 create_milestone "Phase 9 — Layer 2 Verdict" \
   "Week 16. Single opening of eval-L2. Tag: v1.1.0" \
