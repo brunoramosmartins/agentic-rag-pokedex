@@ -68,6 +68,18 @@ The corpus is **rendered from the graph** (`world/render.py`):
 - The benchmark can be regenerated locally from the generator + seeds, which
   helps the publication decision in `docs/data-sources.md`.
 
+## Updates
+
+### 2026-09-29 — Pokédex flavor text removed from world v1
+
+The decision above kept the flavor text for realism and named it the first
+thing to remove if the twin leaked. It leaked (E-003; ADR-003, Updates), so
+world v1 has no notes. Consequences here: every unit of the corpus is now
+generated from registered facts, so no free text sits outside the registry;
+the shortcut scan loses its flavor-text case and the G3 audit its flavor read
+(plan impact PI-013). The declared limitation grows: the rendered corpus is
+cleaner still, with no prose at all.
+
 ## Alternatives considered
 
 | Alternative | Why rejected |

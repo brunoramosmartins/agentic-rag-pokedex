@@ -52,6 +52,7 @@ jobs:
       NEO4J_URI: bolt://localhost:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: ci-password
+      NEO4J_TEST_ALLOW_RESET: "1"   # the CI database is disposable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,5 +60,4 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -e ".[dev,graph]"
-      # Exit code 5 = no tests collected; expected until Phase 1 adds the loader.
-      - run: pytest -m integration -v || [ $? -eq 5 ]
+      - run: pytest -m integration -v

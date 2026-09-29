@@ -62,7 +62,7 @@ Phase 10.
   retriever quality during training)? Popular Pokémon are extremely popular
   entities: what does that predict for the real-world arm in Phase 10?
 - Relate to G2's thresholds (identity probe > 10% of 50 pages; closed-book on
-  the twin > 5%). Does Longpre give any reason to expect the Pokédex text to be
+  the twin more than 5 points above each template's majority-answer rate). Does Longpre give any reason to expect the Pokédex text to be
   the main leak?
 
 **My take.**

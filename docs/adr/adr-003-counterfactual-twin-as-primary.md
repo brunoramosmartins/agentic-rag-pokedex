@@ -36,8 +36,9 @@ entity renamed consistently, facts intact (`world/twin.py`).
 
 - Gate **G2 — the twin does not leak** (Phases 1 and 3): an identity probe
   must not recognize the real entity from the renamed page in > 10% of 50 pages,
-  and closed-book (A0) on the twin must stay ≤ 5% — measured against chance
-  on small answer spaces (amended 2026-09-26; rule in
+  and closed-book (A0) on the twin must stay within 5 points of each
+  template's chance rate — its majority-answer rate, never below uniform
+  (amended 2026-09-26 and 2026-09-29; rule in
   [`contingency.md`](../contingency.md), G2). The probe has a positive
   control: real pages with their own name masked must be identified in ≥ 50%, or
   the probe is broken.
@@ -50,6 +51,23 @@ entity renamed consistently, facts intact (`world/twin.py`).
   benchmark with contamination removed, not a stand-in for company data. The
   README must not pitch it as "safe for your private data".
 - Aliases for exact match come only from the twin map (keeps the grader tight).
+
+## Updates
+
+### 2026-09-29 — G2's exit taken: no Pokédex notes in world v1
+
+The identity probe (E-003, `experiments/registry.md`) confirmed the suspicion
+this ADR named. On 50 species, the model named the real species from the twin
+page in 27 of 50 cases when the renamed Pokédex notes were shown, and in 1 of
+50 when they were not; the positive control reached 48 of 50.
+Renaming every name was not enough: the flavor text's descriptions ("lives in
+caves… rusts easily") identify the species by themselves. As the exit plan
+says, the notes go: world v1 renders no notes. On that world, with a fresh
+sample of 50 species, the probe passes: control 48 of 50, twin 1 of 50 (E-003,
+run 2). The one species named was recognized from structure alone — a
+three-stage line with a Mega form — so a structural fingerprint remains for the
+most distinctive species; it is within the threshold and declared. The twin
+keeps every fact; it loses the prose that made its pages read like a wiki.
 
 ## Alternatives considered
 

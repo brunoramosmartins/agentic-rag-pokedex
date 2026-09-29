@@ -29,6 +29,7 @@ filled only after the run, next to the date.
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
+| [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
 
 ---
 
@@ -159,8 +160,11 @@ failed job is re-run on the same ids, never re-drawn.
 
 **Fixed parameters:** λ = 4; T_max = 6 steps; B = 4,000 evidence tokens;
 `search(query, k ≤ 5)` with no total count and no pagination markers (main
-condition); the same cost instruction for every arm ("a wrong answer costs 4×
-not answering").
+condition); `open_page(title, section=None, offset=0)`, which reads a page from
+the top and continues with `offset`, with nothing saying whether more remain,
+and serves the whole page when `section` matches nothing — no tool states that
+evidence is missing; at most 700 tokens of units per call (`o200k_base`); the
+same cost instruction for every arm ("a wrong answer costs 4× not answering").
 
 **Model:** gpt-5-mini, Batch tier, `reasoning_effort` low, frozen for the run.
 
@@ -231,6 +235,12 @@ usage on 10 calls; identity probe positive control ≥ 50%.
 - **Detector precision / recall per step**, against the exact label, by
   subtype (`missing-hop`, `wrong-version`, `truncated`, `nonexistent`);
   implicit-detector firing rate.
+- **S3 truncation mechanism**, per arm: of the S3 questions answered with the
+  full set, the share where the agent stopped **before** reaching the end of the
+  list (it suspected the missing part and fetched it) versus the share where it
+  learned the end only by asking past it (`offset` answered "No more units.").
+  Both are read from the logged trajectories; the second is detection by
+  exhaustion, not by suspicion.
 - **O2 − A3** on S1–S4 (labelled oracle).
 
 **λ-free headline.**
@@ -413,6 +423,29 @@ _Not run._
   2. The v1.0 cap becomes US$ 20 (ADR-008, update of 2026-09-28). n_max is
      computed against it; there is still no cap increase after the dress
      rehearsal.
+- **2026-09-29 — tool contract fixed in Phase 1 (before any run).** The fixed
+  parameters now describe `open_page` as built: without `section` it returns
+  the page from the top; `section` filters units by their section line;
+  `offset` skips units to continue a list longer than one call; past the end it
+  answers "No more units." Every call returns at most 700 tokens of units
+  (`o200k_base`), the first unit always. Reason: the parameters named only
+  `search`, and a species page (~1,500 tokens) or a large hub does not fit in
+  one call; `offset` lets an agent that suspects an incomplete list ask for the
+  rest, which is the decision S3 measures, while the main condition still says
+  nothing about what remains.
+- **2026-09-29 — no tool states an absence; S3 mechanism split (Phase 1 close
+  review, before any run).** Two changes from a design review:
+  1. `open_page` with a `section` that matches nothing now serves the whole
+     page from the top, with no message; it used to answer "No section
+     matching …", which labelled the absence of a withheld S4 section outright.
+     An agent asking for a withheld learnset now sees the other versions'
+     sections — the plausible, insufficient evidence S4 is built on — and must
+     notice the gap itself. The principle, recorded in ADR-009: the structure
+     may be artificial; the signal used to decide sufficiency is never handed
+     over by the infrastructure.
+  2. The mechanism quantities gain the **S3 truncation mechanism**: stopping
+     after fetching the rest before reaching the end, versus learning the end
+     only by asking past it.
 
 ---
 
@@ -484,3 +517,222 @@ _Not run._
     claimed all insufficiency strata.
   k = 5 now governs, and the link-type order must be registered before the
   run.
+
+---
+
+## E-003 — Identity probe: can the model name the real species behind a twin page?
+
+- **Phase:** 1 (world), before any question exists.
+- **Status:** analyzed — registered 2026-09-29; run 1 frozen from its manifest
+  (16:57:47 UTC, before submission; see Amendments); run 2 frozen before
+  submission. Verdict: G2's identity half passes on world v1 (no notes).
+- **Hypothesis:** gating — the identity half of G2 (`docs/contingency.md`).
+  The closed-book half runs in Phase 3.
+
+### Objective
+
+Measure how often the primary model, told that a page describes a renamed
+Pokémon species, names the real species — on twin pages, against a positive
+control of real pages with the species' own name masked, which shows the probe
+can detect identification at all.
+
+### Configuration
+
+- **Sample:** 50 species, stratified by generation — 6 from each of
+  generations 1–5 and 5 from each of generations 6–9 — drawn with seed
+  `20260929` among the species whose default entry has a level-up learnset in
+  the version scope (999 species; the pool questions will come from).
+  **The same 50 species in every condition** (paired).
+- **Conditions** (150 calls):
+
+| Condition | Page shown | Role |
+|---|---|---|
+| **Control** | Real page, served as `open_page(title)` returns it (≤ 700 tokens), with every occurrence of the species' own name masked as `[MASKED]` (title, evolution line, form names, notes; case-insensitive, whole word) | Positive control |
+| **Twin** | Twin page, served as `open_page(title)` returns it | The G2 measurement |
+| **Twin, no notes** | Twin page served with its `Notes` unit removed (the freed budget goes to the next units) | Descriptive: attributes a leak to the Pokédex text |
+
+- **Prompt** (identical in every condition, loaded by name from `prompts/`,
+  hash logged): "The page below describes a Pokémon species. Its name — and, on
+  some pages, every other name — has been replaced. Which real Pokémon species
+  is it? Answer with its English name, or 'unknown'." Telling the model what
+  to look for makes this the hardest test for the twin.
+- **Output:** structured, `{"guess": string, "confidence": number 0–1}`. An
+  invalid output is re-sent up to twice; a residual invalid output is excluded
+  and reported N-of-M.
+- **Model:** gpt-5-mini, Batch API, `reasoning_effort` low (as E-001).
+- **Cost:** printed before the run by the token meter; under US$ 0.10 even at
+  the pessimistic reasoning assumption. The script supports `--limit N`.
+
+### Measurement
+
+- **Identified (governs):** the guess, normalized (ASCII letters, lower case),
+  equals the English name of **any species or form in the same evolution line**
+  as the page's species. Knowing the family is enough to answer an S1 question
+  from memory.
+- **Descriptive:** exact species (or one of its forms); per-generation rates;
+  mean confidence of identified and unidentified guesses; "unknown" rate.
+- Counts are published N-of-50, with Wilson 95% intervals. At n = 50 the
+  interval around 10% spans roughly 4–21%: the rule below is a registered
+  count, not a precise estimate.
+
+### Decision rule
+
+1. **Control identified in < 25 of 50** (< 50%): the probe is broken, not the
+   twin safe. No G2 verdict; the masking or prompt is fixed as a dated
+   amendment here, and the probe re-runs on the same 50 species.
+2. **Control ≥ 25 and twin identified in ≤ 5 of 50** (≤ 10%): the identity half
+   of G2 passes (preliminary; Phase 3 completes G2).
+3. **Twin identified in > 5 of 50:** G2 fails; the exit plan applies
+   (`docs/contingency.md`). If the no-notes condition is ≤ 5 of 50, the world
+   is rendered without notes (`--no-notes`) and the probe re-runs on a fresh
+   sample of 50 species. Otherwise the leak is structural (the facts
+   themselves), and primary-population questions exclude the leaking species'
+   templates, decided on dev and recorded.
+
+### Run 2 — the G2 exit (registered 2026-09-29, before its run)
+
+Rule 3 applies: run 1 found the twin leaking and the no-notes condition within
+the threshold in both bounds. World v1 is rendered without notes and the probe
+re-runs:
+
+- **World:** the default render, no `Notes` units (the preparation step refuses
+  a world that has them); registry and page-file hashes recorded in the run
+  manifest.
+- **Sample:** 50 species, the same stratification, seed `20260930`, **excluding
+  run 1's 50 species**.
+- **Conditions** (100 calls): **control** (the real page, now without notes,
+  masked as before) and **twin** (the twin page, now without notes). The
+  no-notes condition is the twin itself.
+- **Everything else as run 1**, with the amendment of 2026-09-29 in force from
+  the start: `max_completion_tokens` 4,000; up to two re-sends of invalid
+  answers; first valid answer kept; residual invalid answers counted both ways.
+- **Decision rule:** control < 25 of 50 → probe broken; control ≥ 25 and twin
+  ≤ 5 of 50 → **G2's identity half passes**; twin > 5 of 50 → the leak is
+  structural (the facts themselves) and rule 3's last branch applies.
+- **Expected result (author's prediction, 2026-09-29):** control about 45 of
+  50; twin 1 or 2 of 50.
+- **Freeze manifest** (from `runs/e003-run2/manifest.json`, prepared 17:41:13
+  UTC, **frozen before submission**):
+
+| Item | Value |
+|---|---|
+| Prompt SHA-256 | `f171878d75425a9f0de24c6d9dbd44244b0e32d38ff6b26d1f9e418e4c3efb3c` (as run 1) |
+| Real page file SHA-256 (no notes) | `a3e5179bca94149c79ae401c44a8fd3d865c511b13a646f069473f86ab104873` |
+| Twin page file SHA-256 (no notes) | `06b3c54b3984e706ee7437d90873ac10a9d36b7785ac853dd8f1a9fe68ab5f74` |
+| Registry SHA-256 | `11530e235001f022b786c119cef6cf2a5f6d1a58a5ce247bb2cf841aa754bf53` |
+| Seed; species | `20260930`; 50 species, none of run 1's (list in the run manifest) |
+| Model; `reasoning_effort`; max completion tokens | gpt-5-mini; low; 4,000 |
+| Requests; estimated cost | 100; US$ 0.025 central / 0.050 pessimistic |
+
+### Expected result (author's prediction, 2026-09-29)
+
+Control: about 45 of 50. Twin: 2 or 3 of 50. The notes weigh little: the
+no-notes condition lands close to the twin.
+
+### Freeze manifest (2026-09-29)
+
+| Item | Value |
+|---|---|
+| Prompt `identity_probe` SHA-256 | `f171878d75425a9f0de24c6d9dbd44244b0e32d38ff6b26d1f9e418e4c3efb3c` |
+| Real page file SHA-256 | `630f5e0a31707d3bb3f857392de93276c4304d099c7f610f007ff2ba4459c0fa` |
+| Twin page file SHA-256 | `187637561f7e7cd2faeb57a7d7769795972720efd09bd4bb33910f4709d66931` |
+| Seed; species | `20260929`; 50 species (list in the run manifest) |
+| Model; `reasoning_effort`; max completion tokens | gpt-5-mini; low; 1,000 (4,000 for the last re-send and later runs; Amendments) |
+| Requests | 150 (50 species × 3 conditions) |
+| Estimated cost | US$ 0.038 central / 0.076 pessimistic |
+| Batch | `batch_6abbee1579948190afda9a6ca6f4e60a`, submitted 16:57:58 UTC |
+
+### Actual result
+
+**Run 2 (2026-09-29; world v1 without notes; 100 of 100 answers valid, no
+re-send).**
+
+| Condition | Identified | Wilson 95% CI | Exact | "unknown" |
+|---|---|---|---|---|
+| Control | **48 of 50** (96%) | 87–99% | 48 | 0 |
+| Twin | **1 of 50** (2%) | 0–10% | 1 | 22 |
+
+By generation, identified: control G1–G6 all, G7 4 of 5, G8 all, G9 4 of 5;
+twin G2 1 of 6, every other generation 0.
+
+**Decision: pass — G2's identity half passes** on world v1 (control ≥ 25, twin
+≤ 5 of 50). The one identified species is a generation-2 species with a
+three-stage evolution line and a Mega form, named at confidence 0.9 with no
+text on the page: a residual **structural** fingerprint, within the threshold
+and declared as a limitation. The other 49 twin answers were "unknown" (22) or
+a wrong species (27, mean confidence 0.61). Measured cost US$ 0.0545.
+Prediction: control about 45 (48); twin 1 or 2 (1).
+
+**Run 1, final (2026-09-29; 150 of 150 answers valid after the two registered
+re-sends and the 4,000-token re-send of 8).**
+
+| Condition | Identified | Wilson 95% CI | Exact | "unknown" |
+|---|---|---|---|---|
+| Control | **48 of 50** (96%) | 87–99% | 48 | 1 |
+| Twin (with notes) | **27 of 50** (54%) | 40–67% | 27 | 0 |
+| Twin, no notes | **1 of 50** (2%) | 0–10% | 1 | 27 |
+
+By generation, identified: control G1–G8 all, G9 3 of 5; twin G1 5/6, G2 3/6,
+G3 3/6, G4 3/6, G5 4/6, G6 3/5, G7 4/5, G8 2/5, G9 0/5; no notes: G1 1/6, all
+others 0.
+
+**Decision (rule 3): fail — notes.** The probe works; the twin with Pokédex
+notes leaks (27 of 50, far above 5); without notes it does not (1 of 50). The
+exit is taken: world v1 renders no notes, and run 2 tests that world. Measured
+cost, every call and re-send included: US$ 0.1614. Prediction: control about
+45 (48); twin 2–3 (27); notes weigh little (they carry nearly all of the leak).
+
+**First collection (2026-09-29, batch `batch_6abbee…`; partial — 29 of 150
+answers invalid, see Amendments).** Kept for the record; superseded by the
+final counts above.
+
+| Condition | Identified (valid answers) | Bounds with the invalid ones | "unknown" |
+|---|---|---|---|
+| Control | **48 of 50** (96%; Wilson 95% CI 87–99%), all exact | — (0 invalid) | 1 |
+| Twin | **22 of 34** (65%; 48–79%), all exact | 22–38 of 50 | 0 |
+| Twin, no notes | **1 of 37** (3%; 0–14%) | 1–14 of 50 | 21 |
+
+By generation, identified of valid: control G1–G8 all, G9 3 of 5; twin G1 4/4,
+G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
+
+- The probe works (control 96%).
+- **The twin leaks**: at least 22 of 50 (44%) even if every invalid twin answer
+  were a miss — above 10% in every case. G2's identity half fails.
+- **The Pokédex notes carry the leak**: 65% with them, 3% without. Whether the
+  no-notes condition is at most 5 of 50 — which selects the branch of rule 3 —
+  depends on its 13 invalid answers: undetermined until they are re-sent.
+- Invalid answers: 28 truncated (the model spent the whole 1,000-token output
+  cap on reasoning) and 1 error, all in the two twin conditions. Median
+  reasoning tokens of valid answers: control 128, twin 512, twin no-notes 576.
+- Measured cost: US$ 0.0905 (estimate: 0.038 central / 0.076 pessimistic).
+- Prediction: control about 45 (actual 48); twin 2–3 (actual ≥ 22); notes weigh
+  little (they carry almost all of the leak).
+
+### Amendments
+
+- **2026-09-29 — freeze recorded after submission.** The protocol freezes an
+  entry before its run; here the freeze is written from the run manifest
+  (`runs/e003/manifest.json`), which the preparation step wrote at 16:57:47
+  UTC, 11 seconds before the batch was submitted and before any answer existed.
+  Every item above is copied from that manifest; nothing in the configuration
+  changed after it. Recorded so the order of events is visible.
+- **2026-09-29 — output cap and invalid answers (decided after the first
+  collection, with its rates seen).** 28 answers were truncated at the
+  registered cap of 1,000 output tokens, reasoning included; invalid answers are
+  the calls where the model reasoned longest, so excluding them is not neutral.
+  Changes:
+  1. The two re-sends the entry allows ran with the registered cap (batches
+     `batch_6abbf235…` and `batch_6abbf246…`, the same 29 requests). Per request
+     the **first valid answer in submission order** is kept; a later one never
+     replaces it.
+  2. Answers still invalid after those two are re-sent once more with
+     `max_completion_tokens` = **4,000** (the rewritten request file is kept).
+     Every later run of this probe uses 4,000.
+  3. Residual invalid answers are counted both ways: worst case for the twin
+     (invalid twin answers identified, invalid control answers missed) and best
+     case. A verdict both cases share is taken; otherwise the result is
+     "undetermined" and the branch of rule 3 is not taken on it.
+  The decision rule and its thresholds are unchanged. Reason: truncation is a
+  defect of the instrument (the cap was set without a measurement), not an
+  outcome. The raw batch outputs are now kept in `runs/e003/outputs/`.
+

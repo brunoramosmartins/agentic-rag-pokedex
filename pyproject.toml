@@ -20,7 +20,7 @@ dependencies = [
 [project.optional-dependencies]
 # Each phase pulls in only what it needs: pip install -e ".[dev,graph]"
 graph = ["neo4j>=5.14"]
-retrieval = ["rank-bm25>=0.2.2", "faiss-cpu>=1.7.4", "sentence-transformers>=2.7"]
+retrieval = ["fastembed>=0.4"]
 llm = ["openai>=1.40", "tiktoken>=0.7"]
 observability = [
     "opentelemetry-sdk>=1.24",

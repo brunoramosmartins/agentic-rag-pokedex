@@ -1,6 +1,6 @@
 # Phase 8 — Reading Synthesis (Geifman × Guo × Kadavath)
 
-Cross-source questions for the Phase 8 readings. The output feeds E-003,
+Cross-source questions for the Phase 8 readings. The output feeds the Phase 8 registry entry,
 `classifier/policy.py` and the model card.
 
 Sources:
@@ -25,7 +25,7 @@ Sources:
 **Prompt.**
 - All three papers study a single decision. The detector decides at every step,
   with the option to keep searching. Write down what changes in the cost
-  analysis (e.g. the value of one more step) and whether E-003 needs to state
+  analysis (e.g. the value of one more step) and whether the Phase 8 entry needs to state
   it.
 
 **My take.**

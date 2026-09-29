@@ -1,0 +1,7 @@
+id,identifier,form_identifier,pokemon_id,introduced_in_version_group_id,is_default,is_battle_only,is_mega,form_order,order
+1,sprig,,1,1,1,0,0,1,1
+2,sprout,,2,1,1,0,0,1,2
+3,sproutree,,3,1,1,0,0,1,3
+4,blaze,,4,1,1,0,0,1,4
+10001,blaze-mega,mega,10001,2,1,1,1,1,5
+10002,sproutree-tidal,tidal,10002,2,1,0,0,2,6

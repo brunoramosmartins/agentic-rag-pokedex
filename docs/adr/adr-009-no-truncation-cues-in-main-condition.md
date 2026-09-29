@@ -40,6 +40,34 @@ cue changes truncation detection — a practical finding for agent builders:
 - S3 predictions in E-001 are written for the no-cue condition; E-001
   predicts a small A4 − A3 gain on S3 in the main condition.
 
+## Updates
+
+### 2026-09-29 — The principle behind this ADR, applied to absence
+
+A design review at the Phase 1 close generalized this decision into a
+principle for every tool:
+
+> **The structure may be artificial; the signal used to decide sufficiency is
+> never handed over by the infrastructure.**
+
+Counts and pagination markers were one instance. A second one was found in
+`open_page`: a `section` that matched nothing answered "No section matching …",
+which labelled a withheld S4 section as absent before the agent had to infer
+anything. A neutral empty answer would not fix it — an empty filter result
+carries the same information. So a section that matches nothing is ignored and
+the whole page is served from the top, as a wiki link to a missing anchor
+lands at the top of the page. An agent asking for a withheld learnset sees the
+other versions' learnsets — S4's plausible, insufficient evidence — and must
+notice the gap itself; the absence stays visible in the page, as legitimate
+evidence, but no tool announces it. A test enumerates titles and sections and
+fails if the main condition ever states an absence.
+
+`offset` answering "No more units." past the end of a list is kept: the agent
+learns the end only by asking for more, which is itself the behavior S3
+measures. E-001 reads the two mechanisms apart — fetching the rest before
+reaching the end versus learning the end by asking past it (amendment of
+2026-09-29).
+
 ## Alternatives considered
 
 | Alternative | Why rejected |

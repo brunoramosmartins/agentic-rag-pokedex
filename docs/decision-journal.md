@@ -469,3 +469,371 @@ contribution as measurement and cites the three later works.
 **Plan impact PI-009 resolved:** plan revised on 2026-09-28 — Phase 1 counts
 admissible answers per template; Phases 1 and 3 apply the chance-adjusted
 closed-book check.
+
+## 2026-09-29 — Phase 1 opened
+
+**Scope.** Phase 1 — The World: PokéAPI → graph → twin → pages. 8–11 partial
+working days (weeks 2–3). Ends with tag `v0.2-world` (no release).
+
+**Gate check.** Every Phase 0 deliverable is present; PR #9 merged with CI
+green and `v0.1-foundation` pushed. The eight Phase 0 issues were still open
+(one of them, "ADRs 001–010", duplicated) and are closed as part of the
+opening.
+
+**Open plan impacts.** None: PI-001 to PI-009 were resolved on 2026-09-28. The
+ones that shape this phase are already in its tasks: free-text units marked in
+the registry (PI-001), base version groups spanning generations with the
+level-difference rate reported (PI-002), and admissible answers counted per
+answer slot for the chance-adjusted closed-book check (PI-009).
+
+**Carry-overs.** None.
+
+**Scope decisions.** None taken at kickoff.
+
+## 2026-09-29 — Rendered examples in docs; the identity probe takes E-003
+
+Two conflicts found while opening Phase 1, both absorbed the same day.
+
+- **Rendered pages in docs.** `docs/data-sources.md` listed "rendered pages or
+  any unit text" as never published, yet `docs/world.md` is meant to show one
+  rendered page per entity type. The IP risk is the Pokédex prose, not the
+  PokéAPI facts under twin names. `docs/data-sources.md` now allows twin-side
+  examples in docs with every flavor-text unit elided; the benchmark files
+  still carry unit ids only.
+- **Registry id.** Registry ids are monotonic. The identity probe is the first
+  experiment to run and is registered as E-003; the Phase 8 entry takes the
+  next free id. The two Phase 8 reading notes and the milestone description now
+  refer to "the Phase 8 entry".
+
+**Plan impact PI-010:** Phase 1 — the published-material rule excludes rendered pages and unit text, yet `docs/world.md` shows one rendered page per type → twin-side pages may appear in docs with every flavor-text unit elided; `docs/data-sources.md` amended to say so, and later case renders follow the same rule. Open.
+
+**Plan impact PI-011:** Phase 8 — its registry entry was assumed to be E-003 → it takes the next free id; the Phase 8 reading notes refer to it as "the Phase 8 entry". Open.
+
+**Plan impact PI-010 resolved:** absorbed — `docs/data-sources.md` amended (documentation examples); the Phase 1 world-doc issue requires elided flavor units.
+
+**Plan impact PI-011 resolved:** absorbed — `notes/phase8-synthesis.md`, `notes/geifman-2017-selective-classification.md` and `.github/setup/milestones.sh` updated; no hours or deliverables change.
+
+## 2026-09-29 — Download and graph load: what enters the graph
+
+`world/download.py` fetches 23 PokéAPI CSVs at the pinned commit and keeps a
+file only if its SHA-256 matches the manifest. The 14 files hashed for G1 still
+match; 9 files are added for English names, move categories and forms
+(`docs/data-sources.md`).
+
+`world/load_graph.py` loads the **real** world; the twin is a renaming layer
+built on top of it. Scope filters, each counted in the load statistics:
+
+- **Types:** only types with rows in the efficacy table, i.e. the 18 battle
+  types. `unknown`, `shadow` and the Tera-only `stellar` go.
+- **Moves:** only moves some Pokémon learns, with a battle type (drops shadow
+  moves and the Z- and Max-move variants: 833 of 937 kept).
+- **Abilities:** main series only (314 of 374).
+- **Names and flavor text:** English only; flavor whitespace collapsed.
+- **Learnsets:** every version group and every learn method is loaded
+  (638,321 rows). The version scope is chosen from the coverage report and
+  applied when pages are rendered, so the coverage report and the S2 filter
+  read the same graph.
+- **Not loaded:** evolution conditions (level, item, trigger), stats, genus,
+  height and weight. Evolution enters as structure only (`EVOLVES_FROM`),
+  which is all the S1 templates need.
+
+A load replaces the whole database and then checks every node and relationship
+count against the records it wrote, because a `MATCH` that misses an endpoint
+writes nothing and raises nothing. Integration tests wipe the database, so they
+run only with `NEO4J_TEST_ALLOW_RESET=1` (set in CI).
+
+Found while reading: 4 English Pokémon names are shared by two entries
+("10% Zygarde", "Koraidon", "Miraidon", "Mega Meowstic"). Titles must be unique
+for `open_page`, so the renderer disambiguates them; the graph keeps the
+PokéAPI identifier, which is unique.
+
+## 2026-09-29 — Version scope frozen: x-y, ultra-sun-ultra-moon, scarlet-violet
+
+The learnset coverage report (`docs/world.md`, Version scope) was computed from
+the graph and from the raw CSVs; the two agree in every cell. The author chose
+**x-y, ultra-sun-ultra-moon and scarlet-violet** (generations 6, 7 and 9).
+
+- **Evidence.** S2 material does not bind: every one-group-per-generation set
+  has more than 300 S2-usable pairs in its weakest group. This set is the most
+  balanced (weakest group 2,383 pairs), 486 Pokémon have a learnset in all
+  three groups, and 999 of 1,025 in at least one, generation 9 included.
+  Level-difference rates between the chosen groups: 24% (x-y vs
+  ultra-sun-ultra-moon), 56% (ultra-sun-ultra-moon vs scarlet-violet), 63%
+  (x-y vs scarlet-violet).
+- **Rejected.** x-y + ultra-sun-ultra-moon + sword-shield (more S2 pairs, but
+  generation 9 left without learnsets); sword-shield with scarlet-violet (1% of
+  levels differ); every four-group set (each adds a near-duplicate group).
+- **Consequences.** `VERSION_SCOPE` in `world/pokeapi.py`. The graph keeps
+  every version group; the renderer writes learnset sections only for the
+  scope, and every examiner template filters `LEARNS.version_group` to it, so a
+  gold answer can never come from a group the corpus does not contain. The S2
+  filter compares against the other two groups of the scope, and excludes
+  level-0 ("on evolution") and multi-level pairs as ambiguous.
+
+## 2026-09-29 — The twin: pinned word list, name shapes, what free text rewrites
+
+`world/twin.py` builds the twin map with `TWIN_SEED = 20260929`. Decisions:
+
+- **Pinned word list.** The dictionary filter uses `words_alpha.txt` from
+  `dwyl/english-words` (Unlicense), pinned by commit and SHA-256 and fetched
+  with the CSVs. A system dictionary was the first idea and was dropped: it
+  differs between machines, so the published seed would not rebuild the same
+  twin.
+- **Names are drawn independently of the real name**, so no twin name carries
+  a trace of its entity. Look-alikes of any English real name (same first or
+  last four letters, one edit away, or containing it) are redrawn as well, so a
+  twin name does not evoke another real entity either. The first draw produced
+  unreadable names (up to 12 letters, "thh" clusters) and one profanity; words
+  are now 4–9 letters, never three consonants in a row, with a blocklist.
+- **Shapes are kept where they carry structure, not identity:** form names keep
+  "<qualifier> <species>" with a consistent pseudo-word per qualifier, and
+  version-group names are rebuilt from their versions.
+- **Free text** rewrites Title-case and upper-case names only. Lower-case prose
+  stays; the identity probe measures what it leaks. Version names are not
+  rewritten in prose, where "X" or "Sun" are ordinary words.
+
+Build on the real data: round trip identity for every name, no shared word,
+0 of 14,496 flavor texts still naming a real species (`docs/world.md`).
+
+## 2026-09-29 — Page and unit design
+
+The author reviewed the page design before any code; one decision changed in
+the discussion.
+
+- **All learn methods on species pages (changed).** The first proposal kept
+  level-up only, to keep the corpus small. The author's objection, from a
+  concrete use (building a competitive team needs machine, egg and tutor moves
+  too), exposed what that loses: a machine unit listing a move is plausible,
+  insufficient evidence for a question about its level — a wrong-method
+  distractor that strengthens S2 and S4 without touching the label, since the
+  registry knows the unit states no level. Species pages now carry one unit
+  per method and version group; hubs stay level-up only (a machine hub would
+  list most of the corpus). Cost: 13,477 units instead of about 8,800.
+- **Forms:** types and abilities only; their learnsets are out of v1.
+- **Hub entries carry the learner's types**, so S3 keeps its type filter
+  within T_max.
+- **S4:** 120 withheld (species, version group) pairs, seeded; their entries
+  also leave the hubs of that group, so no indexed unit states a withheld
+  level. The examiner's S3 templates must avoid hubs touching them.
+- **Notes:** two Pokédex texts per species at most; `--no-notes` is the G2 exit.
+- **Unique titles:** one page per ability name; " (2)" for repeated form names.
+
+Parked with the author's agreement: "can X learn Y?" — a negative answer is
+sufficient only after every learn method has been seen (`notes/open-ideas.md`).
+
+Build on the real data: 144,861 facts, 13,357 indexed units, registry check
+PASS in both namings, forced rebuild byte-identical (`docs/world.md`).
+
+## 2026-09-29 — Index and tool contract
+
+Three decisions, taken by the author before any code:
+
+- **`open_page(title)` reads the page from the top**, up to the call's cap,
+  like opening a wiki page. The alternative, a table of contents first, costs a
+  step of T_max = 6 on every hop.
+- **`offset` continues a section** past one call. Nothing says more remains;
+  an agent that suspects an incomplete list asks, and asking is the decision S3
+  measures. Without it, hub units beyond the first call could only surface
+  through reformulated searches, which would make S3 a test of the ranking.
+- **Dense backend: `fastembed` with `BAAI/bge-small-en-v1.5`.** ONNX on CPU, no
+  torch; the GPU is not visible from WSL, and 13k units need no approximate
+  index. The `retrieval` extra is now `fastembed` only: BM25 is adapted from the
+  previous project (standard library), so `rank-bm25`, `faiss-cpu` and
+  `sentence-transformers` leave the dependencies.
+
+The 700-token cap per call is now written into E-001's fixed parameters,
+counted with `o200k_base` (amendment of 2026-09-29).
+
+## 2026-09-29 — Answer spaces; the G2 chance rate becomes the majority-answer rate
+
+The answer-space count (`docs/world.md`, Answer spaces) shows skewed slots: a
+move's type is Normal 22.6% of the time, a damage factor is ×1 63% of the time,
+a move's power is 80 in 13% of moves, and a learnable level is 1 in 21.3% of
+answerable pairs. The G2 closed-book rule compared A0 with uniform chance on
+spaces of at most 20 values and with a flat 5% elsewhere, so a model that knows
+only the answer distribution — no leak — would fail it. Escalated the same day
+because it touches a `docs/contingency.md` criterion; decided before any A0
+run.
+
+**Plan impact PI-012:** Phase 3 — the G2 closed-book check compares A0 with uniform chance on small answer spaces and with a flat 5% on open ones, but answer slots are skewed (always guessing the modal value scores 22.6% on a move's type, 63% on a damage factor, 13% on move power, 21.3% on a learn level, with no leak) → chance becomes each template's majority-answer rate (the share of its most common gold answer among its generated questions, never below uniform), for every template, small or open; the 5-point margin stays; Phase 2 reports each template's majority-answer rate. Open.
+
+The author approved the change and added a generation cap: each template's
+majority-answer rate is at most max(10%, 1.5 × its uniform chance). Reason: an
+agent that stops early and guesses the modal answer would otherwise score
+lucky correct answers (`correct-at-insufficient`) in E-001 as well as in G2.
+Cost: answer distributions per template are no longer the world's natural ones.
+
+**Plan impact PI-012 resolved:** absorbed — `docs/contingency.md` G2 amended
+(chance = majority-answer rate, never below uniform; generation cap
+max(10%, 1.5 × uniform)); ADR-003's consequence and `docs/hypothesis.md` (A0 ≈
+chance on the twin) updated. Phase 2's generator enforces the cap and reports
+each template's majority-answer rate; Phase 3's closed-book check uses it. No
+hours or dates change.
+
+## 2026-09-29 — E-003 registered: the identity probe
+
+The identity half of G2 is registered as E-003 (draft) before any code for it.
+The author chose among alternatives:
+
+- **Model:** gpt-5-mini only — the probe asks whether the model of the runs
+  recognizes the twin. GPT-4o-mini belongs to the v1.2 extension, where the
+  probe can be repeated.
+- **Input:** the page as `open_page(title)` serves it, which is what an agent
+  sees on one hop, plus a descriptive third condition without the Pokédex notes
+  (50 more calls), so a leak can be attributed to the flavor text — the exit
+  G2 already names — without a second run.
+- **Match rule:** any species or form of the same evolution line counts as
+  identified. Knowing the family is enough to answer S1 from memory, so this is
+  the conservative rule for the twin. Exact species is descriptive.
+- **Sample:** 50 species stratified by generation (6 per generation 1–5, 5 per
+  generation 6–9), the same species in every condition. Popularity falls with
+  generation, so a simple random draw could miss the most memorized species.
+
+The prompt tells the model it is looking at a renamed Pokémon: the hardest
+test for the twin. Cost under US$ 0.10. The author's prediction goes into the
+entry before the run.
+
+## 2026-09-29 — E-003 first collection: the twin leaks through the Pokédex notes
+
+The identity probe (E-003) ran on 50 species. The control identified 48 of 50,
+so the probe works. The twin identified 22 of 34 valid answers — at least 22 of
+50 counting every invalid answer as a miss — so **G2's identity half fails**.
+Without the Pokédex notes the twin identified 1 of 37: the flavor text, still
+readable in lower-case prose after renaming ("lives in caves… rusts easily"),
+carries the leak, as ADR-003 suspected. The author had predicted 2–3 of 50 and
+little weight for the notes.
+
+29 answers were invalid: 28 truncated at the registered 1,000-token output cap,
+spent on reasoning. With the author's agreement, E-003 is amended (dated,
+decided after the rates were seen): the two allowed re-sends keep the
+registered cap and the first valid answer per request is kept; what stays
+invalid is re-sent once at 4,000; residual invalid answers are counted both
+ways, and only a verdict both cases share is taken. The branch of the exit plan
+(notes vs structural) waits for those re-sends.
+
+**Plan impact PI-013:** Phase 2 — the corpus was assumed to keep Pokédex notes (flavor units marked for the shortcut scan, flavor text read in the G3 audit) → E-003 finds the notes leak identity (twin 22 of 34 valid, ≥ 22 of 50; without notes 1 of 37); if the no-notes branch holds, pages carry no notes, the shortcut scan's flavor-text planted leak and the G3 flavor read are dropped, and the README states the lost realism. Open.
+
+**Plan impact PI-014:** Phase 3 — the budget assumed 150 (central) / 400 (pessimistic) reasoning tokens per call → on twin pages gpt-5-mini at low effort used a median of 512–576, and 28 of 100 twin calls hit a 1,000-token cap → the pilot measures reasoning per arm before n_max, and every registered run's `max_completion_tokens` leaves headroom (≥ 4,000). Open.
+
+Both were escalated the same day: PI-013 touches the phase in progress and a
+`docs/contingency.md` exit; PI-014 touches the budget behind the sizing. The
+probe itself cost US$ 0.09, above its pessimistic estimate of 0.076.
+
+## 2026-09-29 — G2's exit taken: world v1 renders no Pokédex notes
+
+After the two registered re-sends, E-003 run 1 reads, in both bounds of its
+remaining invalid answers: twin 26–31 of 50, twin without notes 1–4 of 50,
+control 48 of 50. Rule 3's branch is "notes": the leak is in the flavor text,
+not in the facts. The author confirmed the consequences:
+
+- **World v1 has no notes.** The renderer's CLI leaves them out by default;
+  `--notes` restores them for research. 12,452 units (12,332 indexed), the
+  same 144,861 facts; registry check PASS; byte-identical on a forced rebuild.
+- **E-003 run 2** is registered before it runs: a fresh sample of 50 species
+  (seed 20260930, excluding run 1's), control and twin on the no-notes world,
+  the 4,000-token cap from the start.
+- **The vector cache is per unit.** Re-rendering re-embeds only units whose
+  text changed; the earlier whole-corpus file was imported, so the no-notes
+  index needed no embedding at all (12,332 vectors reused).
+- **Documents:** `docs/world.md`, `docs/data-sources.md`, `docs/contingency.md`
+  (G2 status), and Updates sections in ADR-002 and ADR-003.
+
+PI-013 stays open until run 2 passes. The last re-send of run 1 (4,000
+tokens, 8 answers) completes its published counts; it cannot change the
+verdict, which both bounds already share.
+
+## 2026-09-29 — E-003 run 1 final; run 2 frozen before submission
+
+Run 1 closed with every answer valid after the registered re-sends: control 48
+of 50, twin with notes 27 of 50, twin without notes 1 of 50. Decision: fail —
+notes; the exit (no notes in world v1) stands. Total cost US$ 0.16.
+
+World v1 was re-rendered without notes: page hashes equal the ones of the test
+render made earlier the same day, and the index reused every cached vector.
+Run 2 was prepared on it (50 species, none of run 1's) and **frozen from its
+manifest before submission** — the order run 1 missed. The author's prediction
+for run 2: control about 45 of 50, twin 1 or 2.
+
+## 2026-09-29 — E-003 run 2: G2's identity half passes on world v1
+
+On the no-notes world, with 50 species none of which run 1 used: control 48 of
+50, twin 1 of 50 (22 "unknown", 27 wrong species at mean confidence 0.61). The
+author had predicted about 45 and 1–2. The one species named — at confidence
+0.9, with no text on the page — has a three-stage evolution line and a Mega
+form: identification from structure alone is possible for the most distinctive
+species. It is within the threshold and is declared as a limitation; it does
+not call for another exit. The closed-book half of G2 runs in Phase 3.
+
+**Plan impact PI-013 resolved:** contingency G2 taken — Pokédex notes removed from world v1 (the renderer's default; `--notes` for research), E-003 run 2 passes on the no-notes world. Phase 2 drops the shortcut scan's flavor-text planted leak and the G3 audit's flavor read, since no unit is free text; the README states the lost realism in Phase 7.
+
+## 2026-09-29 — Phase 1 close review: decisions stress-tested
+
+Before closing Phase 1 the author reviewed every Phase 1 decision and brought
+in an external design review. Findings and what was adopted (A–F):
+
+- **S1 skipped hops that do not change the answer.** Measured: in 246 of 299
+  single-final evolution lines the base and final forms share their hidden
+  ability, so an agent that skips the missing hop is right by coincidence 82%
+  of the time. Adopted (A): S1 splits into *material* missing hops (the
+  anchor's own answer differs from the gold answer), which form S1 in the H1
+  pool, and *benign* ones (they coincide), kept as a descriptive slice outside
+  H1 — it tests whether a detector reacts to missing evidence or to an
+  implausible answer, the line between this project's label and Joren et al.'s.
+  S1 gets templates beyond hidden ability, which leaves 53 material lines.
+- **A tool announced an absence (B).** `open_page` answered "No section
+  matching …" for a withheld S4 section. A neutral empty answer carries the same
+  information, so a section matching nothing now serves the whole page. The
+  principle is recorded in ADR-009: the structure may be artificial; the signal
+  used to decide sufficiency is never handed over by the infrastructure. E-001
+  amended (tool contract).
+- **S3 mechanism split (C):** fetching the rest before the end versus learning
+  the end by asking past it; E-001's mechanism quantities amended.
+- **Scope filter guarded by a negative test (D):** in Phase 2, removing a
+  template's version-group filter must make a test fail.
+- **Answer-concentration cap published before and after (E)**, as an
+  experimental intervention (`docs/contingency.md`).
+- **Cost never changes the treatment (F).** If Phase 3 finds the agent costlier
+  than budgeted (PI-014), n shrinks — the abort and descriptive branches of
+  measurability gate 8 exist for that — while `reasoning_effort`, T_max, B and
+  the prompts stay as registered. Raising `max_completion_tokens` is headroom,
+  not a treatment change.
+
+Not adopted: adding structural difficulty to compensate for the notes'
+removal. Making the environment harder to recover effect size would shape the
+design around the expected result; any addition must be justified by the
+construct. The strata carry the construct (finding *a* record is never enough
+in S1–S4); the notes added reading difficulty, a different construct. The
+README will state that the benchmark measures sufficiency over a structured,
+rendered corpus.
+
+**Plan impact PI-015:** Phase 2 — S1 assumed the missing hop changes the answer → in 246 of 299 single-final evolution lines base and final share their hidden ability (an agent that skips the hop is right 82% of the time) → S1 templates filter to material hops (anchor's own answer ≠ gold) for the H1 pool, benign hops form a descriptive slice outside H1, S1 gets templates beyond hidden ability (53 material lines there), and a negative test proves every template's version-group filter. Open.
+
+## 2026-09-29 — Plan revised at the Phase 1 close
+
+The phase plan was revised before the Phase 1 tag, so the later phases start
+from the Phase 1 evidence. Retrospective impact found in the close sweep:
+
+**Plan impact PI-016 (retrospective, logged 2026-09-29):** Phase 2 — the generator's filters were planned before the world existed → the world design adds constraints: S3 templates avoid hubs whose gold set includes a withheld species; hidden-ability templates sample only species that have one; level-0 ("on evolution") and multi-level pairs are ambiguous answers; 19 evolution lines branch, so "final form" is ambiguous there; non-default forms have no learnsets. Open.
+
+The author decided three things:
+
+- **No calendar.** This is a personal project worked on sporadically; phase
+  sizes stay as relative effort estimates, not dates. Milestones lose their due
+  dates; Phase 8's three-week timebox becomes 15 partial days of effort, still
+  the guard against sunk cost. Author preference.
+- **The S1 benign slice** is 40 questions in eval-L1, run by A3, A4 and A4p
+  only, descriptive and outside H1; its size is confirmed against n_max in
+  Phase 3.
+- **PI-016** is accepted as above.
+
+Phase 2 grows by about one partial day (S1 material and benign, templates beyond
+hidden ability, the negative scope test, the concentration cap) and loses the
+flavor-text tasks; the surplus of Phase 1 pays for it. The measurability-gate
+answers are unchanged: the measured cost per arm arrives in Phase 3, which
+re-runs gates 3 and 8 with it, and the S1 material pool arrives in Phase 2.
+
+**Plan impact PI-014 resolved:** plan revised on 2026-09-29 — Phase 3 measures reasoning tokens per arm before n_max; every registered `max_completion_tokens` leaves headroom (≥ 4,000); if the measured cost binds, n shrinks and the treatment (`reasoning_effort`, T_max, B, prompts) stays as registered.
+
+**Plan impact PI-015 resolved:** plan revised on 2026-09-29 — Phase 2 builds material S1 (H1 pool) and a benign S1 slice (descriptive; 40 questions in eval-L1 for A3, A4, A4p), adds S1 templates beyond hidden ability, and proves the version-group filter with a negative test.
+
+**Plan impact PI-016 resolved:** plan revised on 2026-09-29 — the five constraints become Phase 2 generator filters, each with its N-of-M count in `docs/examiner.md`.

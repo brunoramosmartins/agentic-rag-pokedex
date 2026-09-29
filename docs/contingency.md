@@ -10,7 +10,7 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
 | Gate | When | Fails if | Exit plan |
 |---|---|---|---|
 | **G1 — Data and licenses** | Phase 0 | The PokéAPI CSV is unavailable, its license is not BSD-3, or the chosen game versions have learnset gaps | Swap the versions in scope for others with complete coverage; as a last resort, any CC0 graph (e.g. Wikidata) — the pipeline is domain-agnostic |
-| **G2 — The twin does not leak** | Phases 1 and 3 | Identity probe: the model recognizes the real entity from the renamed page in > 10% of 50 pages; or closed-book (A0) on the twin scores > 5% (open answer spaces; > chance + 5 points on small ones — see below) | Mask or remove the Pokédex flavor text (main suspect); if it persists, primary-population questions exclude the leaking templates, decided on dev and recorded |
+| **G2 — The twin does not leak** | Phases 1 and 3 | Identity probe: the model recognizes the real entity from the renamed page in > 10% of 50 pages; or closed-book (A0) on a twin template scores more than 5 points above that template's chance rate — its majority-answer rate, never below uniform (see below) | Mask or remove the Pokédex flavor text (main suspect); if it persists, primary-population questions exclude the leaking templates, decided on dev and recorded |
 | **G3 — Generator correct** | Phase 2 | Human audit of 60 stratified questions finds < 58 correct gold answers | Fix and re-audit a **fresh** sample; after 3 iterations, remove the failing templates and record it |
 | **G4 — Power** | Phases 3 and 6 | The pooled n required, using the SD of D measured on dev, exceeds n_max (what the cap pays for after cuts) | Abort criterion of [measurability gate 8](measurability-gate.md#gate-8--the-abort-criterion) |
 | **G5 — Last exit** | Any | Motivation or budget collapses | v1.0 (Layer 1 verdict + release) is the product; the v1.1 and v1.2 extensions are separate releases, cuttable without losing the verdict |
@@ -37,14 +37,35 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
 - **Positive control** (fixed before running): real pages with their own name
   masked must be identified in ≥ 50%. If the control fails, the probe is broken
   and G2 is not evaluated until it is fixed.
-- **Closed-book check:** A0 on twin questions must stay ≤ 5% correct on
-  templates with an open answer space (species, moves, abilities, sets).
-  Templates whose answer takes **≤ 20 admissible values** in the corpus
-  (e.g. a type, one of 18) are checked separately: A0's correct rate on each
-  must stay within 5 points of its uniform chance rate (1 / number of admissible
-  values). Guessing on a small answer space is not leakage. Per-template rates
-  are published. (Amended 2026-09-26.)
+- **Closed-book check:** on every template, A0's correct rate on the twin must
+  stay within **5 points of the template's chance rate**. The chance rate is
+  the template's **majority-answer rate** — the share of its most common gold
+  answer among its generated questions — and never below uniform chance
+  (1 / number of admissible values). Always guessing the most common answer is
+  not leakage. Per-template rates, with their chance rates, are published.
+- **Answer concentration, capped at generation (Phase 2):** each template's
+  majority-answer rate is at most **max(10%, 1.5 × its uniform chance)** — 10%
+  for types, levels, power and every open slot; 37.5% for a damage factor (one
+  of 4); 50% for a move category (one of 3). A lucky constant guess then stays
+  small, in G2 and in E-001's stops alike. The cap is an **experimental
+  intervention**, not a property of the world: for every template, the answer
+  distribution before the cap (all candidate questions) and after it (the
+  generated set) are both published in `docs/examiner.md`.
+- *Amendments.* 2026-09-26: small answer spaces checked against uniform chance
+  instead of the flat 5%. 2026-09-29: chance is the majority-answer rate, for
+  every template, and generation caps it. Until then, chance was 1 / n on
+  spaces of at most 20 values and a flat 5% elsewhere; a constant guess of the
+  modal value beats both with no leak at all (a move's type is Normal 22.6% of
+  the time, a learnable level is 1 in 21.3% of pairs; `docs/world.md`, Answer
+  spaces).
 - Checked first on the world build (Phase 1) and again on the pilot (Phase 3).
+- **Status (2026-09-29):** identity half failed with the Pokédex notes (E-003,
+  run 1: twin recognized in 27 of 50 pages; 1 of 50 without
+  notes). Exit taken: world v1 renders no notes. **Run 2 on the no-notes
+  world, fresh sample: control 48 of 50, twin 1 of 50 — the identity half
+  passes.** One species was named from structure alone (a three-stage line
+  with a Mega form): a residual fingerprint, declared. The closed-book half
+  runs in Phase 3.
 
 ## G3 — Generator correct
 
