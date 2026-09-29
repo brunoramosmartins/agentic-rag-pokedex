@@ -40,7 +40,6 @@ Group A templates are visible to all tuning; group B templates are held out
 | S1-A1 | Hidden ability of the final form of X's evolution line | X → final form | 405 | 70 |
 | S1-A2 | Types of the final form of X's evolution line | X → final form | 434 | 104 |
 | S1-A3 | Hidden ability of the species X evolves into | X → next form | 405 | 57 |
-| S1-A4 | Hidden ability of the species X evolves from | X → pre-evolution | 445 | 87 |
 | S1-B1 | Type damage multiplier of move M against species X | M → its type; X → its types; the type chart | many | all |
 
 - **Anchor answer:** the same attribute read on X itself (X's hidden ability,
@@ -51,6 +50,13 @@ Group A templates are visible to all tuning; group B templates are held out
   material by construction: no single fact gives the multiplier.
 - S1 avoids version-scoped relations on purpose: a hop through a learnset would
   mix a wrong-version trap into a missing-hop question.
+- **Profiles link forward only** ("Evolves into", or "—" for a final form,
+  itself a registered fact). With the whole evolution line on every Profile,
+  the final form's Profile held both the anchor and the answer, and the
+  single-unit shortcut filter discarded every evolution-based S1 question
+  (PI-017). With forward links, all 405 S1-A1 anchors need at least two units.
+  A pre-evolution template is impossible in any design — the parent's Profile
+  names X and holds the answer — so it was dropped.
 - S1-B1 multiplies type factors only (abilities that change effectiveness are
   outside the question): ×0, ×0.25, ×0.5, ×1, ×2, ×4.
 
@@ -93,7 +99,7 @@ Group A templates are visible to all tuning; group B templates are held out
 | Stratum | Group A | Group B |
 |---|---|---|
 | S0 | S0-A1 … S0-A4 | S0-B1 |
-| S1 | S1-A1 … S1-A4 | S1-B1 |
+| S1 | S1-A1 … S1-A3 | S1-B1 |
 | S2 | S2-A1, S2-A2 | S2-B1 |
 | S3 | S3-A1 | S3-B1 |
 | S4 | S4-A1 | S4-B1 |
@@ -117,7 +123,6 @@ filled with twin names in the twin population and real names in eval-L3.
 | S1-A1 | What is the hidden ability of the final form of {X}'s evolution line? · {X} eventually reaches a final evolution. What is that form's hidden ability? · Which hidden ability does the last evolution of {X} have? |
 | S1-A2 | What types does the final form of {X}'s evolution line have? · {X} eventually reaches a final evolution. What are its types? · Which types does the last evolution of {X} have? |
 | S1-A3 | What is the hidden ability of the species {X} evolves into? · {X} evolves into another species. What is that species' hidden ability? · Which hidden ability does {X}'s evolution have? |
-| S1-A4 | What is the hidden ability of the species that evolves into {X}? · {X} evolves from another species. What is that species' hidden ability? · Which hidden ability does {X}'s pre-evolution have? |
 | S1-B1 | How effective is {M} against {X}? · If {M} hits {X}, what is its type damage multiplier? · What type-effectiveness multiplier does {M} get against {X}? |
 | S2-A1, S4-A1 | At what level does {X} learn {M} in {V}? · In {V}, at which level does {X} learn {M}? · {X} learns {M} by leveling up in {V}. At what level? |
 | S2-A2, S4-B1 | Which move does {X} learn at level {L} in {V}? · In {V}, what move does {X} learn upon reaching level {L}? · Name the move {X} learns at level {L} in {V}. |

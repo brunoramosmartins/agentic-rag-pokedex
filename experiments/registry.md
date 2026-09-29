@@ -735,4 +735,13 @@ G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
   The decision rule and its thresholds are unchanged. Reason: truncation is a
   defect of the instrument (the cap was set without a measurement), not an
   outcome. The raw batch outputs are now kept in `runs/e003/outputs/`.
+- **2026-09-29 — the pages changed after the probe (note; the result
+  stands).** World v1 was re-rendered after both runs: species Profiles now
+  link forward only ("Evolves into", or "—" for a final form) instead of
+  showing the whole evolution line (PI-017). Everything else on the pages is
+  unchanged. The new Profiles state a subset of what the probed ones stated —
+  one line of the evolution family instead of all of it, plus the fact that a
+  final form does not evolve, which the whole line already implied — so the
+  identity leak on the current pages can only be lower than what run 2
+  measured. No re-run.
 

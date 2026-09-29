@@ -86,7 +86,7 @@ every name is renamed** — species, moves, abilities, types and versions
 | Stratum | Example | What makes it hard |
 |---|---|---|
 | **S0 — one hop, sufficient (control)** | *"What is Charmander's hidden ability?"* | Nothing: one section answers. Every arm should stop at step 1 |
-| **S1 — missing hop** | *"What is the hidden ability of the final form of Charmander's evolution line?"* | Step 1 finds Charmander; the final form exists only after reading the evolution chain. Stopping at step 1 is stopping with insufficient evidence |
+| **S1 — missing hop** | *"What is the hidden ability of the final form of Dratini's evolution line?"* | Step 1 finds Dratini, whose page names only the next form; the final form (and its hidden ability, which differs from Dratini's) is reached two links later. Stopping early is stopping with insufficient evidence — and, since the answers differ, with a wrong answer (material S1; `docs/examiner.md`) |
 | **S2 — wrong version** | *"At what level does Charmander learn Flamethrower in Scarlet/Violet?"* | The corpus has the learnset of other versions, with different levels. Answering from the wrong version is accepting plausible, insufficient evidence |
 | **S3 — truncated set** | *"Which Ice-type Pokémon learn Freeze-Dry by level in Scarlet/Violet?"* | The answer is a set; search returns part of it per step. A partial list is a wrong answer, and nothing says how many elements are missing ([ADR-009](adr/adr-009-no-truncation-cues-in-main-condition.md)) |
 | **S4 — no answer in the corpus** | *"At what level does X learn Y in Scarlet/Violet?"*, with that version's learnset section **withheld** | Other versions' sections remain. The only correct answer is to abstain |

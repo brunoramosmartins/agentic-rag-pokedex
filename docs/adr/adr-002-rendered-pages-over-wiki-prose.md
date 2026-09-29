@@ -80,6 +80,18 @@ the shortcut scan loses its flavor-text case and the G3 audit its flavor read
 (plan impact PI-013). The declared limitation grows: the rendered corpus is
 cleaner still, with no prose at all.
 
+### 2026-09-29 — Profiles link forward only
+
+Species Profiles first showed the whole evolution line, as wikis do. Designing
+the examiner's templates showed the cost: the final form's Profile named the
+anchor of every evolution-based S1 question and held its answer, so one unit
+answered a question built to need two, and the single-unit shortcut filter
+discarded all of them. Profiles now show only the species a species evolves
+into, and a final form states "Evolves into: —" — a registered fact, so an
+agent that reaches it has evidence that the line ends there. To find a
+pre-evolution, the agent searches. The corpus is shaped for question validity
+here, and says so (PI-017).
+
 ## Alternatives considered
 
 | Alternative | Why rejected |

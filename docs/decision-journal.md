@@ -882,3 +882,24 @@ Measured before deciding (`docs/examiner.md`). The author approved:
   them.
 
 Also added: `world/explore.py`, a local tool to see any page in both namings.
+
+## 2026-09-29 — Profiles link forward only (escalated and absorbed)
+
+Writing the S1 templates showed that species Profiles carrying the whole
+evolution line put the anchor and the answer of every evolution-based S1
+question in one unit — the final form's Profile — so the single-unit shortcut
+filter would discard all of them. Measured alternatives (anchors / material):
+forward links only keep S1-A1 405 / 70, S1-A2 434 / 104, S1-A3 405 / 57;
+immediate links both ways keep only 103 / 19 and 110 / 41 and lose S1-A3. The
+author chose forward links.
+
+**Plan impact PI-017:** Phase 2 (and the Phase 1 world) — species Profiles were assumed to be able to show the whole evolution line → that puts the anchor and the answer of every evolution-based S1 question in one unit (the final form's Profile), so the single-unit shortcut filter discards all of them → Profiles show forward links only ("Evolves into"), final forms state "Evolves into: —" as a registered fact, S1-A4 (pre-evolution) is dropped, world v1 is re-rendered; E-003 stands, since the new pages show a subset of what it probed. Open.
+
+Done the same day: `render.py` links forward and registers `evoend` facts
+(145,429 facts; registry check PASS in both namings); all 405 S1-A1 anchors now
+need at least two units; `docs/world.md` examples regenerated;
+`docs/examiner.md`, `docs/hypothesis.md` (S1 example now Dratini, a material
+case — the old Charmander example was benign), ADR-002 (Updates) and a note in
+E-003 updated.
+
+**Plan impact PI-017 resolved:** absorbed — the world was re-rendered within Phase 2, S1 keeps four templates (S1-A1 to A3 and S1-B1), no hours or deliverables change.

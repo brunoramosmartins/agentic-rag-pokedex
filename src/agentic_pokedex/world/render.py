@@ -11,7 +11,8 @@ text back into fact ids and comparing them with the registry, unit by unit.
 
 Pages:
 
-- **Species:** ``Profile`` (types, abilities, the whole evolution line, forms);
+- **Species:** ``Profile`` (types, abilities, the species it evolves into —
+  forward links only, or "—" for a final form — and forms);
   one ``Form`` unit per non-default entry (types, abilities); ``Notes`` (up to
   two Pokédex texts, free text, outside the registry — **off in world v1**,
   see below); one ``Learnset`` unit per
@@ -74,6 +75,7 @@ from agentic_pokedex.world.registry import (
     UnitMeta,
     eff_id,
     evo_id,
+    evoend_id,
     form_id,
     learn_id,
     mcat_id,
@@ -126,6 +128,7 @@ class World:
     pokemon_types: dict[int, list[tuple[int, int]]]
     pokemon_abilities: dict[int, list[tuple[int, int, bool]]]
     parent: dict[int, int]
+    children: dict[int, list[int]]
     chains: dict[int, list[int]]
     efficacy: dict[tuple[int, int], int]
     learnsets: list[Record]
@@ -218,12 +221,21 @@ def build_world(
         pokemon_types=dict(pokemon_types),
         pokemon_abilities=dict(pokemon_abilities),
         parent=parent,
+        children=_children(parent),
         chains=dict(chains),
         efficacy={(e["attacker"], e["defender"]): e["factor"] for e in tables.efficacy},
         learnsets=learnsets,
         notes=notes,
         dropped=dropped,
     )
+
+
+def _children(parent: dict[int, int]) -> dict[int, list[int]]:
+    """Species → the species that evolve from it, by id."""
+    children: dict[int, list[int]] = defaultdict(list)
+    for child, par in sorted(parent.items()):
+        children[par].append(child)
+    return dict(children)
 
 
 def choose_withheld(
@@ -259,6 +271,9 @@ def world_facts(world: World) -> dict[str, Fields]:
     facts: dict[str, Fields] = {}
     for child, par in world.parent.items():
         facts[evo_id(child, par)] = {"kind": "evo", "species": child, "parent": par}
+    for sid in world.species:
+        if not world.children.get(sid):
+            facts[evoend_id(sid)] = {"kind": "evoend", "species": sid}
     for sid, forms in world.forms_of.items():
         for pid in forms:
             facts[form_id(pid, sid)] = {"kind": "form", "pokemon": pid, "species": sid}
@@ -324,23 +339,6 @@ def _split(
     ]
 
 
-def _evolution_line(world: World, sid: int) -> list[tuple[int, list[int]]]:
-    """(parent, children) pairs of the species' chain, breadth first."""
-    members = set(world.chains[world.species[sid]["evolution_chain_id"]])
-    children: dict[int, list[int]] = defaultdict(list)
-    for child in sorted(members):
-        if world.parent.get(child) in members:
-            children[world.parent[child]].append(child)
-    queue = [m for m in sorted(members) if world.parent.get(m) not in members]
-    line = []
-    while queue:
-        node = queue.pop(0)
-        if children[node]:
-            line.append((node, children[node]))
-            queue.extend(children[node])
-    return line
-
-
 def _profile_facts(world: World, pid: int) -> list[str]:
     facts = [ptype_id(pid, slot, t) for slot, t in world.pokemon_types.get(pid, [])]
     facts += [
@@ -377,17 +375,20 @@ def build_units(
 
     for sid in world.species:
         pid = world.default_of[sid]
-        line = _evolution_line(world, sid)
+        # Forward links only: a Profile never names the species it evolves
+        # from, or the anchor of an S1 question would sit in the same unit as
+        # the answer (PI-017). A final form states that it does not evolve.
+        children = world.children.get(sid, [])
         forms = world.forms_of.get(sid, [])
         facts = _profile_facts(world, pid)
-        facts += [evo_id(c, p) for p, cs in line for c in cs]
+        facts += [evo_id(c, sid) for c in children] or [evoend_id(sid)]
         facts += [form_id(f, sid) for f in forms]
         base = {"page": "species", "key": sid}
         units.append(Unit(
             UnitMeta(
                 id=f"species/{sid}/profile", section="Profile", facts=facts, **base
             ),
-            {"pokemon": pid, "evolution": line, "forms": forms},
+            {"pokemon": pid, "children": children, "forms": forms},
         ))
         for form in forms:
             units.append(Unit(
@@ -606,15 +607,8 @@ def body(unit: Unit, world: World, names: Names) -> list[str]:
         pid = data["pokemon"]
         lines = [_types_line(world, names, pid), _abilities_line(world, names, pid)]
         if meta.section == "Profile":
-            line = data["evolution"]
-            lines.append(
-                "Evolution: "
-                + ("; ".join(
-                    f"{_link(names.species[p])} → "
-                    + ", ".join(_link(names.species[c]) for c in cs)
-                    for p, cs in line
-                ) or "does not evolve")
-            )
+            children = ", ".join(_link(names.species[c]) for c in data["children"])
+            lines.append(f"Evolves into: {children or '—'}")
             if data["forms"]:
                 forms = ", ".join(_link(names.pokemon[f]) for f in data["forms"])
                 lines.append(f"Forms: {forms}")
@@ -704,14 +698,12 @@ def parse_facts(meta: UnitMeta, text: str, world: World, names: Names) -> set[st
                 facts.add(pability_id(pid, names.lookup("abilities", name), False))
             for name in _links(hidden):
                 facts.add(pability_id(pid, names.lookup("abilities", name), True))
-        elif line.startswith("Evolution: "):
-            for segment in line.removeprefix("Evolution: ").split("; "):
-                found = _links(segment)
-                if not found:
-                    continue
-                par = names.lookup("species", found[0])
-                for child in found[1:]:
-                    facts.add(evo_id(names.lookup("species", child), par))
+        elif line.startswith("Evolves into: "):
+            found = _links(line)
+            for child in found:
+                facts.add(evo_id(names.lookup("species", child), meta.key))
+            if not found and line == "Evolves into: —":
+                facts.add(evoend_id(meta.key))
         elif line.startswith("Forms: "):
             for name in _links(line):
                 facts.add(form_id(names.lookup("pokemon", name), meta.key))

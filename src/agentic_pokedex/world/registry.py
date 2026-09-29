@@ -9,6 +9,7 @@ A fact id carries its full content, so two renderings agree on a fact only if
 they agree on its value::
 
     evo:{species}:{parent}                      species evolves from parent
+    evoend:{species}                            species does not evolve
     form:{pokemon}:{species}                    a non-default entry of species
     ptype:{pokemon}:{slot}:{type}
     pability:{pokemon}:{ability}:{hidden|regular}
@@ -37,6 +38,11 @@ Fields = dict[str, Any]
 def evo_id(species: int, parent: int) -> str:
     """Fact: ``species`` evolves from ``parent``."""
     return f"evo:{species}:{parent}"
+
+
+def evoend_id(species: int) -> str:
+    """Fact: ``species`` does not evolve (a final form, or no evolution)."""
+    return f"evoend:{species}"
 
 
 def form_id(pokemon: int, species: int) -> str:
