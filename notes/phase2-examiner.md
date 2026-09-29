@@ -26,6 +26,15 @@ planted leaks, dev and train ids frozen, `docs/examiner.md` published.
 
 ## Sufficiency labeler and golden trajectories (`labeling/sufficiency.py`)
 
+Done 2026-09-29. The label of a state is coverage of every gold fact by the
+units seen, computed from the registry for each question; the labeler refuses
+unknown or withheld units and questions whose covers contradict their stratum.
+Each state also reports the gold facts still missing, the near-certain units
+seen (S2, S4) and, for S3, the members covered. The generator now records the
+distractor facts and near-certain units of S2 and S4, and the withheld units
+of S4. Golden trajectories: 9 hand-labelled on the fixture world plus 6
+refusals (`tests/fixtures/golden_trajectories.json`).
+
 ## Shortcut scan with planted leaks
 
 ## Splits and the template partition (`examiner/splits.py`)

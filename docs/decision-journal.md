@@ -928,3 +928,31 @@ Decisions made while building, none changing the approved design:
 - **Question ids** carry PokéAPI ids and are local. The published benchmark
   must use opaque ids: a PokéAPI species id maps a twin name back to its real
   species.
+
+## 2026-09-29 — The sufficiency labeler
+
+`labeling/sufficiency.py` labels every state of a trajectory as a pure
+function of the question's gold facts, the registry and the unit ids each
+observation showed; specification in `docs/examiner.md`. Decisions:
+
+- **Covers are recomputed from the registry**, never read from the question
+  record, so a stale record cannot move a label.
+- **Refuse, never guess.** A seen unit the registry does not know, a seen
+  withheld unit, an unanswerable non-S4 question or an answerable S4 question
+  raise an error instead of producing a label; each one is a fault in the
+  logger, the index or the generator, and a label computed over it would be
+  silently wrong.
+- **Near-certain evidence is reported beside the label, not inside it.** The
+  generator now records, for S2 and S4, the distractor facts (the same
+  question answered by another version group of the scope) and the indexed
+  units stating them; the label says which of those units were seen. The
+  error taxonomy's `accepted-wrong-version` and E-002's near-certain count
+  read this field. S4 questions also record their withheld units. The
+  question set is unchanged: at most one version group is withheld per
+  species, so every distractor has indexed units; the question file gains
+  three fields and its hash changes.
+- **S3 labels report members covered** (entries whose learn and type facts
+  are all seen, of the set size) for E-002's delivered fraction of the set.
+- **Golden trajectories run on the fixture world**, with labels written by
+  hand from its rendered units: 9 trajectories covering every stratum and
+  subtype, and 6 refusals.

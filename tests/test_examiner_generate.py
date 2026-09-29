@@ -13,6 +13,7 @@ from agentic_pokedex.examiner.generate import (
     Context,
     Question,
     answer_text,
+    attach_covers,
     build_learnsets,
     build_s0,
     build_s1_final,
@@ -30,6 +31,7 @@ from agentic_pokedex.examiner.templates import (
     TEMPLATES,
 )
 from agentic_pokedex.world.pokeapi import iter_learnsets, read_world
+from agentic_pokedex.world.registry import Registry
 from agentic_pokedex.world.render import Names, World, build_world
 
 RAW = Path(__file__).parent / "fixtures" / "pokeapi_mini"
@@ -149,6 +151,34 @@ def test_s2_level_questions_need_a_different_level_elsewhere(world: World) -> No
         "S2-A1:p=4,m=2,v=alpha-beta", "S2-A1:p=4,m=2,v=gamma",
     ]
     assert drop["no other group lists this learnset"] == 2  # Sprout, Sproutree
+
+
+def test_s2_distractors_are_the_other_groups_answers(world: World) -> None:
+    out = {x.id: x for x in build_learnsets("S2-A1", level_rows(world), ctx(world),
+                                            Counter())}
+    assert out["S2-A1:p=4,m=2,v=gamma"].distractor_facts == [
+        "learn:4:2:alpha-beta:level-up:1"
+    ]
+    assert out["S2-A1:p=1,m=1,v=alpha-beta"].distractor_facts == [
+        "learn:1:1:gamma:level-up:5"
+    ]
+
+
+def test_near_certain_and_withheld_units(world: World, fixture_world_dir: Path) -> None:
+    registry = Registry.load(fixture_world_dir / "registry.json")
+    withheld = [(1, "alpha-beta")]
+    s2 = build_learnsets("S2-A1", level_rows(world), ctx(world, withheld), Counter())
+    s4 = build_learnsets("S4-A1", level_rows(world), ctx(world, withheld), Counter())
+    attach_covers(s2 + s4, registry)
+    blaze = next(x for x in s2 if x.id == "S2-A1:p=4,m=2,v=gamma")
+    assert blaze.near_certain == ["move/2/learned-by/alpha-beta/0",
+                                  "species/4/learnset/level-up/alpha-beta/0"]
+    assert blaze.withheld_units == []
+    (sprig,) = s4
+    assert sprig.cover == {"learn:1:1:alpha-beta:level-up:1": []}
+    assert sprig.withheld_units == ["species/1/learnset/level-up/alpha-beta/0"]
+    assert sprig.near_certain == ["move/1/learned-by/gamma/0",
+                                  "species/1/learnset/level-up/gamma/0"]
 
 
 def test_withheld_pairs_move_from_s2_to_s4(world: World) -> None:

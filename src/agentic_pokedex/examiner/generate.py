@@ -80,9 +80,13 @@ class Question:
         gold_facts: Fact ids the answer is derived from.
         anchor_answer: S1 only: the same attribute read on the anchor.
         material: S1 only: the gold answer differs from the anchor's.
-        cover: Gold fact → indexed units stating it (filled by ``attach``).
-        near_certain: S2: indexed units of the other groups that give a
-            different answer.
+        cover: Gold fact → indexed units stating it (filled by
+            ``attach_covers``).
+        distractor_facts: S2 and S4: the same question answered by another
+            version group of the scope.
+        near_certain: S2 and S4: indexed units stating a distractor fact
+            (filled by ``attach_covers``).
+        withheld_units: S4 only: the withheld units stating the gold facts.
         set_size: S3 only.
     """
 
@@ -96,7 +100,9 @@ class Question:
     anchor_answer: Any = None
     material: bool | None = None
     cover: dict[str, list[str]] = field(default_factory=dict)
+    distractor_facts: list[str] = field(default_factory=list)
     near_certain: list[str] = field(default_factory=list)
+    withheld_units: list[str] = field(default_factory=list)
     set_size: int | None = None
 
 
@@ -285,7 +291,12 @@ def build_learnsets(
                 out.append(_q(template, f"p={p},m={m},v={g}",
                               slots={"X": x, "M": m, "V": g},
                               answer=level,
-                              gold_facts=[learn_id(p, m, g, "level-up", level)]))
+                              gold_facts=[learn_id(p, m, g, "level-up", level)],
+                              distractor_facts=[
+                                  learn_id(p, m, h, "level-up", lv)
+                                  for h in others
+                                  for lv in sorted(by_move[(p, m)].get(h, ()))
+                              ]))
         elif template in ("S2-A2", "S4-B1"):
             for level, moves in sorted(levels.items()):
                 if level < 1 or len(moves) != 1:
@@ -302,7 +313,12 @@ def build_learnsets(
                     continue
                 out.append(_q(template, f"p={p},l={level},v={g}",
                               slots={"X": x, "L": level, "V": g}, answer=m,
-                              gold_facts=[learn_id(p, m, g, "level-up", level)]))
+                              gold_facts=[learn_id(p, m, g, "level-up", level)],
+                              distractor_facts=[
+                                  learn_id(p, mv, h, "level-up", level)
+                                  for h in others
+                                  for mv in sorted(by_level[(p, h)].get(level, ()))
+                              ]))
         elif template == "S2-B1":
             top = max(levels)
             if top < 1 or len(levels[top]) != 1:
@@ -315,8 +331,14 @@ def build_learnsets(
                 continue
             facts = [learn_id(p, mv, g, "level-up", lv)
                      for lv, ms in sorted(levels.items()) for mv in sorted(ms)]
+            tops = {h: max(by_level[(p, h)]) for h in others}
             out.append(_q(template, f"p={p},v={g}", slots={"X": x, "V": g},
-                          answer=m, gold_facts=facts))
+                          answer=m, gold_facts=facts,
+                          distractor_facts=[
+                              learn_id(p, mv, h, "level-up", tops[h])
+                              for h in others
+                              for mv in sorted(by_level[(p, h)][tops[h]])
+                          ]))
     return out
 
 
@@ -378,9 +400,22 @@ BUILDERS: Mapping[str, Callable[..., list]] = {
 
 
 def attach_covers(questions: Iterable[Question], registry: Registry) -> None:
-    """Fill each question's cover from the registry's indexed units."""
+    """Fill each question's cover, near-certain and withheld units.
+
+    Near-certain units are the indexed units stating a distractor fact: another
+    version's answer, which reads as evidence but answers a different question.
+    """
     for q in questions:
         q.cover = {f: registry.fact_units(f, indexed_only=True) for f in q.gold_facts}
+        q.near_certain = sorted({
+            u for f in q.distractor_facts
+            for u in registry.fact_units(f, indexed_only=True)
+        })
+        if q.stratum == "S4":
+            q.withheld_units = sorted({
+                u for f in q.gold_facts for u in registry.fact_units(f)
+                if registry.units[u].withheld
+            })
 
 
 def single_unit(q: Question) -> bool:
@@ -634,6 +669,9 @@ def main(argv: list[str] | None = None) -> int:
             for fact, units in q.cover.items():
                 shown_units = ", ".join(units[:3]) + (" …" if len(units) > 3 else "")
                 print(f"    {fact:<40} {shown_units or '(withheld)'}")
+            if q.near_certain:
+                print(f"    near-certain: {', '.join(q.near_certain[:3])}"
+                      + (" …" if len(q.near_certain) > 3 else ""))
 
     if wanted:
         print("\n(partial run: the question file is written only by a full run)")

@@ -169,8 +169,9 @@ Applied in this order; each publishes N-of-M per template.
 | `answer`, `aliases` | yes | twin names or numbers; sets sorted |
 | `gold_facts` | yes | fact ids |
 | `cover` | yes | for each gold fact, the indexed units that state it |
-| `near_certain_units` | yes | S2: the other groups' units giving a different answer |
-| `withheld_units` | yes | S4 |
+| `distractor_facts` | yes | S2, S4: the same question answered by another version group |
+| `near_certain_units` | yes | S2, S4: indexed units stating a distractor fact |
+| `withheld_units` | yes | S4: the withheld units stating the gold facts |
 | `set_size` | yes | S3 |
 | `material` | yes | S1: material or benign |
 | `majority_share` | yes | per template, not per question |
@@ -186,6 +187,47 @@ Insufficient states carry the question's subtype: `missing-hop` (S0, S1),
 `wrong-version` (S2), `truncated` (S3), `nonexistent` (S4). The labeler is a
 pure function over the registry, tested against hand-built golden trajectories
 (100% required, gate 7).
+
+**Labeler** (`labeling/sufficiency.py`). A trajectory is the list of unit ids
+each observation showed (`ToolResult.unit_ids`); the state after step t is the
+union of steps 1…t, and step 0 is the state before any tool call. Each state's
+label records:
+
+| Field | Meaning |
+|---|---|
+| `state`, `subtype` | `sufficient`, or `insufficient` with the stratum's subtype |
+| `missing` | gold facts no seen unit states, in gold-fact order |
+| `covered` / `total` | gold facts stated by a seen unit, of all gold facts |
+| `near_certain` | near-certain units seen so far (S2, S4): reported, never part of the label |
+| `members` | S3: set members whose facts are all seen, of the set size |
+
+The label at the final action is `abstained` when the agent abstains, and the
+state's label otherwise. Covers are recomputed from the registry for every
+question, never read from its record. The labeler refuses, rather than labels:
+
+- a seen unit the registry does not know (a logging fault);
+- a seen withheld unit (the index must never serve one);
+- a question outside S4 with a gold fact no indexed unit states, or an S4
+  question with a gold fact an indexed unit states;
+- a gold or distractor fact the registry does not know.
+
+Adding units never removes a covered fact, so labels are monotone along a
+trajectory: once sufficient, a state stays sufficient.
+
+Golden trajectories (`tests/fixtures/golden_trajectories.json`) run on the
+fixture world; every expected label is written by hand from the rendered
+units. They cover every stratum and subtype, a fact with two copies, an empty
+step and a repeated unit, the S1 state that holds the right answer before the
+line is known to end (a lucky stop if answered), a move hub stating a
+defender's type, the S2 distractor seen before the gold unit, an S3 set
+arriving member by member, an S4 state that never becomes sufficient, and one
+case per refusal.
+
+Inspect a trajectory by hand on the generated questions:
+
+```bash
+python -m agentic_pokedex.labeling.sufficiency <question id> "<unit>,<unit>" "<unit>"
+```
 
 ## Splits
 
