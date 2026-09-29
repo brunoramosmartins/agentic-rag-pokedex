@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from agentic_pokedex.tools.contract import (
     NO_RESULTS,
+    TokenCounter,
     ToolConfig,
     ToolResult,
-    TokenCounter,
     message,
     pack,
 )

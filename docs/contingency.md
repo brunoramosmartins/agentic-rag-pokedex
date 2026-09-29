@@ -47,7 +47,10 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   majority-answer rate is at most **max(10%, 1.5 × its uniform chance)** — 10%
   for types, levels, power and every open slot; 37.5% for a damage factor (one
   of 4); 50% for a move category (one of 3). A lucky constant guess then stays
-  small, in G2 and in E-001's stops alike.
+  small, in G2 and in E-001's stops alike. The cap is an **experimental
+  intervention**, not a property of the world: for every template, the answer
+  distribution before the cap (all candidate questions) and after it (the
+  generated set) are both published in `docs/examiner.md`.
 - *Amendments.* 2026-09-26: small answer spaces checked against uniform chance
   instead of the flat 5%. 2026-09-29: chance is the majority-answer rate, for
   every template, and generation caps it. Until then, chance was 1 / n on

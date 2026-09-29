@@ -765,3 +765,45 @@ species. It is within the threshold and is declared as a limitation; it does
 not call for another exit. The closed-book half of G2 runs in Phase 3.
 
 **Plan impact PI-013 resolved:** contingency G2 taken — Pokédex notes removed from world v1 (the renderer's default; `--notes` for research), E-003 run 2 passes on the no-notes world. Phase 2 drops the shortcut scan's flavor-text planted leak and the G3 audit's flavor read, since no unit is free text; the README states the lost realism in Phase 7.
+
+## 2026-09-29 — Phase 1 close review: decisions stress-tested
+
+Before closing Phase 1 the author reviewed every Phase 1 decision and brought
+in an external design review. Findings and what was adopted (A–F):
+
+- **S1 skipped hops that do not change the answer.** Measured: in 246 of 299
+  single-final evolution lines the base and final forms share their hidden
+  ability, so an agent that skips the missing hop is right by coincidence 82%
+  of the time. Adopted (A): S1 splits into *material* missing hops (the
+  anchor's own answer differs from the gold answer), which form S1 in the H1
+  pool, and *benign* ones (they coincide), kept as a descriptive slice outside
+  H1 — it tests whether a detector reacts to missing evidence or to an
+  implausible answer, the line between this project's label and Joren et al.'s.
+  S1 gets templates beyond hidden ability, which leaves 53 material lines.
+- **A tool announced an absence (B).** `open_page` answered "No section
+  matching …" for a withheld S4 section. A neutral empty answer carries the same
+  information, so a section matching nothing now serves the whole page. The
+  principle is recorded in ADR-009: the structure may be artificial; the signal
+  used to decide sufficiency is never handed over by the infrastructure. E-001
+  amended (tool contract).
+- **S3 mechanism split (C):** fetching the rest before the end versus learning
+  the end by asking past it; E-001's mechanism quantities amended.
+- **Scope filter guarded by a negative test (D):** in Phase 2, removing a
+  template's version-group filter must make a test fail.
+- **Answer-concentration cap published before and after (E)**, as an
+  experimental intervention (`docs/contingency.md`).
+- **Cost never changes the treatment (F).** If Phase 3 finds the agent costlier
+  than budgeted (PI-014), n shrinks — the abort and descriptive branches of
+  measurability gate 8 exist for that — while `reasoning_effort`, T_max, B and
+  the prompts stay as registered. Raising `max_completion_tokens` is headroom,
+  not a treatment change.
+
+Not adopted: adding structural difficulty to compensate for the notes'
+removal. Making the environment harder to recover effect size would shape the
+design around the expected result; any addition must be justified by the
+construct. The strata carry the construct (finding *a* record is never enough
+in S1–S4); the notes added reading difficulty, a different construct. The
+README will state that the benchmark measures sufficiency over a structured,
+rendered corpus.
+
+**Plan impact PI-015:** Phase 2 — S1 assumed the missing hop changes the answer → in 246 of 299 single-final evolution lines base and final share their hidden ability (an agent that skips the hop is right 82% of the time) → S1 templates filter to material hops (anchor's own answer ≠ gold) for the H1 pool, benign hops form a descriptive slice outside H1, S1 gets templates beyond hidden ability (53 material lines there), and a negative test proves every template's version-group filter. Open.

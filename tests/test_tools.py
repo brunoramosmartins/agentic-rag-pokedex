@@ -146,8 +146,33 @@ def test_open_page_cue_condition_states_the_count(pages: Pages) -> None:
     assert result.text.split("\n")[0] == "5 units in this selection."
 
 
-def test_open_page_unknown_title_and_section(pages: Pages) -> None:
+def test_open_page_unknown_title(pages: Pages) -> None:
     assert open_page(pages, "blaze", counter=chars).text == "No page titled 'blaze'."
+
+
+def test_a_section_matching_nothing_serves_the_whole_page(pages: Pages) -> None:
+    whole = open_page(pages, "Blaze", counter=chars)
     missing = open_page(pages, "Blaze", section="Matchups", counter=chars)
-    assert missing.text == "No section matching 'Matchups' on 'Blaze'."
-    assert missing.unit_ids == ()
+    assert (missing.text, missing.unit_ids) == (whole.text, whole.unit_ids)
+
+
+def test_a_withheld_section_is_not_announced(pages: Pages) -> None:
+    # S4: Sprig's level-up learnset in Alpha/Beta is withheld. Asking for it
+    # returns the page, with the other version's learnset — the plausible,
+    # insufficient evidence — and no word about the missing section.
+    result = open_page(
+        pages, "Sprig", section="level-up · Version: Alpha/Beta", counter=chars
+    )
+    assert "species/1/learnset/level-up/gamma/0" in result.unit_ids
+    assert "species/1/learnset/level-up/alpha-beta/0" not in result.unit_ids
+    assert "No section" not in result.text
+
+
+@pytest.mark.parametrize("section", [None, "Profile", "level-up", "Matchups", "zzz"])
+@pytest.mark.parametrize("title", ["Sprig", "Blaze", "Vine Lash", "Ember"])
+def test_the_main_condition_never_states_an_absence(
+    pages: Pages, title: str, section: str | None
+) -> None:
+    text = open_page(pages, title, section=section, counter=chars).text
+    for cue in ("No section", "not found", "does not exist", "units in this selection"):
+        assert cue not in text

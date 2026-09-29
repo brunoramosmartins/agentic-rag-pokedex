@@ -443,12 +443,13 @@ text outside the registry, marked as such.
 |---|---|
 | `search(query, k ≤ 5)` | The best units, with headers |
 | `open_page(title)` | The page from the top |
-| `open_page(title, section)` | Units whose section line contains `section` (`"level-up"`, `"Learned by · Version: …"`) |
+| `open_page(title, section)` | Units whose section line contains `section` (`"level-up"`, `"Learned by · Version: …"`); if none does, the whole page from the top, with no message |
 | `open_page(title, section, offset)` | The same, skipping the first `offset` units; `"No more units."` past the end |
 
 At most **700 tokens of units per call** (`o200k_base`), packed in rank or page
 order, the first unit always. In the main condition nothing says how many units
-matched or remain; in the cue condition (S3 ablation) both tools state the
+matched or remain, or that a section does not exist — no tool hands over the
+signal used to decide sufficiency (ADR-009, Updates); in the cue condition (S3 ablation) both tools state the
 count, and the cue page file carries `Part k/N`. Every result records the ids
 of the units it showed, for the labeler.
 

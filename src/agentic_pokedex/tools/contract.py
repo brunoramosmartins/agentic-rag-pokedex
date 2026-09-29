@@ -2,7 +2,13 @@
 
 - ``search(query, k ≤ 5)`` returns the best units, with their headers.
 - ``open_page(title, section=None, offset=0)`` returns the units of a page by
-  its exact title; ``section`` filters them, ``offset`` skips the first ones.
+  its exact title; ``section`` filters them (a section matching nothing is
+  ignored, and the whole page is served), ``offset`` skips the first ones.
+
+**Principle (ADR-009, Updates):** the structure may be artificial, but the
+signal an agent uses to decide sufficiency is never handed over by the
+infrastructure. No tool states that evidence is missing, how much remains, or
+that a section does not exist.
 - A call returns at most ``TOKEN_CAP`` tokens of units, packed in rank or page
   order; the first unit is always returned, the rest stop at the first one
   that does not fit.

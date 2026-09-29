@@ -161,9 +161,10 @@ failed job is re-run on the same ids, never re-drawn.
 **Fixed parameters:** λ = 4; T_max = 6 steps; B = 4,000 evidence tokens;
 `search(query, k ≤ 5)` with no total count and no pagination markers (main
 condition); `open_page(title, section=None, offset=0)`, which reads a page from
-the top and continues with `offset`, with nothing saying whether more remain;
-at most 700 tokens of units per call (`o200k_base`); the same cost instruction
-for every arm ("a wrong answer costs 4× not answering").
+the top and continues with `offset`, with nothing saying whether more remain,
+and serves the whole page when `section` matches nothing — no tool states that
+evidence is missing; at most 700 tokens of units per call (`o200k_base`); the
+same cost instruction for every arm ("a wrong answer costs 4× not answering").
 
 **Model:** gpt-5-mini, Batch tier, `reasoning_effort` low, frozen for the run.
 
@@ -234,6 +235,12 @@ usage on 10 calls; identity probe positive control ≥ 50%.
 - **Detector precision / recall per step**, against the exact label, by
   subtype (`missing-hop`, `wrong-version`, `truncated`, `nonexistent`);
   implicit-detector firing rate.
+- **S3 truncation mechanism**, per arm: of the S3 questions answered with the
+  full set, the share where the agent stopped **before** reaching the end of the
+  list (it suspected the missing part and fetched it) versus the share where it
+  learned the end only by asking past it (`offset` answered "No more units.").
+  Both are read from the logged trajectories; the second is detection by
+  exhaustion, not by suspicion.
 - **O2 − A3** on S1–S4 (labelled oracle).
 
 **λ-free headline.**
@@ -426,6 +433,19 @@ _Not run._
   one call; `offset` lets an agent that suspects an incomplete list ask for the
   rest, which is the decision S3 measures, while the main condition still says
   nothing about what remains.
+- **2026-09-29 — no tool states an absence; S3 mechanism split (Phase 1 close
+  review, before any run).** Two changes from a design review:
+  1. `open_page` with a `section` that matches nothing now serves the whole
+     page from the top, with no message; it used to answer "No section
+     matching …", which labelled the absence of a withheld S4 section outright.
+     An agent asking for a withheld learnset now sees the other versions'
+     sections — the plausible, insufficient evidence S4 is built on — and must
+     notice the gap itself. The principle, recorded in ADR-009: the structure
+     may be artificial; the signal used to decide sufficiency is never handed
+     over by the infrastructure.
+  2. The mechanism quantities gain the **S3 truncation mechanism**: stopping
+     after fetching the rest before reaching the end, versus learning the end
+     only by asking past it.
 
 ---
 
