@@ -46,6 +46,7 @@ mk_issue() {
 
 M0="Phase 0 — Foundation"
 M1="Phase 1 — World"
+M2="Phase 2 — Examiner"
 
 echo "Creating issues..."
 
@@ -310,6 +311,165 @@ Idempotence is proven, not presumed. The world doc is the reference for Phase 2.
 
 ## References
 - Milestone: Phase 1
+BODY
+
+# ============================================================================
+# Phase 2 — opened 2026-09-29
+# ============================================================================
+
+mk_issue "[Phase 2] Templates per stratum and surface forms" \
+  "$M2" "phase:2,type:feat" <<'BODY'
+## Context
+The golden set is software: 3-5 Cypher templates per stratum (S0-S4), three hand-written surface forms each. No LLM paraphrase in v1 (it can change the question's meaning).
+
+## Tasks
+- [ ] `examiner/templates.py`: named Cypher constants, 3-5 per stratum; every template filters `LEARNS.version_group` to the version scope
+- [ ] `examiner/surfaces.py`: 3 surface forms per template, twin and real text
+- [ ] Template partition A / B, at least one B template per stratum
+- [ ] Spec in `docs/examiner.md` before the generator runs
+
+## Definition of Done
+- [ ] Every stratum has 3-5 templates; partition recorded; surfaces reviewed.
+
+## References
+- Milestone: Phase 2 · `docs/hypothesis.md` (strata) · ADR-007
+BODY
+
+mk_issue "[Phase 2] S1 material and benign; templates beyond hidden ability" \
+  "$M2" "phase:2,type:feat,hypothesis:h1" <<'BODY'
+## Context
+In 246 of 299 single-final evolution lines the base and final forms share their hidden ability: an agent that skips the missing hop is right by coincidence 82% of the time (PI-015).
+
+## Tasks
+- [ ] Material S1 (the anchor's own answer differs from the gold answer) forms S1 in the H1 pool
+- [ ] Benign S1 (they coincide): a descriptive slice, 40 questions in eval-L1 for A3, A4, A4p, outside H1
+- [ ] S1 templates beyond hidden ability (the hidden-ability template leaves 53 material lines)
+- [ ] Material pool size per template published N-of-M
+
+## Definition of Done
+- [ ] S1 material pool reported against the n of measurability gate 3; benign slice generated and tagged.
+
+## References
+- Milestone: Phase 2 · PI-015 · E-001
+BODY
+
+mk_issue "[Phase 2] Generator and filters, with N-of-M counts" \
+  "$M2" "phase:2,type:feat" <<'BODY'
+## Context
+Each question carries its gold answer with aliases, gold chain as fact ids, every minimal sufficient set of units, near-certain units (S2), withheld units (S4) and set size (S3). Filters publish N-of-M.
+
+## Tasks
+- [ ] `examiner/generate.py` from the graph and the fact -> units registry
+- [ ] Filters: ambiguity; single-unit shortcut; S2 (level differs from every other scope group); S3 set size 3-25; S4 (no indexed unit implies the answer)
+- [ ] World constraints (PI-016): S3 avoids hubs whose gold set includes a withheld species; hidden-ability templates sample only species that have one; level-0 and multi-level pairs are ambiguous; branching lines make "final form" ambiguous; forms have no learnsets
+- [ ] **Negative test**: removing a template's version-group filter makes a test fail
+
+## Definition of Done
+- [ ] Every filter's N-of-M per stratum in `docs/examiner.md`; the negative test exists and fails without the filter.
+
+## References
+- Milestone: Phase 2 · PI-002 · PI-016 · `docs/world.md`
+BODY
+
+mk_issue "[Phase 2] Answer-concentration cap, before and after" \
+  "$M2" "phase:2,type:statistics,gate:g2" <<'BODY'
+## Context
+A constant guess of the modal answer scores 22.6% on a move's type and 21.3% on a learn level with no leak. The cap is an experimental intervention, not a property of the world (PI-012).
+
+## Tasks
+- [ ] Each template's majority-answer rate <= max(10%, 1.5 x uniform chance)
+- [ ] Publish every template's answer distribution before (all candidates) and after (the generated set)
+- [ ] Report each template's majority-answer rate: it is G2's chance rate in Phase 3
+
+## Definition of Done
+- [ ] Cap enforced and tested; before/after tables in `docs/examiner.md`.
+
+## References
+- Milestone: Phase 2 · `docs/contingency.md` (G2) · PI-012
+BODY
+
+mk_issue "[Phase 2] Sufficiency labeler with golden trajectories" \
+  "$M2" "phase:2,type:feat,type:test" <<'BODY'
+## Context
+The label is a pure function over the registry: a state is sufficient when the units seen cover at least one gold minimal sufficient set (fixed 2026-09-26). Subtypes: missing-hop, wrong-version, truncated, nonexistent.
+
+## Tasks
+- [ ] `labeling/sufficiency.py`
+- [ ] Golden trajectories built by hand in `tests/fixtures/` (every subtype, redundant copies, withheld units)
+- [ ] Specified in `docs/examiner.md`
+
+## Definition of Done
+- [ ] 100% correct on the golden trajectories (measurability gate 7).
+
+## References
+- Milestone: Phase 2 · ADR-001 (Updates) · ADR-002
+BODY
+
+mk_issue "[Phase 2] Shortcut scan validated on planted leaks" \
+  "$M2" "phase:2,type:test" <<'BODY'
+## Context
+A unit that names a question's anchor together with its answer, outside the registered gold units, flags the question (PI-001). World v1 has no free text, so the flavor-text planted case is dropped (PI-013).
+
+## Tasks
+- [ ] Scan implemented in `examiner/`
+- [ ] Planted leaks built by hand; the scan must flag all of them
+- [ ] Run on every generated question; flags inspected and resolved
+
+## Definition of Done
+- [ ] 100% of planted leaks flagged; flags on generated questions published N-of-M.
+
+## References
+- Milestone: Phase 2 · `docs/measurability-gate.md` (gate 7)
+BODY
+
+mk_issue "[Phase 2] Splits and the template partition" \
+  "$M2" "phase:2,type:feat" <<'BODY'
+## Context
+Only ids and seeds are versioned. dev and train are group A only; eval-L1 mixes groups A and B and carries the benign S1 slice.
+
+## Tasks
+- [ ] `examiner/splits.py` with registered seeds
+- [ ] dev (150, group A), train, eval-L1 (400 + 40 benign S1), val-B, eval-L2, eval-L3 ids
+- [ ] Opening counts initialised at 0 per evaluation split
+
+## Definition of Done
+- [ ] dev and train ids frozen; eval ids drawn by seed; eval-L1 size still adjustable until Phase 6.
+
+## References
+- Milestone: Phase 2 · `data/splits/`
+BODY
+
+mk_issue "[Phase 2] G3 audit — 60 stratified questions" \
+  "$M2" "phase:2,type:research,gate:g3" <<'BODY'
+## Context
+Gate G3: a human audit of 60 stratified questions, with real names recovered through the twin map's inverse, must find >= 58 correct gold answers.
+
+## Tasks
+- [ ] Audit sheet (local only: real names are never committed)
+- [ ] Audit; on failure, fix and re-audit a fresh sample (at most 3 iterations, then remove failing templates and record it)
+
+## Definition of Done
+- [ ] >= 58 of 60 correct; the result and any iteration recorded in the decision journal.
+
+## References
+- Milestone: Phase 2 · `docs/contingency.md` (G3)
+BODY
+
+mk_issue "[Phase 2] docs/examiner.md and the benchmark v0 pre-release" \
+  "$M2" "phase:2,type:docs" <<'BODY'
+## Context
+The benchmark is published twin-side and fact-level only (`docs/data-sources.md`): ids, twin question text, answers with aliases, gold chains as fact ids, sufficient sets as unit ids, seeds.
+
+## Tasks
+- [ ] `docs/examiner.md`: templates, strata, filters with N-of-M, labeler, splits, shortcut rate, S3 set-size distribution
+- [ ] Reachability: every insufficiency subtype and error code producible by at least one dev question
+- [ ] Benchmark card written before the pre-release is uploaded
+
+## Definition of Done
+- [ ] `v0.3-examiner` pre-release with the benchmark files and card.
+
+## References
+- Milestone: Phase 2 · `docs/data-sources.md` (published benchmark)
 BODY
 
 echo "Done."

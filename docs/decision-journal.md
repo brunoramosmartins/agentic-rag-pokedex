@@ -837,3 +837,24 @@ re-runs gates 3 and 8 with it, and the S1 material pool arrives in Phase 2.
 **Plan impact PI-015 resolved:** plan revised on 2026-09-29 — Phase 2 builds material S1 (H1 pool) and a benign S1 slice (descriptive; 40 questions in eval-L1 for A3, A4, A4p), adds S1 templates beyond hidden ability, and proves the version-group filter with a negative test.
 
 **Plan impact PI-016 resolved:** plan revised on 2026-09-29 — the five constraints become Phase 2 generator filters, each with its N-of-M count in `docs/examiner.md`.
+
+## 2026-09-29 — Phase 2 opened
+
+**Scope.** Phase 2 — The Examiner: generator, gold chains and step labels. Size
+L (9–12 partial working days, as an estimate; no calendar). Ends with the
+`v0.3-examiner` pre-release (the benchmark v0) and the G3 verdict.
+
+**Gate check.** Every Phase 1 deliverable is present; PR #18 merged, tag
+`v0.2-world` pushed, Phase 1 issues and milestone closed. One gap: the Phase 1
+note's Lessons Learned and Failed Attempts are empty.
+
+**Carry-overs.** The Phase 1 lessons and failed attempts, written by the
+author, are the first task of Phase 2 (author's decision).
+
+**Open plan impacts.** None: PI-001 to PI-016 are resolved. The ones that shape
+this phase are already in its tasks — S1 material and benign (PI-015), the
+world's constraints on the generator and the negative scope test (PI-016), the
+answer-concentration cap with before/after tables (PI-012), no flavor-text case
+in the shortcut scan or the G3 audit (PI-013).
+
+**Scope decisions.** None taken at kickoff.
