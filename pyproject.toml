@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-rag-pokedex"
+version = "0.1.0"
+description = "Sequential sufficiency detection in multi-step retrieval: does the agent know when the evidence is enough?"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Bruno Ramos Martins" }]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pandas>=2.1",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+# Each phase pulls in only what it needs: pip install -e ".[dev,graph]"
+graph = ["neo4j>=5.14"]
+retrieval = ["rank-bm25>=0.2.2", "faiss-cpu>=1.7.4", "sentence-transformers>=2.7"]
+llm = ["openai>=1.40", "tiktoken>=0.7"]
+observability = [
+    "opentelemetry-sdk>=1.24",
+    "opentelemetry-exporter-otlp>=1.24",
+    "arize-phoenix-otel>=0.6",
+]
+classifier = ["scikit-learn>=1.4"]
+demo = ["streamlit>=1.35"]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: requires a live Neo4j (docker compose up); excluded from the unit run",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
