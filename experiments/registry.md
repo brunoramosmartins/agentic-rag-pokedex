@@ -133,10 +133,14 @@ prompt.
 
 **A2 sweep (Phase 4, dev group A):** grid k ∈ {2, 3, 5} × hybrid weight
 BM25/dense ∈ {0.3, 0.5, 0.7} × expansion depth ∈ {1, 2} × link-type order ∈
-{the E-002 order, its reverse}; criterion: mean C on dev S1–S4; ties go to the
-smaller k, then depth 1. The link-type set is defined in Phase 1 and appended
-here as a dated amendment before the sweep runs. The full grid, including what
-is not adopted, is published.
+{the E-002 order, its reverse}. **Two stages** (amended 2026-09-28):
+1. all 36 configurations are screened by the labeler, ranked by the share of
+   dev S1–S4 questions whose delivered set is sufficient (no API call);
+2. the top 3 run with the model, and the criterion is mean C on dev S1–S4.
+
+Ties go to the smaller k, then depth 1. The link-type set is defined in Phase 1
+and appended here as a dated amendment before the sweep runs. The full grid,
+including what is not adopted and the stage-1 ranking, is published.
 
 **Run order:** A0, A1, A2, A3, A3′, A4, O1, O2, A6 → A4p (dose from A4;
 adherence checked before any result is read) → cue ablation on S3 (A3, A4 with
@@ -401,6 +405,14 @@ _Not run._
   3. The sufficiency label is fixed as coverage of a gold minimal sufficient
      set (ADR-001, update of 2026-09-26). This unblocks the labeler's golden
      trajectories.
+- **2026-09-28 — plan revision (before any code or data).** Changes:
+  1. The A2 sweep runs in two stages: a labeler screen of all 36
+     configurations, then the top 3 with the model. Reason: dev tuning had no
+     budget line, and the full grid with the model would cost ≈ US$ 4.3 of the
+     ≈ 8 total tuning cost.
+  2. The v1.0 cap becomes US$ 20 (ADR-008, update of 2026-09-28). n_max is
+     computed against it; there is still no cap increase after the dress
+     rehearsal.
 
 ---
 

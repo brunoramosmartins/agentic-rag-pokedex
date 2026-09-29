@@ -410,3 +410,62 @@ closed-book check assumed that any correct answer on the twin means leakage →
 Phases 1 and 3 compute the admissible-answer count per template and apply the
 chance-adjusted check; per-template rates are published. Rule already amended
 in `docs/contingency.md`. Open.
+
+## 2026-09-28 — Plan revised at the Phase 0 close
+
+The phase plan was revised to absorb every open plan impact before the Phase 0
+tag, so that later phases start from current evidence. The author made three
+decisions.
+
+- **Budget (PI-007).** The v1.0 cap goes from US$ 13.5 to **US$ 20**, decided
+  before any data. Dev tuning had no budget line. With a two-stage A2 sweep
+  (labeler screen of 36 configurations, then the top 3 with the model), tuning
+  is ≈ US$ 4.0 central / 5.2 pessimistic, so v1.0 becomes 15.3 / 19.9. The rule
+  against raising the cap after the dress rehearsal stands. Rejected: keeping
+  13.5 with tuning on 60 questions (the pessimistic case would trigger the cut
+  order almost surely), and dropping A6 now.
+- **Readings (PI-008).** SIM-RAG (read) and S2G-RAG (skim) join the Phase 5
+  readings. Compensating cut: FLARE becomes optional, since Self-RAG and CRAG
+  cover low-confidence-triggered retrieval.
+- **Hours.** The new tasks in Phases 1–3 (shortcut scan, flavor-unit marking,
+  answer-space counts, n_max) add ~1.5 partial days. Compensating cut: the
+  Phase 7 demo timebox drops from 6 to 5 partial days, without the interactive
+  cost counter; cost per arm stays in the README table.
+
+Repo documents synced: ADR-008 (cap, budget, Updates section),
+`docs/contingency.md` (G5), E-001 (two-stage sweep, amendment of 2026-09-28).
+Dates are unchanged: Phase 0 closes inside its week-1 timebox.
+
+**Plan impact PI-001 resolved:** plan revised on 2026-09-28 — Phase 1 marks
+free-text units in the registry; Phase 2 gains the shortcut scan with planted
+leaks and the flavor-text read in the G3 audit.
+
+**Plan impact PI-002 resolved:** plan revised on 2026-09-28 — Phase 1 chooses
+base version groups spanning generations and reports the level-difference rate;
+Phase 2's S2 filter checks every other version group.
+
+**Plan impact PI-003 resolved:** plan revised on 2026-09-28 — Phase 3 runs
+E-002 as descriptive; its stratum-removal rule is gone and H2 stays on S1–S4.
+
+**Plan impact PI-004 resolved:** plan revised on 2026-09-28 — A3′ is part of
+v1.0 and of the Phase 6 run order; the cut order is A6 → cue ablation → A3′, and
+O2 is never cut.
+
+**Plan impact PI-005 resolved:** plan revised on 2026-09-28 — Phase 3 computes
+and logs n_max against the US$ 20 cap before any rehearsal; Phase 6 sizes H1 and
+H2 separately for the *supported* verdict at Δ_design = 0.35.
+
+**Plan impact PI-006 resolved:** plan revised on 2026-09-28 — Phases 4–6 carry
+the registered sweep grid, prompt parity, the veto decision table and the
+permuted A4p dose with its adherence check.
+
+**Plan impact PI-007 resolved:** plan revised on 2026-09-28 — two-stage A2
+sweep and a US$ 20 cap, as above.
+
+**Plan impact PI-008 resolved:** plan revised on 2026-09-28 — Phase 5 readings
+gain SIM-RAG and S2G-RAG (FLARE optional); the Phase 7 README states the
+contribution as measurement and cites the three later works.
+
+**Plan impact PI-009 resolved:** plan revised on 2026-09-28 — Phase 1 counts
+admissible answers per template; Phases 1 and 3 apply the chance-adjusted
+closed-book check.

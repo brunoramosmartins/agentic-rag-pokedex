@@ -69,13 +69,14 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   ablation, (3) the A3′ rerun. **Never cut:** eval-L1 for A2, A3, A4, A4p and
   O2 — without the placebo the mechanism cannot be read, and without O2 rows
   6–7 of the outcome space cannot be told apart.
-- **Pessimistic scenario:** with A3′ the v1.0 estimate is US$ 11.3 central /
-  14.7 pessimistic against the 13.5 cap. Cutting A6 and the cue ablation saves
-  ~US$ 1.8 in the pessimistic case (→ ~12.9).
+- **Pessimistic scenario:** with A3′ and dev tuning, the v1.0 estimate is US$ 15.3
+  central / 19.9 pessimistic against the **US$ 20 cap** (raised from 13.5 on
+  2026-09-28, before any data; ADR-008). Cutting A6 and the cue ablation saves
+  ~US$ 1.8 in the pessimistic case (→ ~18.1).
 - **n_max:** with Phase 3 measured costs, the largest pooled S1–S4 n the cap
   pays for after all three cuts is computed and logged **before the dress
   rehearsal**. If gate 8 asks for more than n_max, the verdict becomes
-  descriptive (row 0). **The cap is not raised.**
+  descriptive (row 0). **The cap is not raised after the dress rehearsal.**
 - **Extension cut order:** (1) GPT-4o-mini replication, (2) MuSiQue, (3) real
   world, (4) the whole v1.1 — the last only by rule (outcome-space row 6, or the
   Phase 8 futility rule), never by fatigue.
