@@ -623,3 +623,23 @@ sufficient only after every learn method has been seen (`notes/open-ideas.md`).
 
 Build on the real data: 144,861 facts, 13,357 indexed units, registry check
 PASS in both namings, forced rebuild byte-identical (`docs/world.md`).
+
+## 2026-09-29 — Index and tool contract
+
+Three decisions, taken by the author before any code:
+
+- **`open_page(title)` reads the page from the top**, up to the call's cap,
+  like opening a wiki page. The alternative, a table of contents first, costs a
+  step of T_max = 6 on every hop.
+- **`offset` continues a section** past one call. Nothing says more remains;
+  an agent that suspects an incomplete list asks, and asking is the decision S3
+  measures. Without it, hub units beyond the first call could only surface
+  through reformulated searches, which would make S3 a test of the ranking.
+- **Dense backend: `fastembed` with `BAAI/bge-small-en-v1.5`.** ONNX on CPU, no
+  torch; the GPU is not visible from WSL, and 13k units need no approximate
+  index. The `retrieval` extra is now `fastembed` only: BM25 is adapted from the
+  previous project (standard library), so `rank-bm25`, `faiss-cpu` and
+  `sentence-transformers` leave the dependencies.
+
+The 700-token cap per call is now written into E-001's fixed parameters,
+counted with `o200k_base` (amendment of 2026-09-29).

@@ -159,8 +159,10 @@ failed job is re-run on the same ids, never re-drawn.
 
 **Fixed parameters:** λ = 4; T_max = 6 steps; B = 4,000 evidence tokens;
 `search(query, k ≤ 5)` with no total count and no pagination markers (main
-condition); the same cost instruction for every arm ("a wrong answer costs 4×
-not answering").
+condition); `open_page(title, section=None, offset=0)`, which reads a page from
+the top and continues with `offset`, with nothing saying whether more remain;
+at most 700 tokens of units per call (`o200k_base`); the same cost instruction
+for every arm ("a wrong answer costs 4× not answering").
 
 **Model:** gpt-5-mini, Batch tier, `reasoning_effort` low, frozen for the run.
 
@@ -413,6 +415,16 @@ _Not run._
   2. The v1.0 cap becomes US$ 20 (ADR-008, update of 2026-09-28). n_max is
      computed against it; there is still no cap increase after the dress
      rehearsal.
+- **2026-09-29 — tool contract fixed in Phase 1 (before any run).** The fixed
+  parameters now describe `open_page` as built: without `section` it returns
+  the page from the top; `section` filters units by their section line;
+  `offset` skips units to continue a list longer than one call; past the end it
+  answers "No more units." Every call returns at most 700 tokens of units
+  (`o200k_base`), the first unit always. Reason: the parameters named only
+  `search`, and a species page (~1,500 tokens) or a large hub does not fit in
+  one call; `offset` lets an agent that suspects an incomplete list ask for the
+  rest, which is the decision S3 measures, while the main condition still says
+  nothing about what remains.
 
 ---
 
