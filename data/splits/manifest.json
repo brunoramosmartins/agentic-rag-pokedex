@@ -1,0 +1,417 @@
+{
+ "seed": 20260929,
+ "questions_kept": 33719,
+ "families": 6822,
+ "material_pools": {
+  "S1-A1": 70,
+  "S1-A2": 104,
+  "S1-A3": 57
+ },
+ "pools": {
+  "S0-A1": {
+   "families": 856,
+   "demand": 46,
+   "capped": false
+  },
+  "S0-A2": {
+   "families": 527,
+   "demand": 46,
+   "capped": false
+  },
+  "S0-A3": {
+   "families": 833,
+   "demand": 44,
+   "capped": false
+  },
+  "S0-A4": {
+   "families": 713,
+   "demand": 44,
+   "capped": false
+  },
+  "S0-B1": {
+   "families": 192,
+   "demand": 42,
+   "capped": false
+  },
+  "S1-A1": {
+   "families": 405,
+   "demand": 71,
+   "capped": false
+  },
+  "S1-A2": {
+   "families": 434,
+   "demand": 98,
+   "capped": false
+  },
+  "S1-A3": {
+   "families": 405,
+   "demand": 59,
+   "capped": false
+  },
+  "S1-B1": {
+   "families": 1025,
+   "demand": 54,
+   "capped": false
+  },
+  "S2-A1": {
+   "families": 616,
+   "demand": 174,
+   "capped": false
+  },
+  "S2-B1": {
+   "families": 256,
+   "demand": 68,
+   "capped": false
+  },
+  "S3-A1": {
+   "families": 233,
+   "demand": 145,
+   "capped": false
+  },
+  "S3-B1": {
+   "families": 206,
+   "demand": 97,
+   "capped": false
+  },
+  "S4-A1": {
+   "families": 121,
+   "demand": 242,
+   "capped": true
+  }
+ },
+ "splits": {
+  "dev": {
+   "frozen": true,
+   "sha256": "d51849a4de3038356c21bfa45d55c591d1cf39dc00ed255921832c423812ba84",
+   "allocation": {
+    "S0-A1": 8,
+    "S0-A2": 8,
+    "S0-A3": 7,
+    "S0-A4": 7,
+    "S1-A1": 9,
+    "S1-A2": 14,
+    "S1-A3": 7,
+    "S2-A1": 15,
+    "S2-A2": 15,
+    "S3-A1": 30,
+    "S4-A1": 30
+   },
+   "questions": 150,
+   "per_template": {
+    "S0-A1": 8,
+    "S0-A2": 8,
+    "S0-A3": 7,
+    "S0-A4": 7,
+    "S1-A1": 9,
+    "S1-A2": 14,
+    "S1-A3": 7,
+    "S2-A1": 15,
+    "S2-A2": 15,
+    "S3-A1": 30,
+    "S4-A1": 30
+   },
+   "group": {
+    "A": 150
+   },
+   "s1_material": {
+    "material": 30
+   },
+   "s2_versions": {
+    "scarlet-violet": 16,
+    "ultra-sun-ultra-moon": 5,
+    "x-y": 9
+   },
+   "s3_set_size": {
+    "min": 3,
+    "median": 5.0,
+    "max": 21
+   },
+   "s4_withheld_pairs": 15
+  },
+  "train": {
+   "frozen": true,
+   "sha256": "9d586574cfbe658abc56e27b8fe1c3b96fabc8e2789e0baf63937d55ae23db00",
+   "allocation": {
+    "S0-A1": 8,
+    "S0-A2": 8,
+    "S0-A3": 7,
+    "S0-A4": 7,
+    "S1-A1": 9,
+    "S1-A2": 14,
+    "S1-A3": 7,
+    "S2-A1": 15,
+    "S2-A2": 15,
+    "S3-A1": 30,
+    "S4-A1": 30
+   },
+   "questions": 150,
+   "per_template": {
+    "S0-A1": 8,
+    "S0-A2": 8,
+    "S0-A3": 7,
+    "S0-A4": 7,
+    "S1-A1": 9,
+    "S1-A2": 14,
+    "S1-A3": 7,
+    "S2-A1": 15,
+    "S2-A2": 15,
+    "S3-A1": 30,
+    "S4-A1": 30
+   },
+   "group": {
+    "A": 150
+   },
+   "s1_material": {
+    "material": 30
+   },
+   "s2_versions": {
+    "scarlet-violet": 12,
+    "ultra-sun-ultra-moon": 11,
+    "x-y": 7
+   },
+   "s3_set_size": {
+    "min": 3,
+    "median": 4.0,
+    "max": 14
+   },
+   "s4_withheld_pairs": 15
+  },
+  "eval-L1": {
+   "frozen": false,
+   "sha256": "b8e1aee38cd82b513f001086333be066e242c17b968aa1a16c0ecab6bcf1a33a",
+   "allocation": {
+    "S0-A1": 16,
+    "S0-A2": 16,
+    "S0-A3": 16,
+    "S0-A4": 16,
+    "S0-B1": 16,
+    "S1-A1": 18,
+    "S1-A2": 27,
+    "S1-A3": 15,
+    "S1-B1": 20,
+    "S2-A1": 27,
+    "S2-A2": 27,
+    "S2-B1": 26,
+    "S3-A1": 40,
+    "S3-B1": 40,
+    "S4-A1": 40,
+    "S4-B1": 40
+   },
+   "questions": 400,
+   "per_template": {
+    "S0-A1": 16,
+    "S0-A2": 16,
+    "S0-A3": 16,
+    "S0-A4": 16,
+    "S0-B1": 16,
+    "S1-A1": 18,
+    "S1-A2": 27,
+    "S1-A3": 15,
+    "S1-B1": 20,
+    "S2-A1": 27,
+    "S2-A2": 27,
+    "S2-B1": 26,
+    "S3-A1": 40,
+    "S3-B1": 40,
+    "S4-A1": 40,
+    "S4-B1": 40
+   },
+   "group": {
+    "A": 258,
+    "B": 142
+   },
+   "s1_material": {
+    "material": 80
+   },
+   "s2_versions": {
+    "scarlet-violet": 49,
+    "ultra-sun-ultra-moon": 14,
+    "x-y": 17
+   },
+   "s3_set_size": {
+    "min": 3,
+    "median": 4.0,
+    "max": 20
+   },
+   "s4_withheld_pairs": 40
+  },
+  "eval-L1-benign": {
+   "frozen": false,
+   "sha256": "ef040f3bb706e723fc48cf70d9ecec3853b39e625ae8524c71eba508dee79e90",
+   "allocation": {
+    "S1-A1": 14,
+    "S1-A2": 13,
+    "S1-A3": 13
+   },
+   "questions": 40,
+   "per_template": {
+    "S1-A1": 14,
+    "S1-A2": 13,
+    "S1-A3": 13
+   },
+   "group": {
+    "A": 40
+   },
+   "s1_material": {
+    "benign": 40
+   },
+   "s2_versions": {},
+   "s3_set_size": {},
+   "s4_withheld_pairs": 0
+  },
+  "val-B": {
+   "frozen": false,
+   "sha256": "aee1797b86a60408f4066e277d73b249a659e477d6543d7682be84c9985c59b2",
+   "allocation": {
+    "S0-B1": 12,
+    "S1-B1": 12,
+    "S2-B1": 12,
+    "S3-B1": 12,
+    "S4-B1": 12
+   },
+   "questions": 60,
+   "per_template": {
+    "S0-B1": 12,
+    "S1-B1": 12,
+    "S2-B1": 12,
+    "S3-B1": 12,
+    "S4-B1": 12
+   },
+   "group": {
+    "B": 60
+   },
+   "s1_material": {
+    "material": 12
+   },
+   "s2_versions": {
+    "scarlet-violet": 10,
+    "ultra-sun-ultra-moon": 1,
+    "x-y": 1
+   },
+   "s3_set_size": {
+    "min": 3,
+    "median": 5.0,
+    "max": 11
+   },
+   "s4_withheld_pairs": 6
+  },
+  "eval-L2": {
+   "frozen": false,
+   "sha256": "01b1ccc627105f623bad8fe2d0704efb827bc63fc1c8ece478f7305878aa9313",
+   "allocation": {
+    "S0-A1": 8,
+    "S0-A2": 8,
+    "S0-A3": 8,
+    "S0-A4": 8,
+    "S0-B1": 8,
+    "S1-A1": 14,
+    "S1-A2": 20,
+    "S1-A3": 11,
+    "S1-B1": 15,
+    "S2-A1": 20,
+    "S2-A2": 20,
+    "S2-B1": 20,
+    "S3-A1": 30,
+    "S3-B1": 30,
+    "S4-A1": 30,
+    "S4-B1": 30
+   },
+   "questions": 280,
+   "per_template": {
+    "S0-A1": 8,
+    "S0-A2": 8,
+    "S0-A3": 8,
+    "S0-A4": 8,
+    "S0-B1": 8,
+    "S1-A1": 14,
+    "S1-A2": 20,
+    "S1-A3": 11,
+    "S1-B1": 15,
+    "S2-A1": 20,
+    "S2-A2": 20,
+    "S2-B1": 20,
+    "S3-A1": 30,
+    "S3-B1": 30,
+    "S4-A1": 30,
+    "S4-B1": 30
+   },
+   "group": {
+    "A": 177,
+    "B": 103
+   },
+   "s1_material": {
+    "material": 60
+   },
+   "s2_versions": {
+    "scarlet-violet": 34,
+    "ultra-sun-ultra-moon": 11,
+    "x-y": 15
+   },
+   "s3_set_size": {
+    "min": 3,
+    "median": 5.0,
+    "max": 19
+   },
+   "s4_withheld_pairs": 30
+  },
+  "eval-L3": {
+   "frozen": false,
+   "sha256": "19076e8a22b7396b834604a42af34ee686e6eeac192f33d9127aba0cd6f0584a",
+   "allocation": {
+    "S0-A1": 6,
+    "S0-A2": 6,
+    "S0-A3": 6,
+    "S0-A4": 6,
+    "S0-B1": 6,
+    "S1-A1": 7,
+    "S1-A2": 10,
+    "S1-A3": 6,
+    "S1-B1": 7,
+    "S2-A1": 10,
+    "S2-A2": 10,
+    "S2-B1": 10,
+    "S3-A1": 15,
+    "S3-B1": 15,
+    "S4-A1": 15,
+    "S4-B1": 15
+   },
+   "questions": 150,
+   "per_template": {
+    "S0-A1": 6,
+    "S0-A2": 6,
+    "S0-A3": 6,
+    "S0-A4": 6,
+    "S0-B1": 6,
+    "S1-A1": 7,
+    "S1-A2": 10,
+    "S1-A3": 6,
+    "S1-B1": 7,
+    "S2-A1": 10,
+    "S2-A2": 10,
+    "S2-B1": 10,
+    "S3-A1": 15,
+    "S3-B1": 15,
+    "S4-A1": 15,
+    "S4-B1": 15
+   },
+   "group": {
+    "A": 97,
+    "B": 53
+   },
+   "s1_material": {
+    "material": 30
+   },
+   "s2_versions": {
+    "scarlet-violet": 22,
+    "ultra-sun-ultra-moon": 5,
+    "x-y": 3
+   },
+   "s3_set_size": {
+    "min": 3,
+    "median": 7.0,
+    "max": 25
+   },
+   "s4_withheld_pairs": 15
+  }
+ }
+}

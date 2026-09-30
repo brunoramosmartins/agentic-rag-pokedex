@@ -446,6 +446,18 @@ _Not run._
   2. The mechanism quantities gain the **S3 truncation mechanism**: stopping
      after fetching the rest before reaching the end, versus learning the end
      only by asking past it.
+- **2026-09-29 — S1 allocation within eval-L1 (Phase 2 splits, before any
+  run).** The Configuration draws "equal numbers per template within each
+  stratum". Material S1 pools (S1-A1 70, S1-A2 104, S1-A3 57) cannot give equal
+  counts once dev, train, eval-L2 and eval-L3 take theirs: S1-A3 would need 63.
+  Change: in S1, the group-A share is split across S1-A1 to S1-A3 in
+  proportion to their material pools (eval-L1: 18 / 27 / 15); S1-B1 keeps its
+  equal share (20), so the A/B proportion per stratum is unchanged. The gate 8
+  extension ("draw more questions up to n\*, balanced by stratum") is bounded
+  by material S1 at a pooled S1–S4 n of 548. Also recorded: the separation rule
+  is implemented on families (shared (template, anchor entity) pair or
+  identical gold chain) and applied between every pair of splits. Decided from
+  pool counts; no outcome data exists. Plan impact PI-018.
 
 ---
 

@@ -986,3 +986,38 @@ S2-A1, S2-A2, S3 and S4 have no flag at all. Noted while reading: some
 material S1 questions have a regional form that is what actually evolves
 (Galarian Corsola, Ghost-type, evolves into Cursola); the graph records
 evolution per species, so this is a world quirk, not a leak.
+
+## 2026-09-29 — Splits
+
+`examiner/splits.py` draws dev, train, eval-L1 (with the 40-question benign S1
+slice as its own file), val-B, eval-L2 and eval-L3 from the 33,719 kept
+questions; `docs/examiner.md` → Splits. dev and train are frozen; evaluation
+ids are drawn now and frozen at the dress rehearsal. Measured before writing
+the code, and approved by the author:
+
+- **Families.** Questions sharing a (template, anchor entity) pair or an
+  identical gold chain go to one split together: 6,822 families. Identical
+  chains join S2-A1 with S2-A2 (418 families) and S4-A1 with S4-B1 (112).
+  Every split is disjoint from every other, stricter than the registered rule,
+  so eval-L2 and eval-L3 stay independent of eval-L1.
+- **No stratification beyond the template.** A simple seeded draw within each
+  template estimates that template's population; the manifest reports the
+  distributions (S2 versions, S3 set sizes, S4 withheld pairs, S1 material).
+  Each pass takes one question per family, so S4 spreads over withheld pairs
+  where it can: 121 families for 242 questions demanded, capped in proportion
+  to each split's demand.
+- **Largest-remainder rounding, group A first** (S2 in eval-L1: 27 / 27 / 26).
+- **Opaque ids from the start**: `q-` + 10 hex of sha256(seed:id). They keep
+  PokéAPI ids out of published files; with the seed public they are not a
+  secret.
+- **Growth.** A gate 8 extension draws after every other split, so nothing
+  already drawn changes.
+
+**Plan impact PI-018:** Phase 6 — the freeze and gate 8's extension assumed eval-L1 draws equal numbers per template within each stratum, growing balanced up to n* → material S1 pools (S1-A1 70, S1-A2 104, S1-A3 57) cannot give equal counts even at the base size once dev, train, eval-L2 and eval-L3 take theirs → group-A S1 is split across S1-A1 to A3 in proportion to their material pools (S1-B1 keeps its equal share, so the A/B proportion is unchanged), and balanced growth stops near a pooled S1–S4 n of 548; E-001 amended before its freeze. Open.
+
+Escalated the day it was found, since it touches a registry entry and gate
+8. Measured after the change: the extension works up to 57 extra questions
+per stratum (137, pooled 548) and fails at 58; material questions used by the
+base splits are 57 of 70, 85 of 104 and 46 of 57.
+
+**Plan impact PI-018 resolved:** absorbed — E-001 amended (draft, before its freeze), the splitter implements the proportional S1 allocation and the bounded extension; no sizes, hours or phases change. If Phase 3 puts n_max above 548, the gap is recorded then.

@@ -232,16 +232,74 @@ python -m agentic_pokedex.labeling.sufficiency <question id> "<unit>,<unit>" "<u
 
 ## Splits
 
-Ids and seeds only are versioned (`data/splits/`).
+`python -m agentic_pokedex.examiner.splits` (`examiner/splits.py`). Ids and
+seeds only are versioned (`data/splits/`): one file of opaque ids per split,
+in draw order, and `manifest.json` with the seed, the allocation, each file's
+hash and each split's distributions. Seed `20260929`.
 
-| Split | Size | Templates | Opening |
-|---|---|---|---|
-| `dev` | 150 (30 per stratum) | group A | free |
-| `train` | simulated states + 150 real trajectories | group A | free |
-| `eval-L1` | 400 (S0 80; S1–S4 80) + 40 benign S1 | A and B | once |
-| `val-B` | 60 | group B | once |
-| `eval-L2` | 280 (S0 40; S1–S4 60) | A and B | once |
-| `eval-L3` | 150, twin and real | A and B | once |
+| Split | Size | Templates | Frozen | Opening |
+|---|---|---|---|---|
+| `dev` | 150 (30 per stratum) | group A | now | free |
+| `train` | 150 real-trajectory questions (30 per stratum); the pool of simulated states is the group-A families left once eval-L1 is frozen | group A | now | free |
+| `eval-L1` | 400 (80 per stratum) | A and B | dress rehearsal | once |
+| `eval-L1-benign` | 40 benign S1 (A3, A4, A4p only; PI-015) | S1-A1 to A3 | dress rehearsal | with eval-L1 |
+| `val-B` | 60 (12 per stratum) | group B | dress rehearsal | once |
+| `eval-L2` | 280 (S0 40; S1–S4 60) | A and B | dress rehearsal | once |
+| `eval-L3` | 150 (30 per stratum), asked in twin and real names | A and B | dress rehearsal | once |
+
+**Separation.** Questions sharing a (template, anchor entity) pair or an
+identical gold chain form a **family**; a family belongs to one split. The
+anchor entity is the species X, the move M (S0-A2 to A4, S3) or the type pair
+(S0-B1). Identical chains join S2-A1 with S2-A2 and S4-A1 with S4-B1, the same
+learn fact asked two ways. 33,719 questions form 6,822 families. Every split is
+disjoint from every other, which is stricter than the registered rule (dev and
+train against eval-L1): eval-L2 and eval-L3 stay independent too. The
+splitter counts clashes per split; all are 0 of n.
+
+**Sizes.** Each stratum's size is split evenly across its templates by
+largest remainder, group A first (S2 in eval-L1: 27 / 27 / 26; S0 in dev:
+8 / 8 / 7 / 7). In S1, the group-A share is then split across S1-A1 to A3 in
+proportion to their material pools, 70 / 104 / 57 (PI-018): equal shares do not
+fit S1-A3 (57 material questions against 63 demanded). S1-B1 keeps its even
+share, so the A/B proportion does not change.
+
+| Split | S1-A1 | S1-A2 | S1-A3 | S1-B1 |
+|---|---:|---:|---:|---:|
+| dev, train | 9 | 14 | 7 | — |
+| eval-L1 | 18 | 27 | 15 | 20 |
+| eval-L2 | 14 | 20 | 11 | 15 |
+| eval-L3 | 7 | 10 | 6 | 7 |
+
+Material questions used: S1-A1 57 of 70, S1-A2 85 of 104, S1-A3 46 of 57.
+
+**Draw.** Per template, a seeded permutation of its families; each pass takes
+at most one question per family, so a split covers as many anchors as it can
+before repeating one. S4 has 121 families (withheld pairs) for 242 questions
+demanded, so each split may claim families in proportion to its demand
+(eval-L1: 40 pairs for 80 questions); every other pool has more families than
+questions. S1 is material in every split except `eval-L1-benign`. Questions
+the shortcut scan discarded never enter, and the splitter refuses to run while
+any is unresolved.
+
+**Gate 8 extension.** `--eval-l1-extra N` adds N questions per stratum to
+eval-L1, drawn after every other split: the other splits and the first 400
+eval-L1 questions do not change. Material S1 caps it at N = 57 (137 per
+stratum, a pooled S1–S4 n of 548); at N = 58 S1-A2 runs out.
+
+**Ids.** `q-` + the first 10 hex digits of sha256(`20260929:{question id}`).
+The seed is public, so anyone running the splitter can map them back; the
+point is to keep PokéAPI ids — which map twin names to real ones — out of
+published files. The mapping is written locally
+(`data/world/examiner/splits.json`).
+
+**Freezing.** Rewriting `dev.txt` or `train.txt` with different ids fails.
+Evaluation ids are frozen at the dress rehearsal, after gate 8 sets eval-L1's
+size.
+
+Distributions, first draw (`manifest.json`): S2 versions in eval-L1 are
+scarlet-violet 49, x-y 17, ultra-sun-ultra-moon 14, following the S2 pool
+(4,450 / 3,323 / 3,354 questions); S3 set sizes 3–20, median 4; S4 covers 40
+withheld pairs.
 
 ## Counts
 
@@ -279,8 +337,6 @@ Drops by reason:
 - **S3-B1:** a member's learnset is withheld 1,977; set size outside 3-25 2; single-unit shortcut 1,244; the level cap removes no learner 399; too few learners for a level cap 8,040
 - **S4-A1:** ambiguous: level 0 or several levels 104; no distractor: other groups do not list the move 79
 - **S4-B1:** ambiguous: level 0 or several moves at the level 136; no distractor: other groups list nothing at the level 316
-
-The splits are not applied yet.
 
 ## Shortcut scan
 

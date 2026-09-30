@@ -44,6 +44,12 @@ scannable. Unit level would have flagged 2,064.
 
 ## Splits and the template partition (`examiner/splits.py`)
 
+Done 2026-09-29. Seven split files of opaque ids plus `manifest.json` in
+`data/splits/`; 6,822 families, every split disjoint from every other (0
+clashes); dev and train frozen. S1 group A allocated in proportion to material
+pools (PI-018, absorbed); the eval-L1 extension for gate 8 is bounded at 57
+extra per stratum.
+
 ## G3 audit — 60 stratified questions
 
 ## `docs/examiner.md` and the benchmark v0
