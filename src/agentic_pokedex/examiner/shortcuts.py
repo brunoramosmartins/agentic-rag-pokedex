@@ -426,7 +426,8 @@ def main(argv: list[str] | None = None) -> int:
         s1 = Counter("material" if material[q] else "benign"
                      for q in qids if material[q] is not None)
         extra = f"  ({dict(s1)})" if s1 else ""
-        print(f"\n{' · '.join(klass)}: {len(qids):,} / {len(found):,} → {verdict}{extra}")
+        counts = f"{len(qids):,} / {len(found):,}"
+        print(f"\n{' · '.join(klass)}: {counts} → {verdict}{extra}")
         rng = random.Random(SCAN_SEED)
         for f in rng.sample(found, min(args.examples, len(found))):
             print(f"  [{f.question}] {f.unit}")

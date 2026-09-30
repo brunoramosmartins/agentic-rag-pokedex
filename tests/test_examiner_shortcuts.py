@@ -64,7 +64,8 @@ def index(fixture_world_dir: Path, lexicon: Lexicon) -> ScanIndex:
 
 
 def test_statements_pair_the_header_with_each_line() -> None:
-    text = "Species: Sprig · Section: Profile\nTypes: [[Moss]]\nEvolves into: [[Sprout]]"
+    text = ("Species: Sprig · Section: Profile\nTypes: [[Moss]]\n"
+            "Evolves into: [[Sprout]]")
     assert statements(text) == [
         "Species: Sprig · Section: Profile\nTypes: [[Moss]]",
         "Species: Sprig · Section: Profile\nEvolves into: [[Sprout]]",
