@@ -75,7 +75,7 @@ def gold(
 
 
 def test_subtypes_follow_the_stratum() -> None:
-    assert SUBTYPES == {"S0": "missing-hop", "S1": "missing-hop",
+    assert SUBTYPES == {"S0": "not-found", "S1": "missing-hop",
                         "S2": "wrong-version", "S3": "truncated",
                         "S4": "nonexistent"}
     for stratum, subtype in SUBTYPES.items():
@@ -103,6 +103,18 @@ def test_s3_members_group_facts_by_entry() -> None:
     assert label_state(g, ["a"]).members == (0, 2)  # a member needs both facts
     assert label_state(g, ["a", "b", "c"]).members == (1, 2)
     assert label_state(g, ["a", "b", "c", "d"]).members == (2, 2)
+
+
+def test_s3_members_come_from_the_set_not_the_hub() -> None:
+    # Hub of three learners, of which only entry 3 is in the set.
+    g = Gold("q", "S3", {"learn:2:1:v:level-up:1": frozenset({"a"}),
+                         "ptype:2:1:1": frozenset({"a"}),
+                         "learn:3:1:v:level-up:4": frozenset({"b"}),
+                         "ptype:3:1:3": frozenset({"b"})},
+             members=frozenset({3}))
+    seen_member = label_state(g, ["b"])
+    assert seen_member.members == (1, 1) and not seen_member.sufficient
+    assert label_state(g, ["a", "b"]).sufficient
 
 
 def test_near_certain_is_reported_not_counted() -> None:

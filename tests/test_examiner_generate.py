@@ -20,6 +20,7 @@ from agentic_pokedex.examiner.generate import (
     build_s1_final,
     build_s1_next,
     build_s3,
+    calls_to_read,
     cap_concentration,
     check_scope,
     single_unit,
@@ -219,9 +220,45 @@ def test_s3_sets(world: World) -> None:
     rows = typed_rows({1: 1, 2: 5, 3: 10, 4: 20})
     (a1,) = build_s3("S3-A1", rows, ctx(world), Counter())
     assert a1.answer == [1, 2, 3, 4] and a1.set_size == 4
+    assert a1.set_members == [1, 2, 3, 4]
     assert "learn:1:1:alpha-beta:level-up:1" in a1.gold_facts
     (b1,) = build_s3("S3-B1", rows, ctx(world), Counter())
     assert b1.slots["L"] == 10 and b1.answer == [1, 2, 3]
+    # The whole hub is gold: the level-20 learner too, which the cap excludes.
+    assert "learn:4:1:alpha-beta:level-up:20" in b1.gold_facts
+    assert b1.set_members == [1, 2, 3]
+
+
+def test_s3_gold_is_the_whole_hub(world: World) -> None:
+    rows = typed_rows({1: 1, 2: 5, 3: 10})
+    rows.append({"move": 1, "version_group": "alpha-beta", "type": 1, "pokemon": 4,
+                 "slot": 1, "level": 7})  # a learner of another type
+    rows.append({"move": 1, "version_group": "alpha-beta", "type": 2, "pokemon": 4,
+                 "slot": 2, "level": 7})
+    out = build_s3("S3-A1", rows, ctx(world, [(4, "alpha-beta")]), Counter())
+    (moss,) = [q for q in out if q.slots["T"] == 3]
+    assert moss.set_members == [1, 2, 3]
+    # Learner 4 is withheld: not on the page, so not gold.
+    assert not any(f.startswith(("learn:4:", "ptype:4:")) for f in moss.gold_facts)
+    kept = build_s3("S3-A1", rows, ctx(world), Counter())
+    (moss,) = [q for q in kept if q.slots["T"] == 3]
+    assert {"learn:4:1:alpha-beta:level-up:7", "ptype:4:1:1",
+            "ptype:4:2:2"} <= set(moss.gold_facts)
+    assert moss.answer == [1, 2, 3]
+
+
+def test_s3_drops_hubs_one_call_returns(world: World) -> None:
+    drop: Counter[str] = Counter()
+    one = Context(world, SCOPE, set(), frozenset({(1, "alpha-beta")}))
+    assert build_s3("S3-A1", typed_rows({1: 1, 2: 5, 3: 10}), one, drop) == []
+    assert drop == {"the whole hub fits in one tool call": 1}
+
+
+def test_calls_to_read() -> None:
+    words = len  # one token per character, for the test
+    assert calls_to_read(["aaaa", "bbbb", "cccc"], words, 10) == 2  # "aaaa\n\nbbbb"
+    assert calls_to_read(["a" * 20], words, 10) == 1  # the first unit always fits
+    assert calls_to_read([], words, 10) == 0
 
 
 def test_s3_drops_sets_with_a_withheld_member(world: World) -> None:

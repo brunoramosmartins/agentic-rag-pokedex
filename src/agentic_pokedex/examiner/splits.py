@@ -112,13 +112,22 @@ is frozen."""
 
 
 def anchor_key(record: Record) -> str:
-    """The anchor entity of a question, for the separation rule."""
+    """The anchor entity of a question, for the separation rule. S4's is its
+    withheld pair: both S4 templates rest on the same missing learnset."""
     t, s = record["template"], record["slots"]
+    if record["stratum"] == "S4":
+        return f"pair:{s['X']}:{s['V']}"
     if t in ("S0-A2", "S0-A3", "S0-A4") or record["stratum"] == "S3":
         return f"move:{s['M']}"
     if t == "S0-B1":
         return f"types:{s['A']},{s['B']}"
     return f"species:{s['X']}"
+
+
+def family_key(record: Record) -> tuple[str, str, str]:
+    """(template, anchor) — for S4 (stratum, withheld pair), across templates."""
+    scope = "S4" if record["stratum"] == "S4" else record["template"]
+    return ("anchor", scope, anchor_key(record))
 
 
 def families(records: Sequence[Record]) -> dict[str, str]:
@@ -138,7 +147,7 @@ def families(records: Sequence[Record]) -> dict[str, str]:
 
     groups: dict[Any, list[str]] = defaultdict(list)
     for r in records:
-        groups[("anchor", r["template"], anchor_key(r))].append(r["id"])
+        groups[family_key(r)].append(r["id"])
         groups[("chain", tuple(sorted(r["gold_facts"])))].append(r["id"])
     for ids in groups.values():
         for other in ids[1:]:
@@ -384,14 +393,14 @@ def separation(
     for name, qids in splits.items():
         for q in qids:
             r = records[q]
-            where[("anchor", r["template"], anchor_key(r))].add(name)
+            where[family_key(r)].add(name)
             where[("chain", tuple(sorted(r["gold_facts"])))].add(name)
     shared = {k for k, names in where.items() if len(names) > 1}
     out = {}
     for name, qids in splits.items():
         out[name] = sum(
             1 for q in qids
-            if ("anchor", records[q]["template"], anchor_key(records[q])) in shared
+            if family_key(records[q]) in shared
             or ("chain", tuple(sorted(records[q]["gold_facts"]))) in shared
         )
     return out

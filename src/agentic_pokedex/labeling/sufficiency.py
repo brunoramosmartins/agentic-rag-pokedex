@@ -37,7 +37,7 @@ INSUFFICIENT = "insufficient"
 ABSTAINED = "abstained"
 
 SUBTYPES: Mapping[str, str] = {
-    "S0": "missing-hop",
+    "S0": "not-found",
     "S1": "missing-hop",
     "S2": "wrong-version",
     "S3": "truncated",
@@ -55,12 +55,15 @@ class Gold:
         stratum: ``S0`` … ``S4``.
         cover: Gold fact → indexed units stating it, in gold-fact order.
         near_certain: Indexed units stating a distractor fact (S2, S4).
+        members: S3: the Pokémon entries of the gold set. The gold facts cover
+            the whole hub (PI-020); members are what ``members`` counts.
     """
 
     question: str
     stratum: str
     cover: Mapping[str, frozenset[str]]
     near_certain: frozenset[str] = frozenset()
+    members: frozenset[int] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -131,7 +134,8 @@ def gold_from(record: Mapping[str, Any], registry: Registry) -> Gold:
     near = frozenset(
         u for f in distractors for u in registry.fact_units(f, indexed_only=True)
     )
-    return Gold(qid, stratum, cover, near)
+    members = frozenset(int(p) for p in record.get("set_members") or [])
+    return Gold(qid, stratum, cover, near, members)
 
 
 def _member(fact: str) -> int:
@@ -155,9 +159,9 @@ def label_state(gold: Gold, seen: Iterable[str], step: int = 0) -> StepLabel:
     total = len(gold.cover)
     members = None
     if gold.stratum == "S3":
-        lacking = {_member(f) for f in missing}
-        size = len({_member(f) for f in gold.cover})
-        members = (size - len(lacking), size)
+        entries = gold.members or frozenset(_member(f) for f in gold.cover)
+        lacking = {_member(f) for f in missing} & entries
+        members = (len(entries) - len(lacking), len(entries))
     sufficient = not missing
     return StepLabel(
         step=step,

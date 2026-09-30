@@ -82,14 +82,22 @@ Group A templates are visible to all tuning; group B templates are held out
 
 | ID | Question | Pool |
 |---|---|---:|
-| S3-A1 | Species of type T that learn M by level-up in V | 1,961 (see Counts) |
-| S3-B1 | Species of type T that learn M by level-up in V at or below level L | to count |
+| S3-A1 | Species of type T that learn M by level-up in V | 1,002 (see Counts) |
+| S3-B1 | Species of type T that learn M by level-up in V at or below level L | 630 |
 
-- The gold set has 3–25 members **and is spread over at least two indexed
-  units**: a set that one hub unit holds entirely is not truncated (2,115 such
-  sets dropped). An early estimate of 323 excluded every hub touching a
-  withheld species; the rule is narrower — only sets whose *members* include
-  one (PI-016) — and leaves 1,961.
+- **Gold facts are the whole (M, V) hub** — every learner's levels and types
+  — not only the members' (PI-020). Seeing every member does not prove that
+  no other type-T learner exists; only the whole list does, as the whole
+  learnset proves S2-B1's "last move" and `evoend` proves S1's final form.
+  Learners whose learnset is withheld are not on the page and are not gold.
+  The labeler still reports how many members are covered (`set_members`).
+- **The hub takes more than one tool call** (PI-020): a hub that one
+  `open_page` call returns whole (700 tokens, in either naming) is not a
+  truncated list — 57 of 80 eval-L1 S3 hubs were, before this filter.
+- The gold set has 3–25 members. Sets whose members include a withheld
+  learnset are dropped (PI-016). An early estimate of 323 excluded every hub
+  touching a withheld species; the first rule, "members spread over two
+  units", kept 1,961 S3-A1 questions; the hub rule keeps 1,002.
 - "Of type T" means T is one of the species' types.
 - A hidden-ability holders template was dropped: 24 sets spread over two
   units.
@@ -188,6 +196,7 @@ evaluation splits are published by id only until opened.
 | `near_certain_units` | yes | S2, S4: indexed units stating a distractor fact |
 | `withheld_units` | yes | S4: the withheld units stating the gold facts |
 | `set_size` | yes | S3 |
+| `set_members` | no | S3: the entries of the gold set; the gold facts cover the whole hub, and the labeler counts members from this |
 | `material` | yes | S1: material or benign |
 | `majority_share` | yes | per template, not per question |
 
@@ -196,10 +205,14 @@ evaluation splits are published by id only until opened.
 A state is the set of unit ids seen so far. It is **sufficient** when every
 gold fact is stated by at least one seen unit — equivalently, when the seen
 units cover at least one minimal sufficient set (fixed 2026-09-26). Covers are
-computed on indexed units only, so an S4 state is never sufficient.
+computed on indexed units only, so an S4 state is never sufficient. For S3
+the gold facts are the whole hub, so sufficiency means the list is known
+complete, not only that every member was seen (PI-020).
 
-Insufficient states carry the question's subtype: `missing-hop` (S0, S1),
-`wrong-version` (S2), `truncated` (S3), `nonexistent` (S4). The labeler is a
+Insufficient states carry the question's subtype: `not-found` (S0; before
+2026-09-30 S0 shared `missing-hop` with S1, which mixed a control into S1's
+detector recall — PI-021), `missing-hop` (S1), `wrong-version` (S2),
+`truncated` (S3), `nonexistent` (S4). The labeler is a
 pure function over the registry, tested against hand-built golden trajectories
 (100% required, gate 7).
 
@@ -265,7 +278,9 @@ hash and each split's distributions. Seed `20260929`.
 identical gold chain form a **family**; a family belongs to one split. The
 anchor entity is the species X, the move M (S0-A2 to A4, S3) or the type pair
 (S0-B1). Identical chains join S2-A1 with S2-A2 and S4-A1 with S4-B1, the same
-learn fact asked two ways. 33,697 questions form 6,800 families. Every split is
+learn fact asked two ways; S4 families are keyed by withheld pair across
+templates, and S3-A1 and S3-B1 on one hub share a gold chain (PI-020). 32,300
+questions form 6,425 families. Every split is
 disjoint from every other, which is stricter than the registered rule (dev and
 train against eval-L1): eval-L2 and eval-L3 stay independent too. The
 splitter counts clashes per split; all are 0 of n.
@@ -289,10 +304,11 @@ Material questions used: S1-A1 57 of 64, S1-A2 85 of 96, S1-A3 46 of 53.
 
 **Draw.** Per template, a seeded permutation of its families; each pass takes
 at most one question per family, so a split covers as many anchors as it can
-before repeating one. S4 has 121 families (withheld pairs) for 242 questions
-demanded, so each split may claim families in proportion to its demand
-(eval-L1: 40 pairs for 80 questions); every other pool has more families than
-questions. S1 is material in every split except `eval-L1-benign`. Questions
+before repeating one. Two pools have fewer families than questions demanded,
+so each split may claim families in proportion to its demand: S4, 120
+withheld pairs for 242 questions (eval-L1: 39 pairs for 80), and S3, 65 moves
+for 242 (eval-L1: 21 moves, 41 hubs for 80). Questions within such a family
+are not independent: E-001's inference clusters them (PI-021). S1 is material in every split except `eval-L1-benign`. Questions
 the shortcut scan discarded never enter, and the splitter refuses to run while
 any is unresolved.
 
@@ -327,7 +343,7 @@ withheld pairs.
 
 Generated 2026-09-29 (`python -m agentic_pokedex.examiner.generate`; the
 question file is byte-identical across runs; regenerated the same day after
-PI-019). **33,697 questions** before splitting.
+PI-019 and PI-020). **32,300 questions** before splitting.
 
 | Template | Candidates | After filters | Kept (after cap) | Majority before → after | S1 material / benign |
 |---|---:|---:|---:|---|---|
@@ -343,8 +359,8 @@ PI-019). **33,697 questions** before splitting.
 | S2-A1 | 28,443 | 7,897 | 7,897 | 4% → 4% (cap 10%) |  |
 | S2-A2 | 24,618 | 2,893 | 2,893 | 1% → 1% (cap 10%) |  |
 | S2-B1 | 2,141 | 337 | 337 | 5% → 5% (cap 10%) |  |
-| S3-A1 | 12,730 | 1,961 | 1,961 | 0% → 0% (cap 10%) |  |
-| S3-B1 | 12,730 | 1,068 | 1,068 | 0% → 0% (cap 10%) |  |
+| S3-A1 | 12,730 | 1,002 | 1,002 | 1% → 1% (cap 10%) |  |
+| S3-B1 | 12,730 | 630 | 630 | 1% → 1% (cap 10%) |  |
 | S4-A1 | 1,662 | 1,479 | 1,479 | exempt (S4 answer: abstain) |  |
 | S4-B1 | 1,431 | 979 | 979 | exempt (S4 answer: abstain) |  |
 
@@ -356,8 +372,8 @@ Drops by reason:
 - **S2-A1:** ambiguous: level 0 or several levels 1,962; another group has the same level 16,986; no distractor: other groups do not list the move 1,375; no other group lists this learnset 223
 - **S2-A2:** ambiguous: level 0 or several moves at the level 2,162; another group has the same move at the level 13,407; no distractor: other groups list nothing at the level 5,933; no other group lists this learnset 223
 - **S2-B1:** ambiguous: several moves at the top level 73; another group has the same last move 1,508; no other group lists this learnset 223
-- **S3-A1:** a member's learnset is withheld 1,977; set size outside 3-25 6,677; single-unit shortcut 2,115
-- **S3-B1:** a member's learnset is withheld 1,977; set size outside 3-25 2; single-unit shortcut 1,244; the level cap removes no learner 399; too few learners for a level cap 8,040
+- **S3-A1:** a member's learnset is withheld 1,977; the whole hub fits in one tool call 9,238; set size outside 3-25 513
+- **S3-B1:** a member's learnset is withheld 1,977; the whole hub fits in one tool call 9,238; too few learners for a level cap 738; the level cap removes no learner 145; set size outside 3-25 2
 - **S4-A1:** ambiguous: level 0 or several levels 104; no distractor: other groups do not list the move 79
 - **S4-B1:** ambiguous: level 0 or several moves at the level 136; no distractor: other groups list nothing at the level 316
 
@@ -389,7 +405,7 @@ label trusts the registry; the scan checks that trust by reading text only.
   writes those values.
 
 Scan of 2026-09-29, rerun after PI-019: planted leaks flagged **160 of 160**;
-**1,272 of 33,697** questions flagged, in 18 classes, all read and resolved as
+**1,272 of 32,300** questions flagged, in 18 classes, all read and resolved as
 coincidence; **0 discarded**. S1-B1: 1,461 of 12,740 not scannable. (The first
 scan, before PI-019, flagged 1,286 of 33,719.)
 
@@ -406,7 +422,7 @@ scan, before PI-019, flagged 1,286 of 33,719.)
 | S1-B1 | 0 of 12,740 | | 1,461 not scannable |
 | S2-A1, S2-A2 | 0 of 7,897; 0 of 2,893 | | |
 | S2-B1 | 143 of 337 | Learnset · Moves (143) | the same move learned by machine or tutor |
-| S3-A1, S3-B1 | 0 of 1,961; 0 of 1,068 | | |
+| S3-A1, S3-B1 | 0 of 1,002; 0 of 630 | | |
 | S4-A1, S4-B1 | 0 of 1,479; 0 of 979 | | |
 
 A question can fall in more than one class. The first scan also flagged 10
@@ -467,14 +483,18 @@ least one dev question, or be unreachable by declared design. For each code the
 module finds a dev question and a reachable state (indexed units) whose label,
 computed by the labeler, is the one the code needs.
 
-Run of 2026-09-30 on dev: **13 of 13 codes reachable**, 1 declared; witness
-states hold 1–2 units (T_max = 6).
+Run of 2026-09-30 on dev (after PI-020 and PI-021): **14 of 14 codes
+reachable**, 1 declared; witness
+states hold 1–2 units (T_max = 6). These are reachable **states**, not
+replayed tool trajectories: a trajectory-level check under the tool contract
+(minimum calls to a sufficient state) is registered for Phase 3 (PI-021).
 
 | Code | Witness state (dev) | Label |
 |---|---|---|
+| not-found | an S0 question and a unit that does not answer it | insufficient (not-found) |
 | missing-hop, stop-missing-hop | one unit of an S1 chain | insufficient (missing-hop) |
 | wrong-version, accepted-wrong-version | another version's unit, the asked version's unseen | insufficient (wrong-version) |
-| truncated, accepted-truncated-set | the units of one member of an S3 set | insufficient (truncated) |
+| truncated, accepted-truncated-set | the units of one learner of an S3 hub | insufficient (truncated) |
 | nonexistent, answered-unanswerable | another version's unit for a withheld learnset | insufficient (nonexistent) |
 | abstained-with-sufficient, over-search, generation-error | an S0 question's gold unit, one step | sufficient |
 | never-reached | an S1 question no single unit makes sufficient | insufficient |

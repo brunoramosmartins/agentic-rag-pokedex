@@ -19,6 +19,7 @@ from agentic_pokedex.examiner.splits import (
     build_splits,
     eligible,
     families,
+    family_key,
     load_kept,
     opaque_id,
     open_split,
@@ -140,7 +141,9 @@ def test_anchor_keys() -> None:
     assert anchor_key(records["S3-B1"]) == "move:0"
     assert anchor_key(records["S0-B1"]) == "types:0,1"
     assert anchor_key(records["S1-B1"]) == "species:100"
-    assert anchor_key(records["S4-A1"]) == "species:100"
+    assert anchor_key(records["S4-A1"]) == "pair:100:gamma"
+    assert family_key(records["S4-A1"]) == family_key(records["S4-B1"])
+    assert family_key(records["S2-A1"]) != family_key(records["S2-A2"])
 
 
 def test_families_join_shared_chains_and_anchors() -> None:

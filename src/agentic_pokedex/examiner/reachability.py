@@ -112,6 +112,17 @@ def _answer_unit(
     return state_of
 
 
+def _off_target(registry: Registry) -> Callable[[Record, Gold], list[str]]:
+    """The first indexed unit that states none of the gold facts."""
+    indexed = sorted(registry.indexed_units())
+
+    def state_of(r: Record, gold: Gold) -> list[str]:
+        gold_units = {u for us in gold.cover.values() for u in us}
+        return [next(u for u in indexed if u not in gold_units)]
+
+    return state_of
+
+
 def _insufficient(subtype: str) -> Callable[[Gold, Sequence[str]], bool]:
     def accept(gold: Gold, state: Sequence[str]) -> bool:
         lab = label_state(gold, state)
@@ -141,6 +152,8 @@ def witnesses(
         texts: Unit id → twin text (for the correct-at-insufficient witness).
     """
     found: dict[str, tuple[Record, Gold, tuple[str, ...]] | None] = {
+        "not-found": _first(records, registry, "S0", _off_target(registry),
+                            _insufficient("not-found")),
         "missing-hop": _first(records, registry, "S1", _one_cover_unit,
                               _insufficient("missing-hop")),
         "wrong-version": _first(records, registry, "S2", _first_near_certain,
@@ -156,6 +169,7 @@ def witnesses(
                                  _insufficient("missing-hop")),
     }
     why = {
+        "not-found": "an S0 question and a unit that does not answer it",
         "missing-hop": "one unit of an S1 chain: a hop still missing",
         "wrong-version": "another version's unit, the asked version's unseen",
         "truncated": "one member of an S3 set",
@@ -165,6 +179,7 @@ def witnesses(
         "answer-visible": "a gold unit that shows the answer, the chain unfinished",
     }
     codes = {
+        "not-found": "not-found",
         "missing-hop": "missing-hop",
         "wrong-version": "wrong-version",
         "truncated": "truncated",

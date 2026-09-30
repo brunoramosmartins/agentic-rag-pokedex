@@ -60,6 +60,11 @@ after the fix, before the author opened it.
 
 ## `docs/examiner.md` and the benchmark v0
 
+E-001 red-team 2026-09-30: 8 blocking, 11 caveats. PI-020 (S3 closure label,
+one-call hubs dropped, S4 families by withheld pair) done and absorbed;
+PI-021 (clusters, O2, gate 8 n_max_eff = 448, taxonomy, trap states, A × B)
+written into E-001 as amendments, open for Phases 3–6.
+
 Reachability done 2026-09-30: 13 of 13 codes reachable on dev, `format-error`
 declared (`examiner/reachability.py`). Opening counts initialised at 0
 (`data/splits/openings.json`, `splits.open_split`).

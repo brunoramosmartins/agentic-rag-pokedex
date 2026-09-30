@@ -83,6 +83,8 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   upper limit of the 80% interval), before eval-L1 ids are frozen.
 - Branches (keep plan / draw more questions / descriptive claim) are fixed in
   measurability gate 8.
+- **Update 2026-09-30 (PI-021):** the n compared is n* times the cluster
+  design effect, against n_max_eff = min(n_max, 448).
 
 ## G5 — Last exit
 

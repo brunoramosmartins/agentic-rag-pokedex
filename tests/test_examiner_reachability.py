@@ -41,6 +41,7 @@ def texts(fixture_world_dir: Path) -> dict[str, str]:
 def test_every_code_has_a_witness(registry: Registry, texts: dict) -> None:
     found = witnesses(DEV, registry, texts)
     assert all(w is not None for w in found.values()), found
+    assert found["not-found"].label == "insufficient (not-found)"
     assert found["wrong-version"].label == "insufficient (wrong-version)"
     assert found["wrong-version"].state == ("move/2/learned-by/alpha-beta/0",)
     assert found["accepted-truncated-set"].state == (

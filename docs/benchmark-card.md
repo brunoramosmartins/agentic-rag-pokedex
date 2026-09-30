@@ -26,7 +26,7 @@ published, a model named the real species from 1 of 50 twin pages (E-003,
 | S0 | Nothing: one unit answers (control) | S0-A1 … A4, S0-B1 |
 | S1 | A missing hop (e.g., the anchor's own value is not the final form's) | S1-A1 … A3, S1-B1 |
 | S2 | Another version's learnset gives a different answer | S2-A1, S2-A2, S2-B1 |
-| S3 | A list truncated across units | S3-A1, S3-B1 |
+| S3 | A list longer than one tool call returns: only the whole list proves it complete | S3-A1, S3-B1 |
 | S4 | The answer was removed from the corpus: the right action is to abstain | S4-A1, S4-B1 |
 
 Group A templates are open to tuning; group B templates are held out
@@ -48,7 +48,7 @@ Group A templates are open to tuning; group B templates are held out
 | `withheld_value` | S4 only: the value the corpus does not contain |
 | `material` | S1: whether the gold answer differs from the anchor's own value |
 | `set_size` | S3: members of the gold set |
-| `gold_facts` | Opaque fact ids the answer is derived from (S1 in chain order) |
+| `gold_facts` | Opaque fact ids the answer is derived from (S1 in chain order; S3: every row of the move's hub, since only the whole list proves the set complete) |
 | `cover` | For each gold fact, the opaque ids of the indexed units that state it: a state is sufficient when every gold fact has a seen unit |
 | `near_certain_units` | S2 and S4: units stating another version's answer |
 | `withheld_units` | S4: the units removed from the corpus |
@@ -72,8 +72,8 @@ who runs the pipeline.
 
 ## Counts (v0)
 
-32,767 questions: dev 150, train 150, pool 32,467 (S0 2,959; S1 13,740; S2
-10,945; S3 2,847; S4 2,276). Held back: eval-L1 400, eval-L1-benign 40, val-B
+31,370 questions: dev 150, train 150, pool 31,070 (S0 2,959; S1 13,740; S2
+10,945; S3 1,450; S4 2,276). Held back: eval-L1 400, eval-L1-benign 40, val-B
 60, eval-L2 280, eval-L3 150. Per-template counts and every filter's N-of-M are
 in `docs/examiner.md`.
 
@@ -81,8 +81,10 @@ in `docs/examiner.md`.
 
 - Sufficiency labeler: 100% on hand-built golden trajectories.
 - Shortcut scan: 160 of 160 planted leaks flagged; 1,272 flagged questions,
-  all resolved as coincidences.
-- Every insufficiency subtype and error code reachable on dev.
+  all resolved as coincidences. The scan cannot flag set (S3) or abstain (S4)
+  answers.
+- Every insufficiency subtype and error code reachable on dev (as states; a
+  trajectory-level check under the tool contract follows).
 - Export: no raw fact or unit id in any field; no real name in any question or
   answer.
 - **Generator audit (G3):** pending — 60 stratified questions checked by hand
@@ -104,6 +106,11 @@ in `docs/examiner.md`.
   no page writes; the shortcut scan cannot check them.
 - **Residual structure.** A model named one species from a twin page by its
   structure alone (a three-stage line with a Mega form).
+- **Clustered questions.** S4 questions share withheld pairs and S3 questions
+  share moves (eval-L1: 39 pairs, 21 moves); questions in a cluster are not
+  independent.
+- **List cues.** Hub units split at exactly 20 rows; a full unit hints that
+  more follow (ADR-009, Updates).
 
 ## Intended use
 

@@ -88,6 +88,8 @@ class Question:
             (filled by ``attach_covers``).
         withheld_units: S4 only: the withheld units stating the gold facts.
         set_size: S3 only.
+        set_members: S3 only: the Pokémon entries of the gold set (the gold
+            facts cover the whole hub, members and not).
     """
 
     id: str
@@ -104,6 +106,7 @@ class Question:
     near_certain: list[str] = field(default_factory=list)
     withheld_units: list[str] = field(default_factory=list)
     set_size: int | None = None
+    set_members: list[int] = field(default_factory=list)
 
 
 @dataclass
@@ -113,6 +116,8 @@ class Context:
     world: World
     scope: tuple[str, ...]
     withheld: set[tuple[int, str]]
+    one_call_hubs: frozenset[tuple[int, str]] = frozenset()
+    """(move, group) hubs one tool call returns whole (PI-020)."""
 
     def hidden(self, pokemon: int) -> frozenset[int]:
         """Canonical hidden-ability keys of a Pokémon entry."""
@@ -351,18 +356,33 @@ def build_learnsets(
 def build_s3(
     template: str, rows: Rows, ctx: Context, drop: Counter[str]
 ) -> list[Question]:
-    """S3-A1 / S3-B1: the type-T learners of M in V (optionally up to level L)."""
+    """S3-A1 / S3-B1: the type-T learners of M in V (optionally up to level L).
+
+    Gold facts are every row of the (M, V) hub — each learner's levels and
+    types — not only the members': seeing the members does not prove that no
+    other type-T learner exists; only the whole list does (PI-020). Learners
+    whose learnset is withheld are not on the page and are left out.
+    """
     groups: dict[tuple[int, str, int], dict[int, dict[str, Any]]] = defaultdict(dict)
+    hubs: dict[tuple[int, str], dict[int, dict[str, Any]]] = defaultdict(dict)
     for r in rows:
         member = groups[(r["move"], r["version_group"], r["type"])].setdefault(
             r["pokemon"], {"slot": r["slot"], "levels": set()}
         )
         member["levels"].add(r["level"])
+        learner = hubs[(r["move"], r["version_group"])].setdefault(
+            r["pokemon"], {"types": {}, "levels": set()}
+        )
+        learner["types"][r["slot"]] = r["type"]
+        learner["levels"].add(r["level"])
     out = []
     low, high = S3_SIZE
     for (m, g, t), members in sorted(groups.items()):
         if any((p, g) in ctx.withheld for p in members):
             drop["a member's learnset is withheld"] += 1
+            continue
+        if (m, g) in ctx.one_call_hubs:
+            drop["the whole hub fits in one tool call"] += 1
             continue
         chosen, slots = dict(members), {"T": t, "M": m, "V": g}
         if template == "S3-B1":
@@ -380,17 +400,55 @@ def build_s3(
             drop["set size outside 3-25"] += 1
             continue
         facts = []
-        for p, v in sorted(chosen.items()):
-            levels = sorted(v["levels"])
-            if template == "S3-B1":
-                levels = [lv for lv in levels if lv <= slots["L"]]
-            facts += [learn_id(p, m, g, "level-up", lv) for lv in levels]
-            facts.append(ptype_id(p, v["slot"], t))
+        for p, v in sorted(hubs[(m, g)].items()):
+            if (p, g) in ctx.withheld:
+                continue
+            facts += [learn_id(p, m, g, "level-up", lv) for lv in sorted(v["levels"])]
+            facts += [ptype_id(p, slot, tt) for slot, tt in sorted(v["types"].items())]
         species = sorted(_species(ctx, p) for p in chosen)
         key = f"m={m},v={g},t={t}" + (f",l={slots['L']}" if "L" in slots else "")
         out.append(_q(template, key, slots=slots, answer=species, gold_facts=facts,
-                      set_size=len(species)))
+                      set_size=len(species), set_members=sorted(chosen)))
     return out
+
+
+def calls_to_read(
+    texts: Sequence[str], counter: Callable[[str], int], cap: int
+) -> int:
+    """Tool calls that return ``texts`` in order, under ``open_page``'s packing:
+    each call takes the next unit, then more while the joined text fits ``cap``."""
+    from agentic_pokedex.tools.contract import UNIT_SEPARATOR
+
+    calls, i = 0, 0
+    while i < len(texts):
+        calls += 1
+        joined = texts[i]
+        i += 1
+        while i < len(texts):
+            longer = UNIT_SEPARATOR.join([joined, texts[i]])
+            if counter(longer) > cap:
+                break
+            joined, i = longer, i + 1
+    return calls
+
+
+def one_call_hubs(
+    registry: Registry, pages: Iterable[Mapping[str, str]],
+    counter: Callable[[str], int], cap: int,
+) -> frozenset[tuple[int, str]]:
+    """(move, group) hubs that one call returns whole, in any naming."""
+    hubs: dict[tuple[int, str], list[tuple[int, str]]] = defaultdict(list)
+    for u in registry.units.values():
+        if u.section == "Learned by" and not u.withheld and u.version_group:
+            hubs[(u.key, u.version_group)].append((u.chunk, u.id))
+    pages = list(pages)
+    out = set()
+    for key, units in hubs.items():
+        ids = [uid for _, uid in sorted(units)]
+        if any(calls_to_read([texts[i] for i in ids], counter, cap) == 1
+               for texts in pages):
+            out.add(key)
+    return frozenset(out)
 
 
 BUILDERS: Mapping[str, Callable[..., list]] = {
@@ -576,6 +634,7 @@ def sample_moves(
 def generate(
     driver: Driver, world: World, registry: Registry, scope: Sequence[str],
     withheld: Iterable[tuple[int, str]], templates: Sequence[str] | None = None,
+    hubs_in_one_call: frozenset[tuple[int, str]] = frozenset(),
 ) -> tuple[list[Question], dict[str, Any]]:
     """Run every template and every filter.
 
@@ -583,7 +642,7 @@ def generate(
         The questions that pass, and per-template counts (candidates, each
         drop reason, the concentration cap summary, the S1 material split).
     """
-    ctx = Context(world, tuple(scope), set(withheld))
+    ctx = Context(world, tuple(scope), set(withheld), hubs_in_one_call)
     cache: dict[str, Rows] = {}
     questions: list[Question] = []
     report: dict[str, Any] = {}
@@ -643,9 +702,17 @@ def main(argv: list[str] | None = None) -> int:
     twin_map = TwinMap.load(args.twin_map)
     withheld = choose_withheld(world)
     wanted = args.template or ([args.show] if args.show else None)
+    from agentic_pokedex.tools.contract import TOKEN_CAP, default_counter
+
+    pages = []
+    for naming in ("twin", "real"):
+        with (args.world_dir / "pages" / f"{naming}.jsonl").open(
+                encoding="utf-8") as handle:
+            pages.append({r["id"]: r["text"] for r in map(json.loads, handle)})
+    in_one_call = one_call_hubs(registry, pages, default_counter(), TOKEN_CAP)
     with connect() as driver:
         questions, report = generate(driver, world, registry, VERSION_SCOPE,
-                                     withheld, wanted)
+                                     withheld, wanted, in_one_call)
 
     twin, real = Names.twin(world, twin_map), Names.real(world)
     twin_term = twin_map.to_twin("term", POKEMON_TERM)

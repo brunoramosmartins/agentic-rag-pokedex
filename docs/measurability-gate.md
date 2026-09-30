@@ -274,6 +274,14 @@ rehearsal**. There is no cap increase after the dress rehearsal.
   insufficiency subtype, with intervals, and the README states that the budget
   did not support a cost claim. Registered now, not negotiated later.
 
+**Update 2026-09-30 (PI-021, E-001 amendment of the same date).** Two inputs
+of this gate changed before any run. (1) eval-L1 questions are clustered
+(withheld pairs, S3 moves, S1 lines), so n* is multiplied by a design effect
+from the drawn cluster sizes, with ρ = 1 in S3 and S4 and the dress-rehearsal
+estimate elsewhere, and inference is by clusters. (2) Balanced growth stops at
+a pooled S1–S4 n of 448 (material S1): **n_max_eff = min(n_max, 448)**
+replaces n_max in the branches above, and n* > n_max_eff is row 0.
+
 **Futility (Phase 6, before the opening):** if the **upper 80% limit** of the
 O2 − A3 difference on dev S1–S4 is below 0.25, a gold-label stop applied to
 A3's own search would not reach the threshold. H1 is declared without room

@@ -1104,3 +1104,33 @@ before any upload. Decisions:
 - **Checks before writing:** no raw fact or unit id in any field, no real
   species, move, ability or type name in any question or answer (both checked
   on planted cases). v0: 32,767 questions (dev 150, train 150, pool 32,467).
+
+## 2026-09-30 — E-001 red-team after the examiner build
+
+The `experiment-redteam` review planned for after the templates read E-001
+against the built examiner: 8 blocking findings and 11 caveats. The claims
+that change data were checked before anything was proposed: 57 of 80 eval-L1
+S3 hubs fit in one 700-token call; withheld pair (442, scarlet-violet) sat in
+eval-L1 and eval-L3; E-001 names O2 in a table row only. The author approved
+all of it.
+
+**Plan impact PI-020:** Phase 2 — S3 assumed that seeing every member makes a state sufficient and that a set spread over two units needs two steps; S4 families assumed per template → seeing the members does not prove the list complete (only the whole (move, version) hub does), 57 of 80 eval-L1 S3 hubs fit in one 700-token call, and one withheld pair sat in eval-L1 and eval-L3 → S3 gold facts become every row of the hub (members still reported), S3 keeps only hubs longer than one call, S4 families are keyed by withheld pair; questions, scan, splits, golden trajectories and reachability regenerated, dev and train refrozen before any use. Open.
+
+Done the same day. Questions: 32,300 (S3-A1 1,002, S3-B1 630; 9,238 hub
+sets dropped as one-call). Scan: 160 of 160 planted leaks, 1,272 flagged, 0
+discarded. Splits refrozen: 6,425 families, 0 clashes; S3 now draws 242
+questions from 65 moves and S4 from 120 pairs, both capped in proportion
+(eval-L1: 21 moves, 41 hubs; 39 pairs). S3 golden trajectories rewritten for
+the closure label, with a new case: the only member seen, the list not yet
+proved complete. S0 got its own subtype, `not-found`. Reachability: 14 of 14
+codes. Benchmark v0 export: 31,370 questions. The G3 round in progress stays
+valid: gold answers did not change, only what proves an S3 set complete.
+
+**Plan impact PI-020 resolved:** absorbed — filters, labels and regenerated artifacts fit Phase 2; no hours or deliverables change.
+
+**Plan impact PI-021:** Phases 3–6 — E-001's analysis assumed independent questions, an operational O2, a gate 8 extension feasible up to n_max and an unambiguous error taxonomy → eval-L1 is clustered (S4 pairs, S3 moves, S1 lines), O2 had no decision rule and is mechanically ahead on S4, balanced growth stops at 448, codes overlapped → clusters with a cluster bootstrap and a design effect in gate 8, an O2 decision rule with per-stratum O2 − A3, n_max_eff = min(n_max, 448), the taxonomy as a decision list with golden tests for the assigner, trap-state precision and recall, a stratum-standardized A × B gap and a Phase 3 trajectory-level check; E-001 amended before its freeze, with 10 threats declared. Open.
+
+Still open inside PI-021: whether rows 0b, 6 and 7 read O2 − A3 on S1–S3
+rather than S1–S4, decided before the freeze. The new work (cluster
+inference, code assigner and its golden tests, trajectory-level check) lands
+in Phases 3 to 6 and is triaged at this phase's close.

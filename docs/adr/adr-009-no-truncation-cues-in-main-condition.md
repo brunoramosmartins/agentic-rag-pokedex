@@ -42,6 +42,20 @@ cue changes truncation detection — a practical finding for agent builders:
 
 ## Updates
 
+### 2026-09-30 — What the pages still say about a list's length
+
+A red-team of E-001 after the examiner build found residual cues in the main
+condition. Hub units split at exactly 20 rows, so a full unit hints that more
+follow and a short one that the list ended; units of one list share a header;
+and in page order the next version's header closes a list, which makes the end
+easier to see for x-y than for scarlet-violet, the last. Nothing states a
+count or a position, so the principle holds, but "nothing tells the agent" is
+too strong: these are declared threats (E-001, amendment of 2026-09-30), and
+each S3 step logs whether the last hub unit seen was full. Randomized chunk
+sizes would remove the first cue but change every cover; not done in v1. The
+same review moved S3 to hubs that one call cannot return whole (PI-020): a
+list read in one call was never truncated.
+
 ### 2026-09-29 — The principle behind this ADR, applied to absence
 
 A design review at the Phase 1 close generalized this decision into a

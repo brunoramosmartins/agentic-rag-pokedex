@@ -466,6 +466,117 @@ _Not run._
   unchanged (18 / 27 / 15 / 20); the gate 8 extension is now bounded at a
   pooled S1–S4 n of **448** (was 548). Splits redrawn with dev and train
   refrozen before any use. Plan impact PI-019.
+- **2026-09-30 — S3 closure, one-call hubs, S4 families (red-team after the
+  examiner build, before any run; Plan impact PI-020).**
+  1. S3 gold facts become every row of the (move, version) hub. Seeing every
+     member did not prove the list complete, so an agent that stopped early
+     and got lucky was labelled sufficient, and one that checked the end was
+     coded `over-search`. The S3 truncation mechanism now reads against the
+     closure label.
+  2. S3 keeps only hubs that one `open_page` call cannot return whole (57 of
+     80 eval-L1 S3 hubs could). Pools: S3-A1 1,002, S3-B1 630.
+  3. S4 families are keyed by withheld pair across templates: one pair sat in
+     eval-L1 and eval-L3.
+  Questions, scan, splits, golden trajectories and reachability regenerated;
+  dev and train refrozen before any use.
+- **2026-09-30 — analysis, oracles, sizing and taxonomy (same red-team,
+  approved by the author before any run; Plan impact PI-021).**
+  1. **O2, operational.** O2 runs A3's loop with the label as its detector:
+     at a sufficient state it answers, whatever A3 proposes; at an
+     insufficient state it vetoes "answer" and "abstain" and searches; at
+     T_max, or when B binds, without a sufficient state, it abstains.
+     O2 − A3 is reported per stratum beside rows 0b, 6 and 7. S4 is never
+     sufficient, so O2 abstains on every S4 question and O2 − A3 there is
+     mechanically C(A3) − 1: **whether rows 0b, 6 and 7 read S1–S3 instead of
+     S1–S4 is decided before the freeze** and recorded here. **O1** runs on
+     S0–S3 only (S4 has no gold units to give).
+  2. **Clusters.** Before the opening, eval-L1 questions are grouped into
+     clusters: withheld pair (S4), move (S3), final form of the line (S1-A1
+     to A3), move (S0-A2 to A4), type pair (S0-B1), anchor species otherwise;
+     connected components across templates. The cluster file is hashed in the
+     freeze manifest; the cluster count is published. Inference becomes a
+     **stratified cluster bootstrap** (clusters resampled within stratum; BCa
+     acceleration from a cluster jackknife) and **sign-flips of cluster
+     sums**; per-stratum readings need ≥ 10 **discordant clusters**; mediation
+     and decomposition intervals use the same resampling; detector precision
+     and recall intervals are clustered by question.
+  3. **Gate 8.** n* is multiplied by a design effect from the drawn eval-L1
+     cluster sizes: 1 + (m̄ − 1)ρ per stratum, weighted by stratum size, with
+     ρ = 1 in S3 and S4 (conservative) and ρ from the dress rehearsal (upper
+     80% limit) elsewhere. **n_max_eff = min(n_max, 448)**: balanced growth
+     stops at a pooled S1–S4 n of 448 (material S1, PI-019), and n* above
+     n_max_eff is row 0. n_max prices the S0 questions the extension adds;
+     the benign slice does not grow.
+  4. **Error taxonomy as a decision list**, first match wins, with golden
+     tests for the assigner among the instrument prerequisites:
+     (1) unparseable output → `format-error`;
+     (2) abstained at a sufficient state → `abstained-with-sufficient`;
+     (3) abstained otherwise → no error code (`abstained`; correct in S4);
+     (4) answered in S4 → `answered-unanswerable`;
+     (5) answered correctly at an insufficient state → `correct-at-insufficient`;
+     (6) answered wrong with a distractor's value in S2 → `accepted-wrong-version`;
+     (7) answered wrong with a strict subset of the gold set in S3 →
+     `accepted-truncated-set`;
+     (8) answered wrong at an insufficient state in S0 or S1 →
+     `stop-missing-hop`;
+     (9) answered wrong at a sufficient state → `generation-error`;
+     (10) anything else → `wrong-other` (residual, counted and sampled).
+     `over-search` and `never-reached` are flags beside the code, not codes.
+     S0's insufficient states get their own subtype, `not-found`.
+  5. **Detector precision and recall** are read primarily on **trap
+     states**: S2 and S4 with a near-certain unit seen and the gold unseen; S1
+     with at least one gold fact covered; S3 with at least one hub unit seen.
+     All insufficient states are a secondary reading.
+  6. **A × B gap**, stratum-standardized: within-stratum (A − B), averaged with
+     equal stratum weights, published only in aggregate, with and without S4.
+     S4-B1 shares S2-A2's wording by design (S4 reads like S2), so its wording
+     is not held out.
+  7. **Trajectory-level check** (Phase 3, before dev is first used): under the
+     tool contract, the minimum calls and tokens from the question to a
+     sufficient state, per eval-L1 question, published N-of-M with one call and
+     with more than T_max or B.
+  8. **The Configuration reads with its amendments:** equal numbers per
+     template are superseded in S1 (PI-018/PI-019); "no question in any stratum
+     has a withheld unit in its gold chain" means no question outside S4. The
+     population adds **eval-L1-benign** (40 benign S1 questions; arms A3, A4,
+     A4p; its own opening count; A4p's dose on it from A4's steps on the same
+     slice). The freeze manifest adds the hashes of the question file, the
+     registry, the withheld set, the labeler, the code assigner,
+     `data/splits/manifest.json` and the cluster file, and per-template counts.
+- **2026-09-30 — declared threats (same red-team).** Declared, with the
+  measurement where one is cheap:
+  1. *Material is defined against the anchor only.* A middle form often shares
+     the final form's value, so a stop at hop 2 of 3 can score C = 0. The
+     share of strictly material questions (gold differs from every non-final
+     node) is published N-of-M; `correct-at-insufficient` is split by the node
+     answered from.
+  2. *Truncation cues remain.* Hubs split at exactly 20 rows (a full unit hints
+     that more follow), units of one list share a header, and the next
+     version's header closes a list. Logged per S3 step: whether the last hub
+     unit seen was full (ADR-009, Updates).
+  3. *S2 is mostly a Scarlet/Violet estimand* (49 of 80 in eval-L1) and
+     measures wrong-version where versions disagree; S2 is reported by version
+     group; S4's version mix differs from S2's.
+  4. *The estimand mixes weights:* S1 group A by material pool, other strata by
+     equal template shares. S1-B1 is all of S1's group B: a join, not a chain,
+     from 40 sampled moves.
+  5. *The benign slice* mostly measures the cost of vetoing lucky stops (the
+     anchor-only state is the same for benign and material questions); its
+     template mix differs from material S1's, so it is compared within
+     template.
+  6. *Overlap below the family level:* dev and eval-L1 may share gold facts
+     (overlapping chains, one hub's A1 and B1). Prompts carry no world content
+     from any split; the N-of-M of eval-L1 questions sharing a gold fact with
+     dev or train is published.
+  7. *The sizing SD comes from dev* — group A only, where prompts are tuned —
+     while eval-L1 is 36% group B.
+  8. *Gold errors favour the arm that abstains more* (a wrong gold turns a
+     correct answer into λ, an abstention stays at 1); G3 samples about three
+     questions per template.
+  9. *The shortcut scan cannot flag set answers (S3) or abstentions (S4);* its
+     zeros there are trivially true.
+  10. *S1-B1 is a join of three facts,* not a chain with a plausible early
+      answer; its lucky-stop rate is mostly a ×1 guess.
 
 ---
 
