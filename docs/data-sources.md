@@ -195,6 +195,15 @@ Anyone can reproduce the corpus with the pinned commit + the generator + the
 seeds. Twin names are seeded pseudo-words filtered against real names, which
 also keeps trademarks out of the published files.
 
+**Opaque ids (amended 2026-09-30).** Question, fact and unit ids carry
+PokéAPI ids (`learn:6:53:x-y:level-up:1`, `species/6/profile`), and a PokéAPI
+id maps a twin name back to its real one. Published files use opaque ids
+(`q-`, `f-`, `u-` + hex of sha256 of the public seed and the local id); a
+rebuilt corpus computes the same ids. Rows are sorted by opaque id, since
+generation order follows PokéAPI ids. **Evaluation splits** are published by
+id only until each has been opened; their questions follow with the opening
+counts. Card: `docs/benchmark-card.md`.
+
 **Documentation examples (amended 2026-09-29).** Docs and the README may show
 a few twin-side rendered pages or units as examples (`docs/world.md` shows one
 page per entity type; later phases render cases of prompt, evidence and

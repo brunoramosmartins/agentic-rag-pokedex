@@ -174,6 +174,9 @@ Applied in this order; each publishes N-of-M per template.
 
 ## The question record
 
+Published fields carry opaque ids (`q-`, `f-`, `u-`; `docs/benchmark-card.md`);
+evaluation splits are published by id only until opened.
+
 | Field | Published | Notes |
 |---|---|---|
 | `id`, `stratum`, `template`, `surface` | yes | |

@@ -64,6 +64,10 @@ Reachability done 2026-09-30: 13 of 13 codes reachable on dev, `format-error`
 declared (`examiner/reachability.py`). Opening counts initialised at 0
 (`data/splits/openings.json`, `splits.open_split`).
 
+Benchmark v0 export (`examiner/benchmark.py`) and card (`docs/benchmark-card.md`)
+done 2026-09-30, opaque ids for questions, facts and units; upload waits for
+G3.
+
 ---
 
 ## Lessons Learned

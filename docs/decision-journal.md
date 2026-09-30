@@ -1082,3 +1082,25 @@ gate 8 extension now stops at 32 extra per stratum, a pooled S1–S4 n of 448
   independent source first (Bulbapedia, Serebii per game, PokémonDB; never a
   site built on PokéAPI) and reads the chain only to locate a disagreement.
   The sources per template are in `docs/examiner.md` → G3 audit.
+
+## 2026-09-30 — Benchmark v0 export and card
+
+`examiner/benchmark.py` exports the benchmark v0 locally
+(`data/world/benchmark/v0/`); `docs/benchmark-card.md` is its card, written
+before any upload. Decisions:
+
+- **Opaque fact and unit ids** (approved by the author), like question ids:
+  `f-`/`u-` + 12 hex of sha256(seed:id). Raw ids carry PokéAPI ids, which map
+  twin names back to real ones. A rebuilt corpus computes the same ids.
+- **Two more orderings leaked the same map** and were closed while building:
+  rows came out in PokéAPI id order (national dex order: the first S0-A1 rows
+  named species 1, 2, 3), and S3 gold facts listed members by PokéAPI id. Rows
+  are sorted by opaque id; gold facts keep chain order in S1 only, where the
+  order is the chain, and are sorted elsewhere.
+- **Evaluation splits by id only until opened.** Publishing their answers
+  before the project measures on them would add a contamination path for no
+  gain; they follow with the opening counts. `--include-evaluation` exists for
+  that later release.
+- **Checks before writing:** no raw fact or unit id in any field, no real
+  species, move, ability or type name in any question or answer (both checked
+  on planted cases). v0: 32,767 questions (dev 150, train 150, pool 32,467).
