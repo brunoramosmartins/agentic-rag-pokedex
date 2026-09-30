@@ -458,6 +458,14 @@ _Not run._
   is implemented on families (shared (template, anchor entity) pair or
   identical gold chain) and applied between every pair of splits. Decided from
   pool counts; no outcome data exists. Plan impact PI-018.
+- **2026-09-29 — the S1 pools shrink (Phase 2 G3 preparation, before any
+  run).** S1 lines through an evolution only a non-default form makes
+  (Cursola, Sirfetch'd, Mr. Rime, Obstagoon, Overqwil, Basculegion) are
+  dropped: their gold answers are wrong for the default form the question
+  names. Material pools become 64 / 96 / 53; the eval-L1 allocation is
+  unchanged (18 / 27 / 15 / 20); the gate 8 extension is now bounded at a
+  pooled S1–S4 n of **448** (was 548). Splits redrawn with dev and train
+  refrozen before any use. Plan impact PI-019.
 
 ---
 

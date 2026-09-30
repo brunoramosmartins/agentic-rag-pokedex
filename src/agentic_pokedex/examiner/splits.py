@@ -34,6 +34,7 @@ Usage::
 
     python -m agentic_pokedex.examiner.splits
     python -m agentic_pokedex.examiner.splits --eval-l1-extra 20   # gate 8
+    python -m agentic_pokedex.examiner.splits --refreeze   # before any use only
 """
 
 from __future__ import annotations
@@ -457,6 +458,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--splits-dir", type=Path, default=DEFAULT_SPLITS_DIR)
     parser.add_argument("--eval-l1-extra", type=int, default=0,
                         help="extra eval-L1 questions per stratum (gate 8)")
+    parser.add_argument("--refreeze", action="store_true",
+                        help="rewrite frozen splits; only before any use, with a "
+                        "journal entry saying why")
     args = parser.parse_args(argv)
 
     records = load_kept(args.world_dir)
@@ -484,7 +488,8 @@ def main(argv: list[str] | None = None) -> int:
           + "   clash")
     for name, qids in splits.items():
         digest = write_split(args.splits_dir / f"{name}.txt",
-                             [opaque[q] for q in qids], frozen[name])
+                             [opaque[q] for q in qids],
+                             frozen[name] and not args.refreeze)
         info = describe(qids, by_id)
         manifest["splits"][name] = {"frozen": frozen[name], "sha256": digest,
                                     "allocation": report["allocation"][name], **info}

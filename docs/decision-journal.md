@@ -1021,3 +1021,44 @@ per stratum (137, pooled 548) and fails at 58; material questions used by the
 base splits are 57 of 70, 85 of 104 and 46 of 57.
 
 **Plan impact PI-018 resolved:** absorbed — E-001 amended (draft, before its freeze), the splitter implements the proportional S1 allocation and the bounded extension; no sizes, hours or phases change. If Phase 3 puts n_max above 548, the gap is recorded then.
+
+## 2026-09-29 — S1: only evolutions the default form makes
+
+Preparing the G3 sheet, a drawn question asked for "the final form of
+Corsola's evolution line", gold Cursola. PokéAPI links evolutions per species;
+in the game only Galarian Corsola evolves, and Corsola as its Profile shows it
+does not. PokéAPI records this: `pokemon_evolution.csv` at the pinned commit
+names the form that must evolve (`required_pokemon_form_id`). Ten evolutions
+need a non-default form; four sit on branching lines S1 already excluded
+(Perrserker, Runerigus, Sneasler, Clodsire), six do not (Cursola, Sirfetch'd,
+Mr. Rime, Obstagoon, Overqwil, Basculegion).
+
+**Plan impact PI-019:** Phase 2 — S1 assumed every species-level evolution in PokéAPI is one the anchor's default form makes → 6 single-child evolutions need a regional or variant form (`required_pokemon_form_id` in `pokemon_evolution.csv`), so 18 material S1 gold answers are wrong for the default form → the examiner drops chains through form-only evolutions, `pokemon_evolution.csv` joins the pinned download, questions, scan and splits are regenerated with dev and train refrozen before any use, and the gate 8 ceiling of PI-018 is re-measured. Open.
+
+Escalated the day it was found (it touches the phase in progress and a frozen
+split). The author chose, of two options:
+
+- **A (taken): drop at the examiner.** `world/pokeapi.form_only_evolutions`
+  reads the CSV; S1-A1 and S1-A2 drop a line through such an evolution, S1-A3
+  a next form reached that way (22 questions: 8, 8 and 6; 18 material).
+- **B: fix the world** (Corsola's Profile "Evolves into: —", the evolution on
+  Galarian Corsola's Form unit). More faithful, but a new fact kind and a
+  re-render of Phase 1 pages. The corpus keeps PokéAPI's species link as a
+  declared simplification no question depends on.
+
+The author also fixed the G3 standard: a gold answer is correct when it
+matches the game for the question as asked (named version group, default
+form), not merely PokéAPI — the stricter reading, since eval-L3 asks in real
+names and a model that knows the game would contest the gold.
+
+Regenerated the same day: 33,697 questions (was 33,719); material S1 pools 64
+/ 96 / 53. The shortcut scan, rerun: 160 of 160 planted leaks, 1,272
+questions flagged in the same 18 classes, 0 discarded — and the 10 material S1
+questions the first scan flagged in Form classes are gone: they were exactly
+these lines (a regional form sharing the final form's value). Splits redrawn
+with `--refreeze`: 6,800 families, 0 clashes; allocations unchanged; dev and
+train changed in their S1 draws only (24 and 22 ids), before any use. The
+gate 8 extension now stops at 32 extra per stratum, a pooled S1–S4 n of 448
+(PI-018 measured 548).
+
+**Plan impact PI-019 resolved:** absorbed — the filter, the pinned CSV and the regenerated questions, scan and splits fit Phase 2; E-001 amended (draft). The lower growth bound (448) is compared with n_max when Phase 3 computes it.

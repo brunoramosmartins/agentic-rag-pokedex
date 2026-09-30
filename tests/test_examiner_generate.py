@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import re
 from collections import Counter
 from pathlib import Path
@@ -135,6 +136,18 @@ def test_s1_final_form_types(world: World) -> None:
     (out,) = build_s1_final("S1-A2", rows, ctx(world), Counter())
     assert out.answer == [2, 3] and out.anchor_answer == [3] and out.material
     assert out.gold_facts[-2:] == ["ptype:3:1:3", "ptype:3:2:2"]
+
+
+def test_s1_drops_evolutions_that_need_a_non_default_form(world: World) -> None:
+    # As if Sproutree evolved only from a regional form of Sprout.
+    formed = dataclasses.replace(world, form_only=frozenset({3}))
+    drop: Counter[str] = Counter()
+    rows = [{"anchor": 1, "anchor_pokemon": 1, "line": [1, 2, 3], "final_pokemon": 3}]
+    assert build_s1_final("S1-A1", rows, ctx(formed), drop) == []
+    nxt = [{"anchor": 2, "anchor_pokemon": 2, "next": 3, "next_pokemon": 3}]
+    assert build_s1_next("S1-A3", nxt, ctx(formed), drop) == []
+    assert drop == {"the line needs a non-default form to evolve": 2}
+    assert world.form_only == frozenset()  # the fixture has none
 
 
 def test_s1_next_form(world: World) -> None:

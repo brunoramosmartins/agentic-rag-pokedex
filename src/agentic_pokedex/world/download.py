@@ -83,6 +83,9 @@ MANIFEST: Mapping[str, str] = {
         "685230c51074cf2f723debcf827a4df4c36ab0ec7e929c806ad65a3e40958705",
     "version_names.csv":
         "23e3e9062f98e1f83d475b9eeac57ddff4375b46c175948a65c4fe8d3e1d87b4",
+    # Added in Phase 2: which evolutions need a non-default form (PI-019).
+    "pokemon_evolution.csv":
+        "66495e349599befb48ef677e2c34c3d1aa0288e83b99277d944bbf495a743341",
 }
 """File name → SHA-256 at ``POKEAPI_COMMIT``. The single source of truth."""
 

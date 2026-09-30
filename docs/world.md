@@ -28,7 +28,7 @@ chain shapes and one more source to validate.
 ## Build
 
 ```bash
-python -m agentic_pokedex.world.download     # 23 CSVs + word list, SHA-256 checked
+python -m agentic_pokedex.world.download     # 24 CSVs + word list, SHA-256 checked
 python -m agentic_pokedex.world.load_graph   # replaces the Neo4j database
 python -m agentic_pokedex.world.coverage     # learnset coverage report
 python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json

@@ -52,6 +52,12 @@ extra per stratum.
 
 ## G3 audit — 60 stratified questions
 
+`examiner/audit.py`: `draw --round N` writes a local sheet (real names), 12
+per stratum from outside the evaluation splits, one per family, S1 material;
+`score --round N` reads the verdicts (pass: ≥ 58 of 60). Preparing round 1
+surfaced PI-019 (S1 lines through form-only evolutions); round 1 was redrawn
+after the fix, before the author opened it.
+
 ## `docs/examiner.md` and the benchmark v0
 
 ---

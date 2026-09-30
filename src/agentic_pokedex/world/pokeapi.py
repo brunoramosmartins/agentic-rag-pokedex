@@ -59,6 +59,7 @@ class WorldTables:
     pokemon_abilities: list[Record] = field(default_factory=list)
     moves: list[Record] = field(default_factory=list)
     flavor_texts: list[Record] = field(default_factory=list)
+    form_only_evolutions: set[int] = field(default_factory=set)
     dropped: Counter[str] = field(default_factory=Counter)
 
 
@@ -156,6 +157,33 @@ def _pokemon_names(
     return names
 
 
+def form_only_evolutions(raw_dir: Path) -> set[int]:
+    """Species reached only by evolving a non-default form of their parent.
+
+    ``pokemon_evolution.csv`` names, per evolution method, the form that must
+    evolve (``required_pokemon_form_id``). A species is form-only when every
+    method requires a form other than the default form of the parent's default
+    entry: Cursola evolves from Galarian Corsola, never from Corsola as its
+    Profile shows it. The species graph keeps the link; S1 questions do not
+    use it (PI-019).
+    """
+    default_pokemon = {
+        int(r["id"]) for r in read_csv(raw_dir, "pokemon.csv") if _bool(r["is_default"])
+    }
+    default_forms = {
+        int(r["id"]) for r in read_csv(raw_dir, "pokemon_forms.csv")
+        if _bool(r["is_default"]) and int(r["pokemon_id"]) in default_pokemon
+    }
+    required: dict[int, list[int | None]] = {}
+    for row in read_csv(raw_dir, "pokemon_evolution.csv"):
+        species = int(row["evolved_species_id"])
+        required.setdefault(species, []).append(_int(row["required_pokemon_form_id"]))
+    return {
+        species for species, forms in required.items()
+        if all(f is not None and f not in default_forms for f in forms)
+    }
+
+
 def read_world(raw_dir: Path) -> WorldTables:
     """Read and filter every table except learnsets.
 
@@ -214,6 +242,8 @@ def read_world(raw_dir: Path) -> WorldTables:
         parent = _int(row["evolves_from_species_id"])
         if parent is not None:
             t.evolutions.append({"species_id": sid, "from_species_id": parent})
+
+    t.form_only_evolutions = form_only_evolutions(raw_dir)
 
     # Pokémon entries (forms).
     pokemon_rows = list(read_csv(raw_dir, "pokemon.csv"))

@@ -181,6 +181,9 @@ def build_s1_final(
     out = []
     for r in rows:
         line, fp, xp = r["line"], r["final_pokemon"], r["anchor_pokemon"]
+        if any(s in ctx.world.form_only for s in line[1:]):
+            drop["the line needs a non-default form to evolve"] += 1
+            continue
         path = _evo_facts(line) + [evoend_id(line[-1])]
         if template == "S1-A1":
             gold_keys = ctx.hidden(fp)
@@ -209,6 +212,9 @@ def build_s1_next(
     """S1-A3: the hidden ability of the single species X evolves into."""
     out = []
     for r in rows:
+        if r["next"] in ctx.world.form_only:
+            drop["the line needs a non-default form to evolve"] += 1
+            continue
         gold_keys = ctx.hidden(r["next_pokemon"])
         if len(gold_keys) != 1:
             drop["next form has no single hidden ability"] += 1

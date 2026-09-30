@@ -37,9 +37,9 @@ Group A templates are visible to all tuning; group B templates are held out
 
 | ID | Question | Hop that must be taken | Anchors | Material |
 |---|---|---|---:|---:|
-| S1-A1 | Hidden ability of the final form of X's evolution line | X → final form | 405 | 70 |
-| S1-A2 | Types of the final form of X's evolution line | X → final form | 434 | 104 |
-| S1-A3 | Hidden ability of the species X evolves into | X → next form | 405 | 57 |
+| S1-A1 | Hidden ability of the final form of X's evolution line | X → final form | 397 | 64 |
+| S1-A2 | Types of the final form of X's evolution line | X → final form | 426 | 96 |
+| S1-A3 | Hidden ability of the species X evolves into | X → next form | 399 | 53 |
 | S1-B1 | Type damage multiplier of move M against species X | M → its type; X → its types; the type chart | many | all |
 
 - **Anchor answer:** the same attribute read on X itself (X's hidden ability,
@@ -54,9 +54,19 @@ Group A templates are visible to all tuning; group B templates are held out
   itself a registered fact). With the whole evolution line on every Profile,
   the final form's Profile held both the anchor and the answer, and the
   single-unit shortcut filter discarded every evolution-based S1 question
-  (PI-017). With forward links, all 405 S1-A1 anchors need at least two units.
+  (PI-017). With forward links, all 397 S1-A1 anchors need at least two units.
   A pre-evolution template is impossible in any design — the parent's Profile
   names X and holds the answer — so it was dropped.
+- **Only evolutions the default form makes are hops (PI-019).** PokéAPI links
+  evolutions per species, but `pokemon_evolution.csv` names the form that
+  must evolve (`required_pokemon_form_id`). Six single-child evolutions need a
+  regional or variant form — Cursola (Galarian Corsola), Sirfetch'd, Mr. Rime,
+  Obstagoon, Overqwil (Hisuian Qwilfish), Basculegion (white-striped
+  Basculin) — so "the final form of Corsola's line" is Cursola in the graph and
+  nothing in the game, where Corsola as its Profile shows it does not evolve.
+  A line through such an evolution is dropped (22 questions, 18 of them
+  material). The corpus keeps PokéAPI's species link ("Evolves into:
+  [[Cursola]]"): a declared simplification no question depends on.
 - S1-B1 multiplies type factors only (abilities that change effectiveness are
   outside the question): ×0, ×0.25, ×0.5, ×1, ×2, ×4.
 
@@ -143,7 +153,8 @@ Applied in this order; each publishes N-of-M per template.
    are not answers; branching lines have no single final form (S1-A1, S1-A2
    excluded there; S1-A3 needs a single next form); non-default forms are never
    anchors or answers; S3 avoids hubs whose gold set includes a withheld
-   species.
+   species; S1 lines never pass an evolution only a non-default form makes
+   (PI-019).
 3. **Ambiguity.** The answer is unique (one level, one move at level L, one
    final form, one last move).
 4. **Stratum conditions.** S1 material/benign tag; S2 distractor present;
@@ -251,7 +262,7 @@ hash and each split's distributions. Seed `20260929`.
 identical gold chain form a **family**; a family belongs to one split. The
 anchor entity is the species X, the move M (S0-A2 to A4, S3) or the type pair
 (S0-B1). Identical chains join S2-A1 with S2-A2 and S4-A1 with S4-B1, the same
-learn fact asked two ways. 33,719 questions form 6,822 families. Every split is
+learn fact asked two ways. 33,697 questions form 6,800 families. Every split is
 disjoint from every other, which is stricter than the registered rule (dev and
 train against eval-L1): eval-L2 and eval-L3 stay independent too. The
 splitter counts clashes per split; all are 0 of n.
@@ -259,8 +270,9 @@ splitter counts clashes per split; all are 0 of n.
 **Sizes.** Each stratum's size is split evenly across its templates by
 largest remainder, group A first (S2 in eval-L1: 27 / 27 / 26; S0 in dev:
 8 / 8 / 7 / 7). In S1, the group-A share is then split across S1-A1 to A3 in
-proportion to their material pools, 70 / 104 / 57 (PI-018): equal shares do not
-fit S1-A3 (57 material questions against 63 demanded). S1-B1 keeps its even
+proportion to their material pools, 64 / 96 / 53 (PI-018, PI-019): equal
+shares do not fit S1-A3 (53 material questions against 63 demanded). S1-B1
+keeps its even
 share, so the A/B proportion does not change.
 
 | Split | S1-A1 | S1-A2 | S1-A3 | S1-B1 |
@@ -270,7 +282,7 @@ share, so the A/B proportion does not change.
 | eval-L2 | 14 | 20 | 11 | 15 |
 | eval-L3 | 7 | 10 | 6 | 7 |
 
-Material questions used: S1-A1 57 of 70, S1-A2 85 of 104, S1-A3 46 of 57.
+Material questions used: S1-A1 57 of 64, S1-A2 85 of 96, S1-A3 46 of 53.
 
 **Draw.** Per template, a seeded permutation of its families; each pass takes
 at most one question per family, so a split covers as many anchors as it can
@@ -283,8 +295,9 @@ any is unresolved.
 
 **Gate 8 extension.** `--eval-l1-extra N` adds N questions per stratum to
 eval-L1, drawn after every other split: the other splits and the first 400
-eval-L1 questions do not change. Material S1 caps it at N = 57 (137 per
-stratum, a pooled S1–S4 n of 548); at N = 58 S1-A2 runs out.
+eval-L1 questions do not change. Material S1 caps it at N = 32 (112 per
+stratum, a pooled S1–S4 n of 448); at N = 33 S1-A1 runs out. (Before PI-019
+the cap was N = 57, a pooled n of 548.)
 
 **Ids.** `q-` + the first 10 hex digits of sha256(`20260929:{question id}`).
 The seed is public, so anyone running the splitter can map them back; the
@@ -304,8 +317,8 @@ withheld pairs.
 ## Counts
 
 Generated 2026-09-29 (`python -m agentic_pokedex.examiner.generate`; the
-question file is byte-identical across runs). **33,719 questions** before
-splitting.
+question file is byte-identical across runs; regenerated the same day after
+PI-019). **33,697 questions** before splitting.
 
 | Template | Candidates | After filters | Kept (after cap) | Majority before → after | S1 material / benign |
 |---|---:|---:|---:|---|---|
@@ -314,9 +327,9 @@ splitting.
 | S0-A3 | 833 | 833 | 833 | 40% → 40% (cap 50%) |  |
 | S0-A4 | 833 | 833 | 713 | 23% → 10% (cap 10%) |  |
 | S0-B1 | 324 | 324 | 192 | 63% → 38% (cap 38%) |  |
-| S1-A1 | 434 | 405 | 405 | 3% → 3% (cap 10%) | 70 / 335 |
-| S1-A2 | 434 | 434 | 434 | 6% → 6% (cap 10%) | 104 / 330 |
-| S1-A3 | 438 | 405 | 405 | 2% → 2% (cap 10%) | 57 / 348 |
+| S1-A1 | 434 | 397 | 397 | 3% → 3% (cap 10%) | 64 / 333 |
+| S1-A2 | 434 | 426 | 426 | 6% → 6% (cap 10%) | 96 / 330 |
+| S1-A3 | 438 | 399 | 399 | 3% → 3% (cap 10%) | 53 / 346 |
 | S1-B1 | 41,000 | 41,000 | 12,740 | 57% → 25% (cap 25%) | 12,740 / 0 |
 | S2-A1 | 28,443 | 7,897 | 7,897 | 4% → 4% (cap 10%) |  |
 | S2-A2 | 24,618 | 2,893 | 2,893 | 1% → 1% (cap 10%) |  |
@@ -328,8 +341,9 @@ splitting.
 
 Drops by reason:
 
-- **S1-A1:** final form has no single hidden ability 29
-- **S1-A3:** next form has no single hidden ability 33
+- **S1-A1:** final form has no single hidden ability 29; the line needs a non-default form to evolve 8
+- **S1-A2:** the line needs a non-default form to evolve 8
+- **S1-A3:** next form has no single hidden ability 33; the line needs a non-default form to evolve 6
 - **S2-A1:** ambiguous: level 0 or several levels 1,962; another group has the same level 16,986; no distractor: other groups do not list the move 1,375; no other group lists this learnset 223
 - **S2-A2:** ambiguous: level 0 or several moves at the level 2,162; another group has the same move at the level 13,407; no distractor: other groups list nothing at the level 5,933; no other group lists this learnset 223
 - **S2-B1:** ambiguous: several moves at the top level 73; another group has the same last move 1,508; no other group lists this learnset 223
@@ -365,9 +379,10 @@ label trusts the registry; the scan checks that trust by reading text only.
 - **Not scannable:** S1-B1 questions whose multiplier is ×4 or ×0.25; no page
   writes those values.
 
-First scan, 2026-09-29: planted leaks flagged **160 of 160**; **1,286 of
-33,719** questions flagged, in 18 classes, all read and resolved as
-coincidence; **0 discarded**. S1-B1: 1,461 of 12,740 not scannable.
+Scan of 2026-09-29, rerun after PI-019: planted leaks flagged **160 of 160**;
+**1,272 of 33,697** questions flagged, in 18 classes, all read and resolved as
+coincidence; **0 discarded**. S1-B1: 1,461 of 12,740 not scannable. (The first
+scan, before PI-019, flagged 1,286 of 33,719.)
 
 | Template | Flagged | Classes (questions) | What the flagged statement says |
 |---|---:|---|---|
@@ -376,20 +391,41 @@ coincidence; **0 discarded**. S1-B1: 1,461 of 12,740 not scannable.
 | S0-A3 | 0 of 833 | | |
 | S0-A4 | 611 of 713 | Learned by · entry (611) | a learner of the move has the move's type |
 | S0-B1 | 149 of 192 | six Matchups line kinds (22–72 each) | a third type's line lists both types |
-| S1-A1 | 16 of 405 | Form · Abilities (13); Holders · entry (7) | a form's, or the anchor's own, hidden ability (benign 14, material 2) |
-| S1-A2 | 249 of 434 | Learned by · entry (240); Form · Types (17) | the anchor's own types in a learner list (benign 240); a form's types (material 6) |
-| S1-A3 | 18 of 405 | Form · Abilities (14); Holders · entry (8) | as S1-A1 (material 2) |
+| S1-A1 | 12 of 397 | Form · Abilities (9); Holders · entry (5) | a form's, or the anchor's own, hidden ability (all benign) |
+| S1-A2 | 243 of 426 | Learned by · entry (240); Form · Types (11) | the anchor's own types in a learner list, or a form's (all benign) |
+| S1-A3 | 14 of 399 | Form · Abilities (10); Holders · entry (6) | as S1-A1 (all benign) |
 | S1-B1 | 0 of 12,740 | | 1,461 not scannable |
 | S2-A1, S2-A2 | 0 of 7,897; 0 of 2,893 | | |
 | S2-B1 | 143 of 337 | Learnset · Moves (143) | the same move learned by machine or tutor |
 | S3-A1, S3-B1 | 0 of 1,961; 0 of 1,068 | | |
 | S4-A1, S4-B1 | 0 of 1,479; 0 of 979 | | |
 
-A question can fall in more than one class. The S1 flags in Form classes on
-material questions (10) include regional forms that are what actually evolves
-(Galarian Corsola is Ghost-type, like its evolution Cursola); the graph records
-evolution per species, so the form's line is not a statement of the gold
-chain. Verdicts and their reasons are in `VERDICTS`; per-question status is
+A question can fall in more than one class. The first scan also flagged 10
+material S1 questions in Form classes: a regional form sharing the final
+form's types or ability (Galarian Corsola is Ghost-type, like Cursola). They
+were exactly the questions whose line needs that form to evolve, the defect
+PI-019 removed; after it no material S1 question is flagged. Verdicts and their reasons are in `VERDICTS`; per-question status is
 written to `data/world/examiner/shortcuts.json` (local), which the splits
 read.
 
+
+## G3 audit
+
+`python -m agentic_pokedex.examiner.audit draw --round N` writes a local sheet
+(`data/world/examiner/audit/`, real names); `score --round N` reads the
+verdicts. 60 questions per round, 12 per stratum spread evenly over the
+stratum's templates, one per family, S1 material, drawn only from outside the
+evaluation splits (dev, train and unassigned families), so the audit opens
+nothing. Each round excludes every question an earlier round drew.
+
+Each question shows its real-name text, gold answer, the units that state its
+gold chain (S4: the withheld units), the other version's unit for S2 and S4,
+the anchor's own value and material tag for S1, and what to check.
+
+**Standard (fixed 2026-09-29, before round 1):** a gold answer is correct when
+it matches the game for the question as asked — the named version group, the
+default form — and the question has exactly that answer; S1 also needs the
+material tag right, S3 the set complete and exact, S4 the withheld value
+right. PokéAPI agreeing is not enough. Pass: at least 58 of 60 (G3 in
+`docs/contingency.md`); a failed round is fixed and re-audited on a fresh
+sample.

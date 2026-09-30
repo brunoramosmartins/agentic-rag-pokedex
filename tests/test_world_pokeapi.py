@@ -8,6 +8,7 @@ import pytest
 
 from agentic_pokedex.world.pokeapi import (
     WorldTables,
+    form_only_evolutions,
     iter_learnsets,
     normalize_text,
     read_world,
@@ -146,3 +147,22 @@ def test_learnsets(tables: WorldTables) -> None:
         "level": None,
     }
     assert all(r["move_id"] != 5 for r in rows)
+
+
+def test_form_only_evolutions(tmp_path: Path, tables: WorldTables) -> None:
+    (tmp_path / "pokemon.csv").write_text(
+        "id,is_default\n1,1\n100,0\n", encoding="utf-8")
+    # Form 101 is its entry's default form, but the entry is not the default.
+    (tmp_path / "pokemon_forms.csv").write_text(
+        "id,pokemon_id,is_default\n1,1,1\n100,100,0\n101,100,1\n",
+        encoding="utf-8")
+    (tmp_path / "pokemon_evolution.csv").write_text(
+        "evolved_species_id,required_pokemon_form_id\n"
+        "2,\n"          # any form evolves
+        "3,100\n"       # only a regional form: form-only
+        "4,1\n4,100\n"  # the default form can, by one method
+        "5,100\n5,\n"   # and here by a method with no form requirement
+        "6,101\n",      # a non-default entry's default form: form-only
+        encoding="utf-8")
+    assert form_only_evolutions(tmp_path) == {3, 6}
+    assert tables.form_only_evolutions == set()

@@ -134,6 +134,7 @@ class World:
     efficacy: dict[tuple[int, int], int]
     learnsets: list[Record]
     notes: dict[int, list[str]]
+    form_only: frozenset[int] = frozenset()
     dropped: Counter[str] = field(default_factory=Counter)
 
 
@@ -228,6 +229,7 @@ def build_world(
         efficacy={(e["attacker"], e["defender"]): e["factor"] for e in tables.efficacy},
         learnsets=learnsets,
         notes=notes,
+        form_only=frozenset(tables.form_only_evolutions),
         dropped=dropped,
     )
 
