@@ -577,6 +577,15 @@ _Not run._
      zeros there are trivially true.
   10. *S1-B1 is a join of three facts,* not a chain with a plausible early
       answer; its lucky-stop rate is mostly a ×1 guess.
+- **2026-09-30 — the two items left open by the previous amendments (decided
+  by the author, before any run).**
+  1. Rows 0b, 6 and 7 read **O2 − A3 on S1–S3**. S4 is excluded because O2
+     abstains on every S4 question by construction, which would make the room
+     look larger and keep futility and row 6 from firing for a reason that
+     has nothing to do with stopping. O2 − A3 on S4 is still reported.
+  2. The design effect uses **ρ estimated on the dress rehearsal** (upper
+     limit of its 80% interval) in every stratum, S3 and S4 included, instead
+     of ρ = 1 in S3 and S4.
 
 ---
 

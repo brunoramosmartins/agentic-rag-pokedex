@@ -1134,3 +1134,19 @@ Still open inside PI-021: whether rows 0b, 6 and 7 read O2 − A3 on S1–S3
 rather than S1–S4, decided before the freeze. The new work (cluster
 inference, code assigner and its golden tests, trajectory-level check) lands
 in Phases 3 to 6 and is triaged at this phase's close.
+
+## 2026-09-30 — O2 on S1–S3; ρ from the dress rehearsal
+
+The author closed the two items PI-021 left open, before any run:
+
+- **Rows 0b, 6 and 7 (futility and room) read O2 − A3 on S1–S3.** O2 abstains
+  on every S4 question by construction, so S4 would make the room look larger
+  and keep futility and row 6 from firing for a reason unrelated to stopping.
+  O2 − A3 on S4 is still reported.
+- **ρ for the design effect is estimated on the dress rehearsal** (upper 80%
+  limit) in every stratum. ρ = 1 in S3 and S4 would have nearly doubled n* in
+  those strata (about 4 questions per S3 move, 2 per S4 pair in eval-L1) and
+  pushed toward row 0 on an assumption rather than a measurement.
+
+E-001 amended; `docs/measurability-gate.md` gate 8 updated. PI-021 stays open
+for the implementation in Phases 3 to 6.
