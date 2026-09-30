@@ -309,6 +309,12 @@ published files. The mapping is written locally
 Evaluation ids are frozen at the dress rehearsal, after gate 8 sets eval-L1's
 size.
 
+**Openings.** `data/splits/openings.json` counts each evaluation split's
+openings, all 0 now. `splits.open_split` is the only reader of an evaluation
+split's ids: it logs the date and purpose of every opening and refuses a
+second one unless asked to reopen, which is counted too. An opened split can
+no longer be redrawn or extended. The counts are published with the results.
+
 Distributions, first draw (`manifest.json`): S2 versions in eval-L1 are
 scarlet-violet 49, x-y 17, ultra-sun-ultra-moon 14, following the S2 pool
 (4,450 / 3,323 / 3,354 questions); S3 set sizes 3–20, median 4; S4 covers 40
@@ -429,3 +435,45 @@ material tag right, S3 the set complete and exact, S4 the withheld value
 right. PokéAPI agreeing is not enough. Pass: at least 58 of 60 (G3 in
 `docs/contingency.md`); a failed round is fixed and re-audited on a fresh
 sample.
+
+**Sources.** The gold chain is not a source: it comes from the same pipeline
+as the gold answer, so their agreement tests nothing. The auditor checks each
+question in an independent source first, then compares with the gold, and
+reads the chain only to locate a disagreement (PokéAPI's data or the
+generator). Sites built on PokéAPI are not independent and are not used.
+
+| Template | Source |
+|---|---|
+| S0-A1 | Bulbapedia species page, abilities box (default form) |
+| S0-A2, S0-A3, S0-A4 | Bulbapedia or PokémonDB move page, current (Generation IX) values |
+| S0-B1 | Type chart, Generation VI onward |
+| S1-A1 to A3 | Bulbapedia species page, evolution section; then the final or next form's abilities or types, and the anchor's own for the material tag |
+| S1-B1 | The move's type, the species' types (default form), the type chart |
+| S2, S4 | Serebii per game (`pokedex-xy`, `pokedex-sm` with its USUM column, `pokedex-sv`), level-up learnset; or Bulbapedia's per-generation learnset pages, or PokémonDB `/pokedex/<name>/moves/<gen>` with its per-game tabs |
+| S3 | Serebii attackdex of the generation (`attackdex-xy`, `attackdex-sm`, `attackdex-sv`), level-up learners, filtered by type and default form |
+
+Version traps: X/Y is not ORAS and Sun/Moon is not USUM — the named group's
+column only; Scarlet/Violet marks moves learned on evolution ("Evo.", level 0
+here, never an answer) and moves only relearnable ("Rem.").
+
+## Reachability
+
+`python -m agentic_pokedex.examiner.reachability` (ADR-007): every
+insufficiency subtype and every error code of E-001 must be producible by at
+least one dev question, or be unreachable by declared design. For each code the
+module finds a dev question and a reachable state (indexed units) whose label,
+computed by the labeler, is the one the code needs.
+
+Run of 2026-09-30 on dev: **13 of 13 codes reachable**, 1 declared; witness
+states hold 1–2 units (T_max = 6).
+
+| Code | Witness state (dev) | Label |
+|---|---|---|
+| missing-hop, stop-missing-hop | one unit of an S1 chain | insufficient (missing-hop) |
+| wrong-version, accepted-wrong-version | another version's unit, the asked version's unseen | insufficient (wrong-version) |
+| truncated, accepted-truncated-set | the units of one member of an S3 set | insufficient (truncated) |
+| nonexistent, answered-unanswerable | another version's unit for a withheld learnset | insufficient (nonexistent) |
+| abstained-with-sufficient, over-search, generation-error | an S0 question's gold unit, one step | sufficient |
+| never-reached | an S1 question no single unit makes sufficient | insufficient |
+| correct-at-insufficient | the final form's Profile: the answer shown, the chain to it unseen | insufficient (missing-hop) |
+| format-error | declared: a property of the output, not of the question | — |

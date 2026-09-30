@@ -1062,3 +1062,23 @@ gate 8 extension now stops at 32 extra per stratum, a pooled S1–S4 n of 448
 (PI-018 measured 548).
 
 **Plan impact PI-019 resolved:** absorbed — the filter, the pinned CSV and the regenerated questions, scan and splits fit Phase 2; E-001 amended (draft). The lower growth bound (448) is compared with n_max when Phase 3 computes it.
+
+## 2026-09-30 — Opening counts, reachability, audit sources
+
+- **Opening counts.** The splits issue asked for opening counts initialised at
+  0; they were missing. `data/splits/openings.json` now holds them, and
+  `splits.open_split` is the only reader of an evaluation split's ids: every
+  opening is logged with its date and purpose, a second one needs an explicit
+  reopen and is counted, and an opened split can no longer be redrawn or
+  extended.
+- **Reachability (ADR-007).** `examiner/reachability.py` finds, for each
+  insufficiency subtype and error code, a dev question and a reachable state
+  whose label is the one the code needs: 13 of 13 reachable, `format-error`
+  declared (a property of the output). The `correct-at-insufficient` witness
+  is the final form's Profile seen alone: it shows the answer but not that the
+  form is on the anchor's line.
+- **Audit sources.** The G3 sheet's gold chain comes from the same pipeline as
+  the gold answer, so their agreement tests nothing; the auditor checks an
+  independent source first (Bulbapedia, Serebii per game, PokémonDB; never a
+  site built on PokéAPI) and reads the chain only to locate a disagreement.
+  The sources per template are in `docs/examiner.md` → G3 audit.

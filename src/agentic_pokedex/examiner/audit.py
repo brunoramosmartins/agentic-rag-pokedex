@@ -22,6 +22,8 @@ and exact; S4 the withheld value right.
 Usage::
 
     python -m agentic_pokedex.examiner.audit draw --round 1
+    python -m agentic_pokedex.examiner.audit review --round 1   # one by one
+    python -m agentic_pokedex.examiner.audit mark --round 1 --item 7 --verdict ok
     python -m agentic_pokedex.examiner.audit score --round 1
 """
 
@@ -45,6 +47,7 @@ from agentic_pokedex.examiner.generate import (
     question_text,
 )
 from agentic_pokedex.examiner.splits import (
+    EVALUATION_SPLITS,
     S1_GROUP_A,
     STRATA,
     apportion,
@@ -60,7 +63,6 @@ from agentic_pokedex.world.twin import POKEMON_TERM
 AUDIT_SEED = 20260929
 PER_STRATUM = 12
 THRESHOLD = 58
-EVALUATION_SPLITS = ("eval-L1", "eval-L1-benign", "val-B", "eval-L2", "eval-L3")
 
 Record = Mapping[str, Any]
 
@@ -316,6 +318,81 @@ def score(verdicts: Sequence[tuple[str, str, str]]) -> dict[str, Any]:
     }
 
 
+# --- Marking --------------------------------------------------------------------
+
+
+def split_blocks(text: str) -> tuple[str, list[str]]:
+    """The sheet's head and its question blocks, each starting at its heading."""
+    parts = re.split(r"(?m)^(?=## \d+\. )", text)
+    return parts[0], parts[1:]
+
+
+def block_number(block: str) -> int:
+    """The item number of a block (``## 7. …`` → 7)."""
+    return int(block.split(".", 1)[0].removeprefix("## "))
+
+
+def normalize_verdict(answer: str) -> str | None:
+    """A typed answer as a verdict: ``ok``, ``wrong — <reason>``, or ``None``
+    when it is neither (``o`` and ``w <reason>`` are accepted)."""
+    answer = answer.strip()
+    if answer.lower() in ("o", "ok"):
+        return "ok"
+    if answer[:1].lower() == "w":
+        reason = re.sub(r"^w(rong)?\s*[—:-]*\s*", "", answer, flags=re.IGNORECASE)
+        return f"wrong — {reason}" if reason else None
+    return None
+
+
+def set_verdict(text: str, item: int, verdict: str) -> str:
+    """The sheet with one item's verdict line replaced.
+
+    Raises:
+        KeyError: No item with that number.
+    """
+    head, blocks = split_blocks(text)
+    for i, block in enumerate(blocks):
+        if block_number(block) == item:
+            blocks[i] = re.sub(r"(?m)^\*\*Verdict:\*\*.*$",
+                               lambda _: f"**Verdict:** {verdict}", block, count=1)
+            return head + "".join(blocks)
+    raise KeyError(item)
+
+
+def review(sheet: Path, read: Any = input) -> int:
+    """Walk the pending items one by one and save each verdict at once.
+
+    Returns:
+        Items still pending when the walk ends.
+    """
+    text = sheet.read_text(encoding="utf-8")
+    _, blocks = split_blocks(text)
+    pending = [b for b in blocks if read_verdicts(b)[0][2] not in ("ok", "wrong")]
+    for k, block in enumerate(pending, start=1):
+        item = block_number(block)
+        print("\n" + block.split("**Verdict:**")[0].rstrip())
+        while True:
+            answer = read(f"[{k}/{len(pending)}] item {item} — ok | w <reason> | "
+                          "s skip | q quit: ")
+            if answer.strip().lower() in ("q", "quit"):
+                return _pending(text)
+            if answer.strip().lower() in ("s", "skip", ""):
+                break
+            verdict = normalize_verdict(answer)
+            if verdict is None:
+                print("  write ok, or w followed by what is wrong")
+                continue
+            text = set_verdict(text, item, verdict)
+            sheet.write_text(text, encoding="utf-8")
+            print(f"  saved: {verdict}")
+            break
+    return _pending(text)
+
+
+def _pending(text: str) -> int:
+    return sum(1 for *_, v in read_verdicts(text) if v not in ("ok", "wrong"))
+
+
 # --- CLI ------------------------------------------------------------------------
 
 
@@ -327,14 +404,32 @@ def _seen(audit_dir: Path) -> dict[str, list[str]]:
 def main(argv: list[str] | None = None) -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(description="G3 audit of the generator.")
-    parser.add_argument("command", choices=("draw", "score"))
+    parser.add_argument("command", choices=("draw", "review", "mark", "score"))
     parser.add_argument("--round", type=int, required=True)
     parser.add_argument("--world-dir", type=Path, default=DEFAULT_WORLD_DIR)
     parser.add_argument("--force", action="store_true",
                         help="overwrite an existing sheet (verdicts are lost)")
+    parser.add_argument("--item", type=int, help="mark: the item number")
+    parser.add_argument("--verdict", help="mark: ok, or 'wrong — <reason>'")
     args = parser.parse_args(argv)
     audit_dir = args.world_dir / "examiner" / "audit"
     sheet = audit_dir / f"g3-round-{args.round}.md"
+
+    if args.command == "review":
+        left = review(sheet)
+        print(f"\n{left} item(s) pending; score with: "
+              f"python -m agentic_pokedex.examiner.audit score --round {args.round}")
+        return 0
+
+    if args.command == "mark":
+        verdict = normalize_verdict(args.verdict or "")
+        if args.item is None or verdict is None:
+            print("mark needs --item N and --verdict ok | 'w <reason>'")
+            return 2
+        sheet.write_text(set_verdict(sheet.read_text(encoding="utf-8"), args.item,
+                                     verdict), encoding="utf-8")
+        print(f"item {args.item}: {verdict}")
+        return 0
 
     if args.command == "score":
         result = score(read_verdicts(sheet.read_text(encoding="utf-8")))

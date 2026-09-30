@@ -29,6 +29,10 @@ Rules (`docs/examiner.md`, "Splits"; E-001):
   real ones, out of published files. The mapping is written locally.
 - **Freezing.** dev and train are frozen: rewriting them with different ids
   fails. Evaluation ids are frozen at the dress rehearsal.
+- **Openings.** ``openings.json`` counts each evaluation split's openings,
+  from 0. ``open_split`` is the only reader of an evaluation split's ids and
+  records every call; a second opening needs ``reopen=True`` and is counted
+  too. An opened split can no longer be redrawn.
 
 Usage::
 
@@ -58,6 +62,9 @@ from agentic_pokedex.world.index import DEFAULT_WORLD_DIR
 SPLIT_SEED = 20260929
 ID_PREFIX = "q-"
 DEFAULT_SPLITS_DIR = REPO_ROOT / "data" / "splits"
+OPENINGS_FILE = "openings.json"
+EVALUATION_SPLITS = ("eval-L1", "eval-L1-benign", "val-B", "eval-L2", "eval-L3")
+"""Opened once each; the opening count is published."""
 STRATA = ("S0", "S1", "S2", "S3", "S4")
 S1_GROUP_A = ("S1-A1", "S1-A2", "S1-A3")
 
@@ -432,6 +439,54 @@ def write_split(path: Path, ids: Sequence[str], frozen: bool) -> str:
     return hashlib.sha256(text.encode()).hexdigest()
 
 
+def read_openings(splits_dir: Path) -> dict[str, dict[str, Any]]:
+    """Opening counts and logs per evaluation split (all 0 if the file is new)."""
+    path = splits_dir / OPENINGS_FILE
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    return {name: {"count": 0, "log": []} for name in EVALUATION_SPLITS}
+
+
+def write_openings(splits_dir: Path, openings: Mapping[str, Any]) -> None:
+    """Write the opening counts (versioned with the split files)."""
+    (splits_dir / OPENINGS_FILE).write_text(
+        json.dumps(openings, indent=1) + "\n", encoding="utf-8")
+
+
+def open_split(
+    name: str, purpose: str, *, splits_dir: Path = DEFAULT_SPLITS_DIR,
+    world_dir: Path = DEFAULT_WORLD_DIR, reopen: bool = False, when: str = "",
+) -> list[str]:
+    """The question ids of a split, in draw order; opening an evaluation split
+    is recorded.
+
+    Args:
+        name: Split name.
+        purpose: What the opening is for (logged; required for evaluation).
+        reopen: Allow a second opening of an evaluation split (counted).
+        when: Date of the opening, for the log.
+
+    Raises:
+        ValueError: An evaluation split opened before, without ``reopen``, or an
+            opening with no purpose.
+    """
+    local = json.loads((world_dir / "examiner" / "splits.json").read_text(
+        encoding="utf-8"))
+    ids = list(local["splits"][name])
+    if name not in EVALUATION_SPLITS:
+        return ids
+    if not purpose.strip():
+        raise ValueError(f"opening {name} needs a purpose")
+    openings = read_openings(splits_dir)
+    entry = openings.setdefault(name, {"count": 0, "log": []})
+    if entry["count"] and not reopen:
+        raise ValueError(f"{name} was opened {entry['count']} time(s) already")
+    entry["count"] += 1
+    entry["log"].append({"when": when, "purpose": purpose})
+    write_openings(splits_dir, openings)
+    return ids
+
+
 def load_kept(world_dir: Path) -> list[dict[str, Any]]:
     """Generated questions minus those the shortcut scan discarded.
 
@@ -483,13 +538,19 @@ def main(argv: list[str] | None = None) -> int:
         "pools": report["pools"],
         "splits": {},
     }
-    frozen = {s.name: s.frozen for s in SPECS}
+    openings = read_openings(args.splits_dir)
+    opened = {n for n, e in openings.items() if e["count"]}
+    frozen = {s.name: s.frozen or s.name in opened for s in SPECS}
+    if opened and (args.refreeze or args.eval_l1_extra):
+        print(f"opened splits cannot be redrawn: {', '.join(sorted(opened))}")
+        return 1
     print(f"{'split':<15} {'n':>4}  " + "  ".join(f"{s:>3}" for s in STRATA)
           + "   clash")
     for name, qids in splits.items():
+        refreezable = args.refreeze and name not in opened
         digest = write_split(args.splits_dir / f"{name}.txt",
                              [opaque[q] for q in qids],
-                             frozen[name] and not args.refreeze)
+                             frozen[name] and not refreezable)
         info = describe(qids, by_id)
         manifest["splits"][name] = {"frozen": frozen[name], "sha256": digest,
                                     "allocation": report["allocation"][name], **info}
@@ -499,6 +560,7 @@ def main(argv: list[str] | None = None) -> int:
               + f"   {clash[name]} of {len(qids)}")
     if args.eval_l1_extra:
         manifest["eval_l1_extra_per_stratum"] = args.eval_l1_extra
+    write_openings(args.splits_dir, openings)
     (args.splits_dir / "manifest.json").write_text(
         json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
     local = args.world_dir / "examiner" / "splits.json"

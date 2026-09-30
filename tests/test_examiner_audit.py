@@ -12,10 +12,13 @@ from agentic_pokedex.examiner.audit import (
     allocation,
     audit_pool,
     chain_units,
+    normalize_verdict,
     read_verdicts,
     render_block,
+    review,
     sample,
     score,
+    set_verdict,
 )
 from agentic_pokedex.examiner.splits import families
 from agentic_pokedex.examiner.templates import TEMPLATES
@@ -151,3 +154,44 @@ def test_score_threshold() -> None:
     failed = score(verdicts(THRESHOLD - 1, 61 - THRESHOLD))
     assert failed["decision"] == "fail" and failed["wrong_by_template"] == {"S2-A1": 3}
     assert score(verdicts(59, 0, 1))["decision"] == "pending"
+
+
+# --- Marking --------------------------------------------------------------------
+
+SHEET = "\n".join([
+    "# G3 audit — round 1", "", "---", "",
+    "## 1. S0-A1 — q-aaaaaaaaaa", "", "**Question:** a?", "", "**Verdict:** ", "",
+    "---", "",
+    "## 2. S2-A1 — q-bbbbbbbbbb", "", "**Question:** b?", "", "**Verdict:** ok", "",
+    "---", "",
+    "## 3. S3-A1 — q-cccccccccc", "", "**Question:** c?", "", "**Verdict:** ", "",
+])
+
+
+def test_normalize_verdict() -> None:
+    assert normalize_verdict(" OK ") == normalize_verdict("o") == "ok"
+    assert normalize_verdict("w level is 30") == "wrong — level is 30"
+    assert normalize_verdict("wrong: level is 30") == "wrong — level is 30"
+    assert normalize_verdict("Wrong — misses Azurill") == "wrong — misses Azurill"
+    assert normalize_verdict("w") is None
+    assert normalize_verdict("maybe") is None
+
+
+def test_set_verdict_touches_one_item() -> None:
+    text = set_verdict(SHEET, 3, "wrong — misses one")
+    assert [v for *_, v in read_verdicts(text)] == ["pending", "ok", "wrong"]
+    assert text.replace("wrong — misses one", "") == SHEET
+    with pytest.raises(KeyError):
+        set_verdict(SHEET, 9, "ok")
+
+
+def test_review_saves_each_answer_and_skips(tmp_path: Path) -> None:
+    sheet = tmp_path / "g3-round-1.md"
+    sheet.write_text(SHEET, encoding="utf-8")
+    answers = iter(["huh", "ok", "s"])  # item 1: rejected then ok; item 3 skipped
+    left = review(sheet, read=lambda _: next(answers))
+    assert left == 1
+    assert [v for *_, v in read_verdicts(sheet.read_text(encoding="utf-8"))] == [
+        "ok", "ok", "pending"]
+    answers = iter(["q"])
+    assert review(sheet, read=lambda _: next(answers)) == 1

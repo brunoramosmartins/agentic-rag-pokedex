@@ -60,6 +60,10 @@ after the fix, before the author opened it.
 
 ## `docs/examiner.md` and the benchmark v0
 
+Reachability done 2026-09-30: 13 of 13 codes reachable on dev, `format-error`
+declared (`examiner/reachability.py`). Opening counts initialised at 0
+(`data/splits/openings.json`, `splits.open_split`).
+
 ---
 
 ## Lessons Learned

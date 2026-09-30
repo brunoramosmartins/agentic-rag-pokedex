@@ -21,6 +21,8 @@ from agentic_pokedex.examiner.splits import (
     families,
     load_kept,
     opaque_id,
+    open_split,
+    read_openings,
     separation,
     template_pools,
     write_split,
@@ -262,3 +264,27 @@ def test_load_kept_requires_a_resolved_scan(tmp_path: Path) -> None:
         load_kept(tmp_path)
     scan.write_text(json.dumps({"status": {"S0-A2:m=1": "discarded"}}))
     assert [r["id"] for r in load_kept(tmp_path)] == ["S0-A2:m=2"]
+
+
+# --- Openings -------------------------------------------------------------------
+
+
+def test_openings_are_counted(tmp_path: Path) -> None:
+    world_dir, splits_dir = tmp_path / "world", tmp_path / "splits"
+    (world_dir / "examiner").mkdir(parents=True)
+    splits_dir.mkdir()
+    (world_dir / "examiner" / "splits.json").write_text(json.dumps(
+        {"splits": {"dev": ["S0-A1:x=1"], "eval-L1": ["S0-A1:x=2"]}}))
+    assert read_openings(splits_dir)["eval-L1"] == {"count": 0, "log": []}
+    kw = {"splits_dir": splits_dir, "world_dir": world_dir}
+    assert open_split("dev", "", **kw) == ["S0-A1:x=1"]  # free, not logged
+    with pytest.raises(ValueError, match="purpose"):
+        open_split("eval-L1", " ", **kw)
+    assert open_split("eval-L1", "E-001 run", when="2026-10-01", **kw) == [
+        "S0-A1:x=2"]
+    with pytest.raises(ValueError, match="opened 1 time"):
+        open_split("eval-L1", "again", **kw)
+    open_split("eval-L1", "rerun after an API outage", reopen=True, **kw)
+    entry = read_openings(splits_dir)["eval-L1"]
+    assert entry["count"] == 2 and entry["log"][0]["purpose"] == "E-001 run"
+    assert "dev" not in read_openings(splits_dir)
