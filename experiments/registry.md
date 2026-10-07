@@ -1095,7 +1095,22 @@ _Not run._
 
 ### Amendments
 
-_None._
+- **2026-10-07 — implementation details, before any run (approved by the
+  author).**
+  1. **Seed:** the 30 A3 questions are drawn with seed `20261007`
+     (`evaluation/pilot.py`, `PILOT_SEED`): dev S1–S4, 8 / 7 / 8 / 7 or as the
+     seed assigns the two extra, round-robin over clusters.
+  2. **Last turn:** after T_max calls, or once B is spent, the agent gets
+     `prompts/agent_final_v0.md` ("You have no tool calls left. Reply now
+     with your answer, as JSON only.") and no tool.
+  3. **Tool replies in the loop:** a result that would pass B is not shown —
+     the call returns "Evidence budget reached." and the tools end; a call the
+     tools cannot run returns "Invalid call." and counts as a step. A budget
+     signal, not a sufficiency cue, identical for every agent arm.
+  4. **No API JSON mode:** the `{answer, abstain}` format comes from the
+     prompts only, in every arm (JSON mode can conflict with tool calls, and
+     using it in some arms only would break parity).
+  5. **Smoke runs** use train (`--split train`, `runs/e004-smoke`), never dev.
 
 ---
 
@@ -1156,4 +1171,9 @@ _Not run._
 
 ### Amendments
 
-_None._
+- **2026-10-07 — implementation details, before any run (approved by the
+  author).** The 800 questions are drawn with seed `20261008`
+  (`evaluation/closed_book.py`, `CLOSED_BOOK_SEED`), round-robin over
+  clusters within each template. The real-name text is rendered by the
+  generator with the question's own surface form. No API JSON mode (as
+  E-004). `decide` refuses to run until the grader's audit has passed.

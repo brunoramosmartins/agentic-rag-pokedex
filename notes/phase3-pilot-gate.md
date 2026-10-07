@@ -62,6 +62,14 @@ fictional or hints that a list may be incomplete. Grader moved to this phase
 abstention, C = 0 / 1 / λ (an S4 abstention is correct and still costs 1);
 33 golden completions.
 
+Arms and runners built 2026-10-07: `arms/single.py`, `arms/agent.py` (one
+Batch round per step), `evaluation/batchrun.py`, `evaluation/pilot.py`,
+`evaluation/closed_book.py`. Smoke on train: three rounds, no failure, cost
+US$ 0.009 (estimate 0.033); reasoning medians 32–96 tokens a call against the
+600 assumed. A1 and A2 answered the gold wherever the evidence was
+sufficient and abstained where search missed the anchor ("Name the hidden
+ability of {X}" returned other abilities' Holders units).
+
 ## G2 closed-book half: A0 on the twin and on the real world
 
 ## Reasoning tokens per arm and the re-estimated budget

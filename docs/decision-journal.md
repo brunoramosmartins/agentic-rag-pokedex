@@ -1332,3 +1332,23 @@ real names as the positive control) registered before any arm or prompt
 exists. The author writes both predictions before the runs.
 
 **Plan impact PI-024:** Phases 3 and 4 — the grader and its 100-output audit (gate 4) were planned for Phase 4 → the pilot's SD proxy (E-004) and G2's closed-book rule (E-005) read graded answers in Phase 3 → `evaluation/grader.py` (exact match, alias normalization, structured abstention) is built in Phase 3 with golden tests, and the gate 4 audit (≥ 98 of 100, stratified) runs on E-004 and E-005 outputs before any graded number is read; Phase 4 keeps the arms' tuning and the A2 sweep. Open.
+
+## 2026-10-07 — Arms built; smoke run on train
+
+The one-call arms (A0, A1, A2), the common agent loop over Batch rounds (A3),
+the grader and the E-004 / E-005 runners are built. E-004 and E-005 were
+amended before any run with the author's approval: seeds `20261007` and
+`20261008`, the last-turn message `agent_final_v0`, the loop's tool replies
+("Evidence budget reached.", "Invalid call."), no API JSON mode in any arm,
+smoke runs on train only.
+
+Smoke run on train (`runs/e004-smoke`, not part of E-004): 10 questions for
+A0, A1 and A2, 2 for A3; three Batch rounds, no failure. Measured cost
+US$ 0.009 against an estimate of 0.033 central: reasoning medians were 32–96
+tokens per call, far below the 600 the estimate assumes (E-003's identity
+probe needed more), so the registered estimates are conservative. The answers
+agree with the labels: A1 and A2 answered the gold in the 9 questions whose
+evidence was sufficient and abstained in the one whose search missed the
+anchor; A0 abstained on all 10 twin questions; A3 answered both S1 questions
+correctly in 2 calls each. A dry `prepare` of E-005 (no request sent, files
+deleted) rendered the real-name questions and golds correctly.

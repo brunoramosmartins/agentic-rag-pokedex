@@ -226,6 +226,17 @@ def test_estimate_render_mentions_every_scenario() -> None:
         assert scenario in text
 
 
+def test_estimate_render_shows_the_scenarios_it_used() -> None:
+    est = estimate_cost(
+        model="gpt-5-mini", tier=Tier.BATCH, calls=10, input_tokens_per_call=100,
+        visible_output_tokens_per_call=10,
+        reasoning_scenarios={"central": 600, "pessimistic": 1_200},
+    )
+    text = est.render()
+    assert "+600 reasoning" in text and "+1200 reasoning" in text
+    assert "+150 reasoning" not in text
+
+
 def _estimate():
     return estimate_cost(
         model="gpt-5-mini",

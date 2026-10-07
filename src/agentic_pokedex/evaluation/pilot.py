@@ -48,6 +48,7 @@ from agentic_pokedex.llm.batch import BatchResult, chat_request
 
 EXPERIMENT = "e004"
 RUN_DIR = REPO_ROOT / "runs" / "e004"
+SMOKE_DIR = REPO_ROOT / "runs" / "e004-smoke"
 PILOT_SEED = 20261007
 """Draws the 30 A3 questions; registered in E-004 before the run."""
 
@@ -209,22 +210,26 @@ def describe(state: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def render_case(state: Mapping[str, Any], arm: str) -> str:
-    """One case of an arm: prompt (head), evidence size, completion."""
+    """One case of an arm: question, evidence (head), calls, completion."""
     if arm == AGENT_ARM:
-        data = next(iter(state["agent"].values()))
-        run = data["state"]
-        lines = [f"[{arm} {run['question']}]",
-                 run["messages"][0]["content"][-300:]]
+        run = next(iter(state["agent"].values()))["state"]
+        question = run["messages"][0]["content"].split("Question: ")[-1]
+        lines = [f"[{arm} {run['question']}] {question}"]
         for step in run["steps"]:
             lines.append(f"  → {step['tool']}({step['arguments']}) "
                          f"{len(step['units'])} units, {step['tokens']} tokens")
-        lines.append(f"  final: {run['final']!r}")
+        lines.append(f"  completion: {run['final']!r}")
         return "\n".join(lines)
     entry = next(e for e in state["single"].values() if e["arm"] == arm)
     content = entry["messages"][0]["content"]
-    return (f"[{arm} {entry['question']}] evidence {entry['evidence']['tokens']} "
-            f"tokens, {len(entry['evidence']['units'])} units\n"
-            f"{content[:400]}…\n  completion: {entry.get('completion')!r}")
+    question, _, evidence = content.split("Question: ")[-1].partition("\n\nEvidence:\n")
+    lines = [f"[{arm} {entry['question']}] {question.strip()}",
+             f"  evidence: {entry['evidence']['tokens']} tokens, "
+             f"{len(entry['evidence']['units'])} units"]
+    if evidence:
+        lines.append("  " + evidence[:300].replace("\n", "\n  ") + " …")
+    lines.append(f"  completion: {entry.get('completion')!r}")
+    return "\n".join(lines)
 
 
 def sha256_file(path: Path) -> str:
@@ -240,14 +245,18 @@ def main(argv: list[str] | None = None) -> int:
     prep.add_argument("--limit", type=int, default=None,
                       help="first N dev questions per one-call arm, N/5 for A3")
     prep.add_argument("--yes", action="store_true")
-    prep.add_argument("--run-dir", type=Path, default=RUN_DIR)
+    prep.add_argument("--split", default="dev", choices=("dev", "train"),
+                      help="train for smoke runs (into runs/e004-smoke)")
+    prep.add_argument("--run-dir", type=Path, default=None)
     for name in ("submit", "collect", "report"):
         p = sub.add_parser(name)
         p.add_argument("--run-dir", type=Path, default=RUN_DIR)
     args = parser.parse_args(argv)
-    run = RunDir(args.run_dir)
     if args.command == "prepare":
-        return prepare(run, args.limit, args.yes)
+        default = RUN_DIR if args.split == "dev" else SMOKE_DIR
+        return prepare(RunDir(args.run_dir or default), args.limit, args.yes,
+                       args.split)
+    run = RunDir(args.run_dir)
     if args.command == "submit":
         from openai import OpenAI
 
@@ -282,7 +291,7 @@ def _world() -> tuple[Any, Any, Any]:
     return World.build(index, registry), registry, default_counter()
 
 
-def prepare(run: RunDir, limit: int | None, yes: bool) -> int:
+def prepare(run: RunDir, limit: int | None, yes: bool, split: str = "dev") -> int:
     """Draw the A3 questions, build round 0, print the estimate."""
     from agentic_pokedex.examiner.splits import opaque_id, open_split
     from agentic_pokedex.observability.pricing import Tier
@@ -299,7 +308,10 @@ def prepare(run: RunDir, limit: int | None, yes: bool) -> int:
         print(f"{run.path} already holds a run; refusing to overwrite it.")
         return 1
     world, _, counter = _world()
-    dev = open_split("dev", "", world_dir=DEFAULT_WORLD_DIR)
+    if split == "dev" and run.path.resolve() != RUN_DIR.resolve():
+        print("dev runs only into runs/e004; smoke runs use --split train.")
+        return 1
+    dev = open_split(split, "", world_dir=DEFAULT_WORLD_DIR)
     wanted = set(dev)
     with (DEFAULT_WORLD_DIR / "examiner" / "questions.jsonl").open(
             encoding="utf-8") as fh:
@@ -355,7 +367,8 @@ def prepare(run: RunDir, limit: int | None, yes: bool) -> int:
     run.save("state.json", state)
     run.write_round(lines)
     run.save("manifest.json", {
-        "experiment": "E-004", "prepared_at": datetime.now(UTC).isoformat(),
+        "experiment": "E-004", "split": split,
+        "prepared_at": datetime.now(UTC).isoformat(),
         "model": MODEL, "reasoning_effort": REASONING_EFFORT,
         "max_completion_tokens": MAX_COMPLETION_TOKENS, "seed": PILOT_SEED,
         "limit": limit, "agent_questions": [opaque_id(q) for q in agent_ids],
@@ -363,8 +376,8 @@ def prepare(run: RunDir, limit: int | None, yes: bool) -> int:
         "sha256": {
             "pages/twin.jsonl": sha256_file(DEFAULT_WORLD_DIR / "pages" / "twin.jsonl"),
             "registry.json": sha256_file(DEFAULT_WORLD_DIR / "registry.json"),
-            "data/splits/dev.txt": sha256_file(REPO_ROOT / "data" / "splits"
-                                               / "dev.txt"),
+            f"data/splits/{split}.txt": sha256_file(REPO_ROOT / "data" / "splits"
+                                                    / f"{split}.txt"),
         },
         "estimate_usd": dict(estimate.usd_by_scenario),
     })

@@ -280,6 +280,8 @@ class CostEstimate:
     input_tokens_per_call: float
     visible_output_tokens_per_call: float
     usd_by_scenario: Mapping[str, float]
+    reasoning_by_scenario: Mapping[str, int] = field(
+        default_factory=lambda: dict(REASONING_SCENARIOS))
 
     def render(self) -> str:
         """Human-readable summary, printed before the run starts."""
@@ -290,7 +292,7 @@ class CostEstimate:
             f"visible output/call: {self.visible_output_tokens_per_call:,.0f} tokens",
         ]
         for scenario, usd in self.usd_by_scenario.items():
-            reasoning = REASONING_SCENARIOS.get(scenario, "?")
+            reasoning = self.reasoning_by_scenario.get(scenario, "?")
             lines.append(
                 f"  {scenario:<12} (+{reasoning} reasoning/call): US$ {usd:,.4f}"
             )
@@ -336,6 +338,7 @@ def estimate_cost(
         input_tokens_per_call=input_tokens_per_call,
         visible_output_tokens_per_call=visible_output_tokens_per_call,
         usd_by_scenario=usd,
+        reasoning_by_scenario=dict(reasoning_scenarios),
     )
 
 
