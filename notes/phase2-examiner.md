@@ -58,6 +58,9 @@ per stratum from outside the evaluation splits, one per family, S1 material;
 surfaced PI-019 (S1 lines through form-only evolutions); round 1 was redrawn
 after the fix, before the author opened it.
 
+Round 1 scored 2026-10-06: 60 of 60 ok, 0 wrong, 0 unreadable → G3 passed
+(≥ 58). No template needed a fix; no second round.
+
 ## `docs/examiner.md` and the benchmark v0
 
 E-001 red-team 2026-09-30: 8 blocking, 11 caveats. PI-020 (S3 closure label,
@@ -70,8 +73,9 @@ declared (`examiner/reachability.py`). Opening counts initialised at 0
 (`data/splits/openings.json`, `splits.open_split`).
 
 Benchmark v0 export (`examiner/benchmark.py`) and card (`docs/benchmark-card.md`)
-done 2026-09-30, opaque ids for questions, facts and units; upload waits for
-G3.
+done 2026-09-30, opaque ids for questions, facts and units. G3 result and
+release log filled in the card 2026-10-06; the upload goes with the Phase 2
+close.
 
 ---
 

@@ -475,6 +475,12 @@ Version traps: X/Y is not ORAS and Sun/Moon is not USUM — the named group's
 column only; Scarlet/Violet marks moves learned on evolution ("Evo.", level 0
 here, never an answer) and moves only relearnable ("Rem.").
 
+**Result.** Round 1 (2026-10-06): 60 of 60 correct, pass. Per template: S0-A1
+3, S0-A2 3, S0-A3 2, S0-A4 2, S0-B1 2; S1-A1 to A3 and S1-B1 3 each; S2-A1,
+S2-A2 and S2-B1 4 each; S3-A1 and S3-B1 6 each; S4-A1 and S4-B1 6 each. The
+sheet and verdicts are local (`data/world/examiner/audit/`, real names); the
+audited ids are opaque ids from dev, train or the unassigned pool.
+
 ## Reachability
 
 `python -m agentic_pokedex.examiner.reachability` (ADR-007): every

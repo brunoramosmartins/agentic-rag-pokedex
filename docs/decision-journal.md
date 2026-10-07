@@ -1150,3 +1150,22 @@ The author closed the two items PI-021 left open, before any run:
 
 E-001 amended; `docs/measurability-gate.md` gate 8 updated. PI-021 stays open
 for the implementation in Phases 3 to 6.
+
+## 2026-10-06 — G3 passed: 60 of 60
+
+The author audited round 1 by hand: 60 questions, 12 per stratum, one per
+family, drawn from outside the evaluation splits, each checked against an
+independent source for the game as asked (named version group, default form)
+before reading the gold. **60 of 60 correct** (pass at 58); no `wrong`, no
+unreadable item, so no fix and no second round (G3 in `docs/contingency.md`
+not triggered).
+
+The benchmark card records the result and the release log, with the SHA-256 of
+`questions.jsonl` and `manifest.json`, before the upload. The `v0.3-examiner`
+pre-release ships the benchmark v0 at the Phase 2 close.
+
+What G3 does not cover: 60 questions bound the gold error rate only loosely
+(0 of 60 is compatible with a rate up to about 6% at 95%, Wilson); the
+remaining checks (labeler golden trajectories, shortcut scan, reachability,
+export leak checks) are the rest of the evidence.
+
