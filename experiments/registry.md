@@ -30,7 +30,7 @@ filled only after the run, next to the date.
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | analyzed | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | Dev, k = 5: S0 29, S1 23, S2 28, S3 9 of 30; S4 0 by construction. S0/S2 from search, S1 from link level 1, S3 from section completion; B binds in 150 of 150 |
 | [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
-| [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | draft | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | — |
+| [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | run | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | US$ 0.191 for 150 + 30 questions; reasoning medians 0–128; A3 3.6 steps, 28 of 30 search again, S3 always at T_max; SD of D after the audit |
 | [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | draft | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | — |
 
 ---
@@ -1029,7 +1029,8 @@ G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
 ## E-004 — Pilot: noise, cost and reasoning per arm
 
 - **Phase:** 3 (pilot gate).
-- **Status:** draft — registered 2026-10-07, before any arm or prompt exists.
+- **Status:** run — registered 2026-10-07, before any arm or prompt exists;
+  run 2026-10-08 (graded readings wait for the grader's audit).
 - **Hypothesis:** none. The pilot estimates noise, never effect
   (measurability gate 6).
 
@@ -1095,7 +1096,36 @@ Written 2026-10-08, before the run, as a gut call:
 
 ### Actual result
 
-_Not run._
+**Run 2026-10-08 on dev** (`runs/e004`, prepared at commit `cbc317c`, after
+the author's prediction): 7 Batch rounds, 589 calls, no API failure, no
+output at the 4,000-token cap. **Measured cost US$ 0.191** (estimate 0.49
+central / 0.85 pessimistic). Ungraded readings only; the graded ones (the
+proxy SD of D) wait for the grader's audit (PI-024).
+
+| Arm | Calls | Input tokens (median / max) | Output (median / p90) | Reasoning (median / p90 / max) | US$ | US$ per question |
+|---|---|---|---|---|---|---|
+| A0 | 150 | 163 / 169 | 85 / 149 | 64 / 128 / 320 | 0.019 | 0.00013 |
+| A1 | 150 | 603 / 872 | 151 / 345 | 128 / 320 / 640 | 0.039 | 0.00026 |
+| A2 | 150 | 3,421 / 3,951 | 92 / 492 | 64 / 448 / 896 | 0.097 | 0.00065 |
+| A3 | 139 (30 questions) | 1,327 / 3,594 | 54 / 277 | 0 / 256 / 384 | 0.036 | 0.00118 |
+
+- **A3, 30 of 30 ended:** steps 1 (2), 2 (10), 3 (6), 5 (3), 6 (9); mean
+  3.6, median 3. **28 of 30 searched again after the first observation**
+  (the implicit detector's firing rate, descriptive). T_max reached in 9 of
+  30 — all 8 S3 questions and 1 S4; B never spent (evidence 448–3,049 tokens).
+  By stratum: S1 2–5 steps, S2 1–3, S3 6 every time, S4 2–6. Calls: 80
+  `search`, 29 `open_page`; no invalid call; every final output ends in a
+  JSON object.
+- **Abstentions (ungraded):** A0 150 of 150 on the twin; A1 47 of 150; A2 36
+  of 150.
+- **Rendered cases:** an S0-A1 question in the form "Name the hidden ability
+  of {X}" — A1's search returned other abilities' Holders units, A1 abstained,
+  A2 answered from 3,438 tokens of expanded evidence (its grade waits for the
+  audit); an S1-A2 question where A3 searched, opened the anchor's page, then
+  the final form's page, and answered the type pair in 3 calls.
+- **Against the prediction:** reasoning was 0–128 tokens a call at the median
+  (predicted about 40); A3 took 3.6 steps on average (predicted 2), pushed up
+  by S3, which always ran to T_max; the SD of D is not read yet.
 
 ### Amendments
 

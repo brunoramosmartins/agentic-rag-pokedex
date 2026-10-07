@@ -70,6 +70,11 @@ US$ 0.009 (estimate 0.033); reasoning medians 32–96 tokens a call against the
 sufficient and abstained where search missed the anchor ("Name the hidden
 ability of {X}" returned other abilities' Holders units).
 
+E-004 run on dev 2026-10-08 (prediction committed first): 589 calls, US$ 0.191
+(estimate 0.49), reasoning medians 0–128 a call. A3: 3.6 steps on average,
+28 of 30 search again, all 8 S3 questions at T_max, B never spent. A0
+abstained on all 150 twin questions. SD of D waits for the grader's audit.
+
 ## G2 closed-book half: A0 on the twin and on the real world
 
 ## Reasoning tokens per arm and the re-estimated budget

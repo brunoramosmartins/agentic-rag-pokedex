@@ -1352,3 +1352,15 @@ evidence was sufficient and abstained in the one whose search missed the
 anchor; A0 abstained on all 10 twin questions; A3 answered both S1 questions
 correctly in 2 calls each. A dry `prepare` of E-005 (no request sent, files
 deleted) rendered the real-name questions and golds correctly.
+
+## 2026-10-08 — E-004 run on dev
+
+The pilot ran after the author's prediction was committed (`cbc317c`): 589
+calls in 7 Batch rounds, no API failure, **US$ 0.191** against 0.49 estimated.
+Reasoning medians were 0–128 tokens a call, far below the 600 the estimates
+assume, so every later estimate built on them is conservative until the
+budget is re-estimated with these numbers. A3 took 3.6 steps on average and
+searched again after its first observation in 28 of 30 questions; every S3
+question ran to T_max. Graded readings — the proxy SD of D — wait for the
+grader's audit (PI-024). Result in the registry; nothing in it selects a
+stratum, threshold, prompt or n.
