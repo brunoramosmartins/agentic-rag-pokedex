@@ -1321,3 +1321,14 @@ version. B binds in every question. Descriptive: it selects no stratum,
 threshold or n for E-001, and it changes nothing in the pipeline A2 inherits.
 
 **Plan impact PI-023 resolved:** absorbed — `tokenize` fixed and tested, the lexical index rebuilt with it (dense vectors unchanged), the anchor hit rate measured on train (133 of 150), all before E-002 ran; no phase, hour or deliverable changes.
+
+## 2026-10-07 — E-004 and E-005 registered; the grader moves to Phase 3
+
+E-004 (the pilot: A0, A1, A2 on dev's 150, a minimal A3 on 30; noise, cost
+and reasoning per arm, a proxy SD of D; mean C per arm not printed) and E-005
+(G2's closed-book half: A0 on 50 questions per template, twin and real names,
+outside the evaluation splits; Wilson lower limit against chance + 5 points;
+real names as the positive control) registered before any arm or prompt
+exists. The author writes both predictions before the runs.
+
+**Plan impact PI-024:** Phases 3 and 4 — the grader and its 100-output audit (gate 4) were planned for Phase 4 → the pilot's SD proxy (E-004) and G2's closed-book rule (E-005) read graded answers in Phase 3 → `evaluation/grader.py` (exact match, alias normalization, structured abstention) is built in Phase 3 with golden tests, and the gate 4 audit (≥ 98 of 100, stratified) runs on E-004 and E-005 outputs before any graded number is read; Phase 4 keeps the arms' tuning and the A2 sweep. Open.

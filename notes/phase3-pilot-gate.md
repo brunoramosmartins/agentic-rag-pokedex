@@ -54,6 +54,14 @@ search often misses for another move's hub in the same version. B binds in
 
 ## Pilot on dev: A0, A1, A2 on 150; A3 on 30
 
+E-004 registered 2026-10-07 with E-005 (journal). Prompts v0 approved by the
+author: `answer_closed_book_v0`, `answer_with_evidence_v0`, `agent_v0`, the
+cost and format paragraphs verbatim in all three; none says the world is
+fictional or hints that a list may be incomplete. Grader moved to this phase
+(PI-024): `evaluation/grader.py`, exact match by answer kind, structured
+abstention, C = 0 / 1 / λ (an S4 abstention is correct and still costs 1);
+33 golden completions.
+
 ## G2 closed-book half: A0 on the twin and on the real world
 
 ## Reasoning tokens per arm and the re-estimated budget

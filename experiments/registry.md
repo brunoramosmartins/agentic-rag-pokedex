@@ -30,6 +30,8 @@ filled only after the run, next to the date.
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | analyzed | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | Dev, k = 5: S0 29, S1 23, S2 28, S3 9 of 30; S4 0 by construction. S0/S2 from search, S1 from link level 1, S3 from section completion; B binds in 150 of 150 |
 | [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
+| [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | draft | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | — |
+| [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | draft | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | — |
 
 ---
 
@@ -1022,3 +1024,136 @@ G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
   identity leak on the current pages can only be lower than what run 2
   measured. No re-run.
 
+---
+
+## E-004 — Pilot: noise, cost and reasoning per arm
+
+- **Phase:** 3 (pilot gate).
+- **Status:** draft — registered 2026-10-07, before any arm or prompt exists.
+- **Hypothesis:** none. The pilot estimates noise, never effect
+  (measurability gate 6).
+
+### Objective
+
+Measure what sizing and budgeting need before any arm is tuned: tokens per
+arm, reasoning tokens included (PI-014); steps per question and the implicit
+detector's firing rate for A3; and a proxy SD of D for the preliminary power
+table (gate 3).
+
+### Configuration
+
+- **Split:** dev, template group A. **A0, A1 and A2 on all 150 questions; A3
+  on 30**, drawn with a registered seed from dev S1–S4 (7 or 8 per stratum,
+  one per cluster where the stratum allows).
+- **Arms, untuned, prompts v0** — written in `prompts/` and hashed before the
+  run. Every arm receives the same cost instruction ("a wrong answer costs 4×
+  not answering") and returns the structured output `{answer, abstain}`.
+  - **A0:** the question alone.
+  - **A1:** `search(question, k = 5)`, one result, then the answer prompt.
+  - **A2:** E-002's pipeline (`arms/typed_expansion.py` at its frozen hash,
+    k = 5), then the answer prompt.
+  - **A3:** the common agent loop with `search` and `open_page`, T_max = 6
+    steps, B = 4,000 evidence tokens; at T_max, or when B binds, the agent
+    answers or abstains. The loop is the one Phase 5 builds on (journal,
+    2026-10-06).
+- **Model:** gpt-5-mini, Batch API, `reasoning_effort` low,
+  `max_completion_tokens` 4,000. A3 submits one batch per step.
+- **Cost:** the estimate is printed before the run, and the scripts take
+  `--limit N`. Estimate at about 600 output tokens a call (E-003's twin
+  median): **US$ 0.50 central, 0.90 pessimistic** (A0 0.09, A1 0.11, A2 0.17,
+  A3 0.12). Measured cost is recorded here.
+- **Grading:** `evaluation/grader.py` (PI-024), read only after the gate 4
+  audit passes.
+
+### Measurement
+
+- Input, output and reasoning tokens per call and per question, per arm:
+  median, p90, max; calls that reach the output cap.
+- A3: steps per question; the share of questions that search again after the
+  first observation (the implicit detector's firing rate); B binding.
+- **Proxy SD of D** = C(A1) − C(A3) on the 30 shared questions (λ = 4), with
+  an 80% cluster-bootstrap interval (E-001's cluster keys).
+- One rendered case per arm (prompt, evidence, completion) before any
+  aggregate.
+
+### What it can and cannot conclude
+
+- **Can:** cost per arm, which fixes n_max (gate 8) and the re-estimated
+  budget; reasoning headroom; the order of magnitude of the SD of D.
+- **Cannot:** any difference between arms. **Mean C per arm is not printed.**
+  No per-stratum rate decides anything; no prompt is chosen from these
+  outputs, and any change made after them counts as prompt iteration 1
+  (journal, 2026-10-06).
+
+### Expected result (author's prediction)
+
+_To be written by the author before the run._
+
+### Actual result
+
+_Not run._
+
+### Amendments
+
+_None._
+
+---
+
+## E-005 — G2 closed-book: does memory stand in for evidence on the twin?
+
+- **Phase:** 3 (pilot gate).
+- **Status:** draft — registered 2026-10-07, before any run.
+- **Hypothesis:** gating — G2's closed-book half (`docs/contingency.md`;
+  PI-022). G2's identity half passed in E-003.
+
+### Objective
+
+Whether A0, with no evidence, answers twin questions above each template's
+chance rate: memory standing in for evidence, per template.
+
+### Configuration
+
+- **Sample:** 50 questions per template, all 16 templates (800), drawn with a
+  registered seed from dev, train and the unassigned pool — never from an
+  evaluation split — one per cluster where the pool allows (E-001's cluster
+  keys).
+- **A0** with E-004's prompt v0, on each question's **twin** text and on its
+  **real-name** text (rendered by the generator with real names): 1,600
+  calls. gpt-5-mini, Batch API, `reasoning_effort` low,
+  `max_completion_tokens` 4,000. **Cost estimate: US$ 1.0 central, 1.8
+  pessimistic**; printed before the run, with `--limit N`.
+- **Correct:** exact match with aliases (`evaluation/grader.py`, read after
+  the gate 4 audit; PI-024). In S4, "correct" means stating the withheld
+  value. An abstention is never correct.
+
+### Decision rule (fixed before the run)
+
+- **Chance** per template: its majority-answer rate after the concentration
+  cap (`docs/examiner.md`, Counts), never below uniform; for S4, the majority
+  rate of the withheld values among the sampled questions.
+- **A template fails G2** when the **Wilson 95% lower limit** of A0's correct
+  rate on the twin is above chance + 5 points.
+- **Positive control:** on real names, the Wilson 95% lower limit exceeds
+  chance + 5 points in at least **3 of the 4** templates S0-A1 to S0-A4
+  (well-known facts). If not, the probe, the prompt or the grader is broken,
+  and G2 is not evaluated until it is fixed.
+- **Exit when a template fails:** G2's written exit — the leaking templates
+  leave the primary population, decided on dev and recorded.
+
+### What it can and cannot conclude
+
+- **Can:** catch large leaks per template. With n = 50 and a 10% chance rate,
+  the rule fails a template only above about 25% correct.
+- **Cannot:** show that small leaks are absent.
+
+### Expected result (author's prediction)
+
+_To be written by the author before the run._
+
+### Actual result
+
+_Not run._
+
+### Amendments
+
+_None._
