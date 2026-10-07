@@ -1087,7 +1087,11 @@ table (gate 3).
 
 ### Expected result (author's prediction)
 
-_To be written by the author before the run._
+Written 2026-10-08, before the run, as a gut call:
+
+1. Reasoning: about 40 tokens per call.
+2. A3 takes 2 steps on average.
+3. The proxy SD of D comes out above 1.64, gate 3's working value.
 
 ### Actual result
 
@@ -1163,7 +1167,12 @@ chance rate: memory standing in for evidence, per template.
 
 ### Expected result (author's prediction)
 
-_To be written by the author before the run._
+Written 2026-10-08, before the run, as a gut call:
+
+1. Whether a template leaks is very hard to call; if one does, perhaps through
+   the most famous species (a Pikachu).
+2. The positive control may fail: the model can get real-name facts wrong,
+   because sources vary on them. To be seen.
 
 ### Actual result
 
