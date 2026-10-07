@@ -339,6 +339,16 @@ scarlet-violet 49, x-y 17, ultra-sun-ultra-moon 14, following the S2 pool
 (4,450 / 3,323 / 3,354 questions); S3 set sizes 3–20, median 4; S4 covers 40
 withheld pairs.
 
+After PI-020 (current draw): eval-L1 S3 set sizes 3–17, median 5, S4 covers 39
+withheld pairs; dev 3–19, median 5, 14 pairs; train 3–13, median 4, 14 pairs.
+
+S3 set sizes over the whole pool (questions per size, after filters):
+
+| Size | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11–15 | 16–20 | 21–25 | Total |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| S3-A1 | 236 | 144 | 132 | 122 | 78 | 72 | 42 | 47 | 84 | 35 | 10 | 1,002 |
+| S3-B1 | 257 | 131 | 76 | 59 | 27 | 18 | 14 | 13 | 24 | 8 | 3 | 630 |
+
 ## Counts
 
 Generated 2026-09-29 (`python -m agentic_pokedex.examiner.generate`; the

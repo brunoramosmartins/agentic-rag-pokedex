@@ -1169,3 +1169,48 @@ What G3 does not cover: 60 questions bound the gold error rate only loosely
 remaining checks (labeler golden trajectories, shortcut scan, reachability,
 export leak checks) are the rest of the evidence.
 
+
+## 2026-10-06 — Phase 2 close: deliverable audit
+
+Every Phase 2 deliverable and completion criterion is present except two
+items, decided by the author:
+
+- **`examiner/filters.py` consciously dropped.** The filters live in
+  `examiner/generate.py`, applied in the order `docs/examiner.md` (Filters)
+  gives, each with its N-of-M per template (Counts). A separate module would
+  only move code.
+- **S3 set-size distribution** was published as range and median only; the
+  full distribution per template is now in `docs/examiner.md` (Splits).
+
+The benchmark v0 upload goes with the `v0.3-examiner` pre-release. PI-021 is
+triaged as a plan revision (Phases 3–6 gain tasks and Phase 6 its sizing),
+done before the tag.
+
+## 2026-10-06 — Plan revised for PI-021
+
+The plan for Phases 3 to 6 was revised at the Phase 2 close to carry the E-001
+amendments of 2026-09-30. No hypothesis, threshold (0.25), Δ_design (0.35),
+budget cap or API call changes; the protocol itself was already amended in the
+registry before any run.
+
+- **Phase 3** adds the trajectory-level check: under the tool contract, the
+  minimum calls and tokens from each eval-L1 question to a sufficient state,
+  published N-of-M (one call; beyond T_max or B) before dev is first used, and
+  every subtype and code reachable by a trajectory on dev. n_max_eff =
+  min(n_max, 448) is logged beside n_max.
+- **Phase 5** adds the error-code assigner (`evaluation/errors.py`), a decision
+  list with one golden test per branch, and implements O2's operational rule.
+- **Phase 6** adds the cluster file (hashed in the freeze manifest), the design
+  effect on n* with ρ from the dress rehearsal, cluster inference for every
+  interval, trap-state detector precision and recall, the stratum-standardized
+  A × B gap, futility and rows 0b, 6 and 7 on S1–S3, and the 10 declared
+  threats in the limitations.
+- **Sizes:** Phase 5 becomes 9–12 partial days (was 8–11), Phase 6 6–8 (was
+  5–7), paid by the Phase 2 slack (about 3 partial days used of 9–12).
+- **Measurability gate re-run:** the available n (448 for balanced growth) and
+  the unit of independence (cluster) changed; the plan of 320 sits below 448
+  and the abort branch (row 0) stays written, now comparing n* times the
+  design effect with n_max_eff. `docs/measurability-gate.md` (gates 3 and 7,
+  Updates) and `docs/contingency.md` (G5) synced.
+
+**Plan impact PI-021 resolved:** plan revised on 2026-10-06 — Phases 3, 5 and 6 gain the trajectory-level check, the code assigner with golden tests and the cluster inference with the design effect; Phase 5 and 6 sizes grow by one partial day each, paid by the Phase 2 slack.
