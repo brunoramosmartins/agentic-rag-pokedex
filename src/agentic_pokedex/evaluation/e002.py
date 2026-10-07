@@ -28,7 +28,7 @@ import sys
 from collections import Counter, defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
 from statistics import median
@@ -282,7 +282,7 @@ def manifest(world_dir: Path, split: str, k: int) -> dict[str, Any]:
         f"data/splits/{split}.txt": REPO_ROOT / "data" / "splits" / f"{split}.txt",
     }
     return {
-        "when": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "when": datetime.now(UTC).isoformat(timespec="seconds"),
         "git_commit": git("rev-parse", "HEAD"),
         "git_dirty": bool(git("status", "--porcelain")),
         "split": split, "k": k, "budget": EVIDENCE_BUDGET, "token_cap": TOKEN_CAP,
