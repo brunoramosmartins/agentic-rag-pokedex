@@ -1,8 +1,8 @@
 # Benchmark card — agentic-rag-pokedex v0
 
-**Status: audited, ready for upload.** The generator audit (G3) passed on
-2026-10-06; the pre-release `v0.3-examiner` ships the files described here.
-The release log at the end is completed before the upload.
+**Status: published.** The generator audit (G3) passed on 2026-10-06; the
+pre-release `v0.3-examiner` ships the files described here, with the SHA-256
+values of the release log below.
 
 ## What it is
 
@@ -114,6 +114,11 @@ in `docs/examiner.md`.
   independent.
 - **List cues.** Hub units split at exactly 20 rows; a full unit hints that
   more follow (ADR-009, Updates).
+- **Beyond the step cap** (found 2026-10-07, after the v0 upload). 19 S3
+  questions, all on one widely learned move, need 7 calls to read the whole
+  hub, more than the 6 steps of E-001 (4 in dev, 15 unassigned, none in an
+  evaluation split); 6 of them also need more than 4,000 evidence tokens
+  (`docs/examiner.md`, Trajectory-level check).
 
 ## Intended use
 
@@ -132,4 +137,4 @@ released under this repository's MIT license, for what this project creates.
 
 | Date | Version | Files and SHA-256 | Audit | Uploaded |
 |---|---|---|---|---|
-| 2026-10-06 | v0 (pre-release `v0.3-examiner`) | `questions.jsonl` `b5820d55f1f57075b67c8eb98e8cb19a899fe9948318efb202660b072f2e57d8`; `manifest.json` `16ea40e831c16dbc236c49fb52c4ac2d216b730dbe71eb83dd38e1f4eff6305d` | G3 round 1: 60 of 60 | at the Phase 2 close |
+| 2026-10-06 | v0 (pre-release `v0.3-examiner`) | `questions.jsonl` `b5820d55f1f57075b67c8eb98e8cb19a899fe9948318efb202660b072f2e57d8`; `manifest.json` `16ea40e831c16dbc236c49fb52c4ac2d216b730dbe71eb83dd38e1f4eff6305d` | G3 round 1: 60 of 60 | yes, pre-release `v0.3-examiner` (GitHub asset digests match) |

@@ -503,7 +503,8 @@ Run of 2026-09-30 on dev (after PI-020 and PI-021): **14 of 14 codes
 reachable**, 1 declared; witness
 states hold 1–2 units (T_max = 6). These are reachable **states**, not
 replayed tool trajectories: a trajectory-level check under the tool contract
-(minimum calls to a sufficient state) is registered for Phase 3 (PI-021).
+(minimum calls to a sufficient state) is registered for Phase 3 (PI-021); done
+2026-10-06, see "Trajectory-level check".
 
 | Code | Witness state (dev) | Label |
 |---|---|---|
@@ -516,3 +517,59 @@ replayed tool trajectories: a trajectory-level check under the tool contract
 | never-reached | an S1 question no single unit makes sufficient | insufficient |
 | correct-at-insufficient | the final form's Profile: the answer shown, the chain to it unseen | insufficient (missing-hop) |
 | format-error | declared: a property of the output, not of the question | — |
+
+## Trajectory-level check
+
+`python -m agentic_pokedex.examiner.trajectories` (E-001, amendment of
+2026-09-30, item 7; PI-021), run before dev is first used. Model-free — the
+registry, the gold covers and the unit sizes under the tool contract — so it
+is not an opening of any evaluation split; it publishes counts only.
+
+- **Shortest page reading.** The fewest `open_page(title, section, offset)`
+  calls, then the fewest evidence tokens, whose results together make a
+  sufficient state: exact set cover over the windows of the pages that hold a
+  gold unit. The oracle knows which pages and sections to open, an agent does
+  not. `search` can pack units of different pages into one call, so it could
+  only lower a count, depending on the ranking.
+- **One search could hold it.** Some set of at most 5 gold units, one per gold
+  fact, fits in one call's 700 tokens: a single lucky search could make the
+  state sufficient. Optimistic by design: it ignores the ranking.
+- **Witnesses as trajectories.** Each state-level witness (Reachability) is
+  realized by `open_page` calls whose union carries the same label.
+
+Run of 2026-10-06. Calls of the shortest page reading (N questions), with
+T_max = 6 calls and B = 4,000 evidence tokens:
+
+| Split | S0 | S1 | S2 | S3 | S4 | Beyond T_max | Beyond B | One search could hold it |
+|---|---|---|---|---|---|---|---|---|
+| dev (150) | 1 (30) | 2 (22), 3 (8) | 1 (30) | 2 (22), 3 (4), **7 (4)** | never (30) | **4 of 150** | 0 of 150 | 90 of 150 (S0, S1, S2) |
+| train (150) | 1 (30) | 2 (22), 3 (8) | 1 (30) | 2 (24), 3 (5), 4 (1) | never (30) | 0 of 150 | 0 of 150 | 90 of 150 |
+| eval-L1 (400) | 1 (80) | 2 (46), 3 (34) | 1 (80) | 2 (54), 3 (17), 4 (9) | never (80) | 0 of 400 | 0 of 400 | 240 of 400 |
+| eval-L1-benign (40) | | 2 (33), 3 (7) | | | | 0 of 40 | 0 of 40 | 40 of 40 |
+| val-B (60) | 1 (12) | 2 (1), 3 (11) | 1 (12) | 2 (12) | never (12) | 0 of 60 | 0 of 60 | 36 of 60 |
+| eval-L2 (280) | 1 (40) | 2 (33), 3 (27) | 1 (60) | 2 (50), 3 (6), 4 (1), 5 (3) | never (60) | 0 of 280 | 0 of 280 | 160 of 280 |
+| eval-L3 (150) | 1 (30) | 2 (15), 3 (15) | 1 (30) | 2 (16), 3 (8), 4 (2), 5 (3), 6 (1) | never (30) | 0 of 150 | 0 of 150 | 90 of 150 |
+
+Evidence tokens of the shortest reading, eval-L1: median 167.5, maximum 2,646
+(S3). Readings:
+
+- **S0 and S2 take one call**, by design: S0 is one unit, S2 one fact whose
+  difficulty is the wrong-version distractor.
+- **S1 takes two or three page reads, but every S1 question could be made
+  sufficient by one lucky search** (its chain is two or three short Profiles).
+  Its difficulty is the agent stopping before it has the chain, not the
+  contract preventing it in one call; E-002 measures what the question text
+  actually retrieves.
+- **S3 needs two to five calls** to read the whole hub, never one (the
+  one-call hubs were dropped, PI-020), and no single search can hold it.
+- **4 dev questions are beyond T_max**: one S3 cluster, a widely learned move
+  whose hub takes 7 calls to read whole in two versions. No evaluation split
+  holds a question beyond T_max or B.
+
+Over the whole benchmark (`--pool`, the unassigned 31,070 questions as well):
+**19 of 32,300 questions are beyond T_max** — all S3 on that same move, 4 in
+dev and 15 unassigned — and **6 of 32,300 beyond B** (4,132 evidence tokens),
+all unassigned and among those 19. No other question is beyond either cap.
+
+Every one of the 14 codes is realized on dev by `open_page` calls (1–2 calls;
+`never-reached` repeats an insufficient call T_max times).

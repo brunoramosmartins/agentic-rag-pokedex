@@ -1214,3 +1214,46 @@ registry before any run.
   Updates) and `docs/contingency.md` (G5) synced.
 
 **Plan impact PI-021 resolved:** plan revised on 2026-10-06 — Phases 3, 5 and 6 gain the trajectory-level check, the code assigner with golden tests and the cluster inference with the design effect; Phase 5 and 6 sizes grow by one partial day each, paid by the Phase 2 slack.
+
+## 2026-10-06 — Phase 3 opened
+
+**Scope.** Phase 3 — Pilot gate: the trajectory-level check, E-002, the pilot
+on dev, G2's closed-book half, reasoning tokens per arm, n_max and n_max_eff.
+Size S (3–5 partial working days, as an estimate; no calendar). Ends with tag
+`v0.4-pilot-gate` (no release).
+
+**Gate check.** Every Phase 2 deliverable is present; PR #28 merged, tag
+`v0.3-examiner` and its pre-release published, the asset digests equal to the
+benchmark card's release log (card status now "published"). Carried over: the
+author's corrections to the Phase 2 note's Lessons Learned and Failed
+Attempts.
+
+**Assumption check.** No open plan impact.
+
+**Before any LLM call in this phase:** E-002 records its link-type order and
+its S3 measurement under the closure label; the pilot and the closed-book
+check are registered with their n, cost estimate and what they can and cannot
+conclude.
+
+## 2026-10-06 — Phase 3 decisions before any LLM call
+
+**Plan impact PI-022:** Phase 3 — G2's closed-book half assumed the dev pilot covers every template with enough questions → dev is group A only (11 of 16 templates, 7–30 questions each) and the rule reads a point estimate within 5 points of chance → the closed-book check draws its own sample per template from outside the evaluation splits, with n per template and an interval-based rule (fail when the Wilson 95% lower limit exceeds chance + 5 points) fixed before the run, registered as its own experiment; the A0 run on real names is its positive control. Open.
+
+Decided by the author the same day:
+
+- **G2 closed-book sample: 50 questions per template**, 16 templates, twin and
+  real world (1,600 calls, about US$ 1.1 at the reasoning measured by E-003),
+  drawn from dev, train and the unassigned pool, never from an evaluation
+  split. With n = 50 the rule catches large leaks only; that is what G2
+  guards against (memory standing in for evidence).
+- **The pilot runs a minimal A3**: the common agent loop and a v0 agent
+  prompt, registered before the run and untuned, reused in Phase 5. It gives
+  the costliest reasoning measurement (PI-014) and the SD proxy for D(A1 − A3).
+  v0 is the starting point, as for the judge and A2 prompts: the three
+  registered iterations count changes made after dev outputs are seen, so any
+  change after the pilot is iteration 1.
+- **The trajectory-level check is not an opening of eval-L1.** It is
+  model-free — the registry, the gold covers and the unit sizes under the tool
+  contract — like the per-split distributions of `data/splits/manifest.json`;
+  no arm runs and no output is seen. It reads the questions through the
+  generator's file, not through `open_split`.
