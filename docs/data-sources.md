@@ -68,6 +68,12 @@ are gitignored; everything arrives through a download script with hash checks.
 | `type_names.csv` | `685230c51074cf2f723debcf827a4df4c36ab0ec7e929c806ad65a3e40958705` |
 | `version_names.csv` | `23e3e9062f98e1f83d475b9eeac57ddff4375b46c175948a65c4fe8d3e1d87b4` |
 
+**Added in Phase 2** (which form must evolve; PI-019), same commit.
+
+| File | SHA-256 |
+|---|---|
+| `pokemon_evolution.csv` | `66495e349599befb48ef677e2c34c3d1aa0288e83b99277d944bbf495a743341` |
+
 ### Learnset coverage by version group
 
 At the pinned commit: 1,025 species, 1,351 Pokémon entries (forms included),
@@ -188,6 +194,15 @@ fact-level material**, and the corpus is rebuilt locally.
 Anyone can reproduce the corpus with the pinned commit + the generator + the
 seeds. Twin names are seeded pseudo-words filtered against real names, which
 also keeps trademarks out of the published files.
+
+**Opaque ids (amended 2026-09-30).** Question, fact and unit ids carry
+PokéAPI ids (`learn:6:53:x-y:level-up:1`, `species/6/profile`), and a PokéAPI
+id maps a twin name back to its real one. Published files use opaque ids
+(`q-`, `f-`, `u-` + hex of sha256 of the public seed and the local id); a
+rebuilt corpus computes the same ids. Rows are sorted by opaque id, since
+generation order follows PokéAPI ids. **Evaluation splits** are published by
+id only until each has been opened; their questions follow with the opening
+counts. Card: `docs/benchmark-card.md`.
 
 **Documentation examples (amended 2026-09-29).** Docs and the README may show
 a few twin-side rendered pages or units as examples (`docs/world.md` shows one

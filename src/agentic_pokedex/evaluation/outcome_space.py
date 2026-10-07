@@ -100,20 +100,21 @@ class OutcomeInputs:
     """Everything the E-001 outcome space reads, already reduced to booleans.
 
     Attributes:
-        descriptive_branch: Gate 8 asked for n* > n_max.
-        futility_fired: Upper 80% limit of O2 − A3 on dev S1–S4 < threshold,
+        descriptive_branch: Gate 8 asked for more than it allows: n* times the
+            cluster design effect above n_max_eff = min(n_max, 448).
+        futility_fired: Upper 80% limit of O2 − A3 on dev S1–S3 < threshold,
             evaluated before the opening.
         h1: Verdict of H1 (A3 − A4, S1–S4 pooled).
         s0_share_ge_half: The S0 gain of A4 over A3 is at least 50% of the
             pooled gain.
         s0_excludes_zero: The S0 interval excludes zero in favour of A4, with
-            at least 10 discordant pairs.
+            at least 10 discordant clusters.
         placebo: Whether A4p can be read.
         placebo_share_lt_half: A4's gain over A4p is below 50% of its gain
             over A3.
         mediation_ge_half: The registered mediation (net of A4p when the
             placebo is delivered, gross otherwise) is at least 50%.
-        oracle_room: Position of the 95% interval of O2 − A3 on eval.
+        oracle_room: Position of the 95% interval of O2 − A3 on eval S1–S3.
     """
 
     descriptive_branch: bool

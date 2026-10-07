@@ -837,3 +837,380 @@ re-runs gates 3 and 8 with it, and the S1 material pool arrives in Phase 2.
 **Plan impact PI-015 resolved:** plan revised on 2026-09-29 — Phase 2 builds material S1 (H1 pool) and a benign S1 slice (descriptive; 40 questions in eval-L1 for A3, A4, A4p), adds S1 templates beyond hidden ability, and proves the version-group filter with a negative test.
 
 **Plan impact PI-016 resolved:** plan revised on 2026-09-29 — the five constraints become Phase 2 generator filters, each with its N-of-M count in `docs/examiner.md`.
+
+## 2026-09-29 — Phase 2 opened
+
+**Scope.** Phase 2 — The Examiner: generator, gold chains and step labels. Size
+L (9–12 partial working days, as an estimate; no calendar). Ends with the
+`v0.3-examiner` pre-release (the benchmark v0) and the G3 verdict.
+
+**Gate check.** Every Phase 1 deliverable is present; PR #18 merged, tag
+`v0.2-world` pushed, Phase 1 issues and milestone closed. One gap: the Phase 1
+note's Lessons Learned and Failed Attempts are empty.
+
+**Carry-overs.** The Phase 1 lessons and failed attempts, written by the
+author, are the first task of Phase 2 (author's decision).
+
+**Open plan impacts.** None: PI-001 to PI-016 are resolved. The ones that shape
+this phase are already in its tasks — S1 material and benign (PI-015), the
+world's constraints on the generator and the negative scope test (PI-016), the
+answer-concentration cap with before/after tables (PI-012), no flavor-text case
+in the shortcut scan or the G3 audit (PI-013).
+
+**Scope decisions.** None taken at kickoff.
+
+## 2026-09-29 — Template design for the examiner
+
+Measured before deciding (`docs/examiner.md`). The author approved:
+
+- **S3 requires the gold set spread over at least two indexed units.** Of
+  1,504 candidate "type-T learners of M in V" sets of size 3–25, 1,181 fit in
+  one hub unit — one unit is sufficient there, nothing is truncated. 323 remain.
+  A hidden-ability holders template was dropped (24 sets span two units).
+- **S1 uses version-free relations only** (evolution, abilities, types, the
+  type chart). A hop through a learnset would mix a wrong-version trap into a
+  missing-hop question. Five templates; four evolution-based ones give ~320
+  material anchors; the fifth (a move's type multiplier against a species)
+  needs three facts and is material by construction.
+- **S4 keeps two templates**, below the planned three to five: every S4
+  question rests on a withheld learnset, and a third shape would be artificial.
+  S4 reuses S2's surface forms, so the wording never reveals the stratum.
+- **Partition:** the B template of each stratum is its most different shape
+  (S0-B1 type chart, S1-B1 move vs species, S2-B1 last move, S3-B1 level cap,
+  S4-B1 move at level).
+- **Surface forms** are hand-written, three per template; the author reviews
+  them.
+
+Also added: `world/explore.py`, a local tool to see any page in both namings.
+
+## 2026-09-29 — Profiles link forward only (escalated and absorbed)
+
+Writing the S1 templates showed that species Profiles carrying the whole
+evolution line put the anchor and the answer of every evolution-based S1
+question in one unit — the final form's Profile — so the single-unit shortcut
+filter would discard all of them. Measured alternatives (anchors / material):
+forward links only keep S1-A1 405 / 70, S1-A2 434 / 104, S1-A3 405 / 57;
+immediate links both ways keep only 103 / 19 and 110 / 41 and lose S1-A3. The
+author chose forward links.
+
+**Plan impact PI-017:** Phase 2 (and the Phase 1 world) — species Profiles were assumed to be able to show the whole evolution line → that puts the anchor and the answer of every evolution-based S1 question in one unit (the final form's Profile), so the single-unit shortcut filter discards all of them → Profiles show forward links only ("Evolves into"), final forms state "Evolves into: —" as a registered fact, S1-A4 (pre-evolution) is dropped, world v1 is re-rendered; E-003 stands, since the new pages show a subset of what it probed. Open.
+
+Done the same day: `render.py` links forward and registers `evoend` facts
+(145,429 facts; registry check PASS in both namings); all 405 S1-A1 anchors now
+need at least two units; `docs/world.md` examples regenerated;
+`docs/examiner.md`, `docs/hypothesis.md` (S1 example now Dratini, a material
+case — the old Charmander example was benign), ADR-002 (Updates) and a note in
+E-003 updated.
+
+**Plan impact PI-017 resolved:** absorbed — the world was re-rendered within Phase 2, S1 keeps four templates (S1-A1 to A3 and S1-B1), no hours or deliverables change.
+
+## 2026-09-29 — Examiner templates and the first generation
+
+`examiner/templates.py` (Cypher per template), `examiner/surfaces.py` and
+`examiner/generate.py` generate 33,719 questions from the graph, byte-identical
+across runs; counts per template and per drop reason in `docs/examiner.md`.
+Decisions made while building, none changing the approved design:
+
+- **The single-unit shortcut filter applies to S1 and S3 only.** S0 is one
+  unit by design and S2 is one fact by nature — its difficulty is the
+  wrong-version distractor; the specification said "S1–S3" and was corrected.
+- **Gold facts are the facts the answer is derived from.** For "the last move
+  X learns" that is the whole learnset, so only the learnset unit covers it; a
+  hub entry naming the move at the top level does not prove it is the last.
+- **S4 is exempt from the concentration cap:** its correct answer is always to
+  abstain, so no guess can be lucky.
+- **"Pokémon" takes no plural `s`**, in the twin as in English, so real and
+  twin questions stay parallel.
+- **S3 pool:** 1,961 sets, not the 323 first estimated; the estimate excluded
+  every hub touching a withheld species, the rule excludes only sets whose
+  members include one.
+- **S1-B1** samples 40 damaging moves (seeded) against every species.
+- **Question ids** carry PokéAPI ids and are local. The published benchmark
+  must use opaque ids: a PokéAPI species id maps a twin name back to its real
+  species.
+
+## 2026-09-29 — The sufficiency labeler
+
+`labeling/sufficiency.py` labels every state of a trajectory as a pure
+function of the question's gold facts, the registry and the unit ids each
+observation showed; specification in `docs/examiner.md`. Decisions:
+
+- **Covers are recomputed from the registry**, never read from the question
+  record, so a stale record cannot move a label.
+- **Refuse, never guess.** A seen unit the registry does not know, a seen
+  withheld unit, an unanswerable non-S4 question or an answerable S4 question
+  raise an error instead of producing a label; each one is a fault in the
+  logger, the index or the generator, and a label computed over it would be
+  silently wrong.
+- **Near-certain evidence is reported beside the label, not inside it.** The
+  generator now records, for S2 and S4, the distractor facts (the same
+  question answered by another version group of the scope) and the indexed
+  units stating them; the label says which of those units were seen. The
+  error taxonomy's `accepted-wrong-version` and E-002's near-certain count
+  read this field. S4 questions also record their withheld units. The
+  question set is unchanged: at most one version group is withheld per
+  species, so every distractor has indexed units; the question file gains
+  three fields and its hash changes.
+- **S3 labels report members covered** (entries whose learn and type facts
+  are all seen, of the set size) for E-002's delivered fraction of the set.
+- **Golden trajectories run on the fixture world**, with labels written by
+  hand from its rendered units: 9 trajectories covering every stratum and
+  subtype, and 6 refusals.
+
+## 2026-09-29 — Shortcut scan: statements, the twin, verdicts by class
+
+`examiner/shortcuts.py` implements filter 7. The first run, on the approved
+design, planted 160 leaks and flagged all of them, then flagged 1,286 of
+33,719 questions. The author approved four points after reading the classes
+with rendered examples:
+
+- **Statements, not units.** A statement is a body line with its unit's
+  header (a free-text unit is one statement). At unit level the scan flagged
+  2,064 questions; the extra 778 were two facts on different lines of one
+  unit, such as a pre-evolution's Profile naming the anchor and its own hidden
+  ability. ADR-002 updated.
+- **The twin pages only.** Real names collide lexically ("Fire" inside "Fire
+  Punch", "Porygon" inside "Porygon-Z"): noise of the scan, not a leak of the
+  registry.
+- **All 18 classes are coincidences; 0 questions discarded.** A form of the
+  anchor (its own entry, with its own ability or types); the anchor's own value
+  in S1 (the benign case, already tracked by the material tag); another fact
+  with the same names (a learner's types in a move's hub, a third type's
+  matchup line, the same move by machine or tutor); a learn level equal to a
+  move's power. Verdicts with reasons live in `VERDICTS`; a class seen for the
+  first time fails the scan until it is read.
+- **S1-B1 at ×4 or ×0.25 is not scannable** (1,461 of 12,740): no page writes
+  those values. Published N-of-M.
+
+S2-A1, S2-A2, S3 and S4 have no flag at all. Noted while reading: some
+material S1 questions have a regional form that is what actually evolves
+(Galarian Corsola, Ghost-type, evolves into Cursola); the graph records
+evolution per species, so this is a world quirk, not a leak.
+
+## 2026-09-29 — Splits
+
+`examiner/splits.py` draws dev, train, eval-L1 (with the 40-question benign S1
+slice as its own file), val-B, eval-L2 and eval-L3 from the 33,719 kept
+questions; `docs/examiner.md` → Splits. dev and train are frozen; evaluation
+ids are drawn now and frozen at the dress rehearsal. Measured before writing
+the code, and approved by the author:
+
+- **Families.** Questions sharing a (template, anchor entity) pair or an
+  identical gold chain go to one split together: 6,822 families. Identical
+  chains join S2-A1 with S2-A2 (418 families) and S4-A1 with S4-B1 (112).
+  Every split is disjoint from every other, stricter than the registered rule,
+  so eval-L2 and eval-L3 stay independent of eval-L1.
+- **No stratification beyond the template.** A simple seeded draw within each
+  template estimates that template's population; the manifest reports the
+  distributions (S2 versions, S3 set sizes, S4 withheld pairs, S1 material).
+  Each pass takes one question per family, so S4 spreads over withheld pairs
+  where it can: 121 families for 242 questions demanded, capped in proportion
+  to each split's demand.
+- **Largest-remainder rounding, group A first** (S2 in eval-L1: 27 / 27 / 26).
+- **Opaque ids from the start**: `q-` + 10 hex of sha256(seed:id). They keep
+  PokéAPI ids out of published files; with the seed public they are not a
+  secret.
+- **Growth.** A gate 8 extension draws after every other split, so nothing
+  already drawn changes.
+
+**Plan impact PI-018:** Phase 6 — the freeze and gate 8's extension assumed eval-L1 draws equal numbers per template within each stratum, growing balanced up to n* → material S1 pools (S1-A1 70, S1-A2 104, S1-A3 57) cannot give equal counts even at the base size once dev, train, eval-L2 and eval-L3 take theirs → group-A S1 is split across S1-A1 to A3 in proportion to their material pools (S1-B1 keeps its equal share, so the A/B proportion is unchanged), and balanced growth stops near a pooled S1–S4 n of 548; E-001 amended before its freeze. Open.
+
+Escalated the day it was found, since it touches a registry entry and gate
+8. Measured after the change: the extension works up to 57 extra questions
+per stratum (137, pooled 548) and fails at 58; material questions used by the
+base splits are 57 of 70, 85 of 104 and 46 of 57.
+
+**Plan impact PI-018 resolved:** absorbed — E-001 amended (draft, before its freeze), the splitter implements the proportional S1 allocation and the bounded extension; no sizes, hours or phases change. If Phase 3 puts n_max above 548, the gap is recorded then.
+
+## 2026-09-29 — S1: only evolutions the default form makes
+
+Preparing the G3 sheet, a drawn question asked for "the final form of
+Corsola's evolution line", gold Cursola. PokéAPI links evolutions per species;
+in the game only Galarian Corsola evolves, and Corsola as its Profile shows it
+does not. PokéAPI records this: `pokemon_evolution.csv` at the pinned commit
+names the form that must evolve (`required_pokemon_form_id`). Ten evolutions
+need a non-default form; four sit on branching lines S1 already excluded
+(Perrserker, Runerigus, Sneasler, Clodsire), six do not (Cursola, Sirfetch'd,
+Mr. Rime, Obstagoon, Overqwil, Basculegion).
+
+**Plan impact PI-019:** Phase 2 — S1 assumed every species-level evolution in PokéAPI is one the anchor's default form makes → 6 single-child evolutions need a regional or variant form (`required_pokemon_form_id` in `pokemon_evolution.csv`), so 18 material S1 gold answers are wrong for the default form → the examiner drops chains through form-only evolutions, `pokemon_evolution.csv` joins the pinned download, questions, scan and splits are regenerated with dev and train refrozen before any use, and the gate 8 ceiling of PI-018 is re-measured. Open.
+
+Escalated the day it was found (it touches the phase in progress and a frozen
+split). The author chose, of two options:
+
+- **A (taken): drop at the examiner.** `world/pokeapi.form_only_evolutions`
+  reads the CSV; S1-A1 and S1-A2 drop a line through such an evolution, S1-A3
+  a next form reached that way (22 questions: 8, 8 and 6; 18 material).
+- **B: fix the world** (Corsola's Profile "Evolves into: —", the evolution on
+  Galarian Corsola's Form unit). More faithful, but a new fact kind and a
+  re-render of Phase 1 pages. The corpus keeps PokéAPI's species link as a
+  declared simplification no question depends on.
+
+The author also fixed the G3 standard: a gold answer is correct when it
+matches the game for the question as asked (named version group, default
+form), not merely PokéAPI — the stricter reading, since eval-L3 asks in real
+names and a model that knows the game would contest the gold.
+
+Regenerated the same day: 33,697 questions (was 33,719); material S1 pools 64
+/ 96 / 53. The shortcut scan, rerun: 160 of 160 planted leaks, 1,272
+questions flagged in the same 18 classes, 0 discarded — and the 10 material S1
+questions the first scan flagged in Form classes are gone: they were exactly
+these lines (a regional form sharing the final form's value). Splits redrawn
+with `--refreeze`: 6,800 families, 0 clashes; allocations unchanged; dev and
+train changed in their S1 draws only (24 and 22 ids), before any use. The
+gate 8 extension now stops at 32 extra per stratum, a pooled S1–S4 n of 448
+(PI-018 measured 548).
+
+**Plan impact PI-019 resolved:** absorbed — the filter, the pinned CSV and the regenerated questions, scan and splits fit Phase 2; E-001 amended (draft). The lower growth bound (448) is compared with n_max when Phase 3 computes it.
+
+## 2026-09-30 — Opening counts, reachability, audit sources
+
+- **Opening counts.** The splits issue asked for opening counts initialised at
+  0; they were missing. `data/splits/openings.json` now holds them, and
+  `splits.open_split` is the only reader of an evaluation split's ids: every
+  opening is logged with its date and purpose, a second one needs an explicit
+  reopen and is counted, and an opened split can no longer be redrawn or
+  extended.
+- **Reachability (ADR-007).** `examiner/reachability.py` finds, for each
+  insufficiency subtype and error code, a dev question and a reachable state
+  whose label is the one the code needs: 13 of 13 reachable, `format-error`
+  declared (a property of the output). The `correct-at-insufficient` witness
+  is the final form's Profile seen alone: it shows the answer but not that the
+  form is on the anchor's line.
+- **Audit sources.** The G3 sheet's gold chain comes from the same pipeline as
+  the gold answer, so their agreement tests nothing; the auditor checks an
+  independent source first (Bulbapedia, Serebii per game, PokémonDB; never a
+  site built on PokéAPI) and reads the chain only to locate a disagreement.
+  The sources per template are in `docs/examiner.md` → G3 audit.
+
+## 2026-09-30 — Benchmark v0 export and card
+
+`examiner/benchmark.py` exports the benchmark v0 locally
+(`data/world/benchmark/v0/`); `docs/benchmark-card.md` is its card, written
+before any upload. Decisions:
+
+- **Opaque fact and unit ids** (approved by the author), like question ids:
+  `f-`/`u-` + 12 hex of sha256(seed:id). Raw ids carry PokéAPI ids, which map
+  twin names back to real ones. A rebuilt corpus computes the same ids.
+- **Two more orderings leaked the same map** and were closed while building:
+  rows came out in PokéAPI id order (national dex order: the first S0-A1 rows
+  named species 1, 2, 3), and S3 gold facts listed members by PokéAPI id. Rows
+  are sorted by opaque id; gold facts keep chain order in S1 only, where the
+  order is the chain, and are sorted elsewhere.
+- **Evaluation splits by id only until opened.** Publishing their answers
+  before the project measures on them would add a contamination path for no
+  gain; they follow with the opening counts. `--include-evaluation` exists for
+  that later release.
+- **Checks before writing:** no raw fact or unit id in any field, no real
+  species, move, ability or type name in any question or answer (both checked
+  on planted cases). v0: 32,767 questions (dev 150, train 150, pool 32,467).
+
+## 2026-09-30 — E-001 red-team after the examiner build
+
+The `experiment-redteam` review planned for after the templates read E-001
+against the built examiner: 8 blocking findings and 11 caveats. The claims
+that change data were checked before anything was proposed: 57 of 80 eval-L1
+S3 hubs fit in one 700-token call; withheld pair (442, scarlet-violet) sat in
+eval-L1 and eval-L3; E-001 names O2 in a table row only. The author approved
+all of it.
+
+**Plan impact PI-020:** Phase 2 — S3 assumed that seeing every member makes a state sufficient and that a set spread over two units needs two steps; S4 families assumed per template → seeing the members does not prove the list complete (only the whole (move, version) hub does), 57 of 80 eval-L1 S3 hubs fit in one 700-token call, and one withheld pair sat in eval-L1 and eval-L3 → S3 gold facts become every row of the hub (members still reported), S3 keeps only hubs longer than one call, S4 families are keyed by withheld pair; questions, scan, splits, golden trajectories and reachability regenerated, dev and train refrozen before any use. Open.
+
+Done the same day. Questions: 32,300 (S3-A1 1,002, S3-B1 630; 9,238 hub
+sets dropped as one-call). Scan: 160 of 160 planted leaks, 1,272 flagged, 0
+discarded. Splits refrozen: 6,425 families, 0 clashes; S3 now draws 242
+questions from 65 moves and S4 from 120 pairs, both capped in proportion
+(eval-L1: 21 moves, 41 hubs; 39 pairs). S3 golden trajectories rewritten for
+the closure label, with a new case: the only member seen, the list not yet
+proved complete. S0 got its own subtype, `not-found`. Reachability: 14 of 14
+codes. Benchmark v0 export: 31,370 questions. The G3 round in progress stays
+valid: gold answers did not change, only what proves an S3 set complete.
+
+**Plan impact PI-020 resolved:** absorbed — filters, labels and regenerated artifacts fit Phase 2; no hours or deliverables change.
+
+**Plan impact PI-021:** Phases 3–6 — E-001's analysis assumed independent questions, an operational O2, a gate 8 extension feasible up to n_max and an unambiguous error taxonomy → eval-L1 is clustered (S4 pairs, S3 moves, S1 lines), O2 had no decision rule and is mechanically ahead on S4, balanced growth stops at 448, codes overlapped → clusters with a cluster bootstrap and a design effect in gate 8, an O2 decision rule with per-stratum O2 − A3, n_max_eff = min(n_max, 448), the taxonomy as a decision list with golden tests for the assigner, trap-state precision and recall, a stratum-standardized A × B gap and a Phase 3 trajectory-level check; E-001 amended before its freeze, with 10 threats declared. Open.
+
+Still open inside PI-021: whether rows 0b, 6 and 7 read O2 − A3 on S1–S3
+rather than S1–S4, decided before the freeze. The new work (cluster
+inference, code assigner and its golden tests, trajectory-level check) lands
+in Phases 3 to 6 and is triaged at this phase's close.
+
+## 2026-09-30 — O2 on S1–S3; ρ from the dress rehearsal
+
+The author closed the two items PI-021 left open, before any run:
+
+- **Rows 0b, 6 and 7 (futility and room) read O2 − A3 on S1–S3.** O2 abstains
+  on every S4 question by construction, so S4 would make the room look larger
+  and keep futility and row 6 from firing for a reason unrelated to stopping.
+  O2 − A3 on S4 is still reported.
+- **ρ for the design effect is estimated on the dress rehearsal** (upper 80%
+  limit) in every stratum. ρ = 1 in S3 and S4 would have nearly doubled n* in
+  those strata (about 4 questions per S3 move, 2 per S4 pair in eval-L1) and
+  pushed toward row 0 on an assumption rather than a measurement.
+
+E-001 amended; `docs/measurability-gate.md` gate 8 updated. PI-021 stays open
+for the implementation in Phases 3 to 6.
+
+## 2026-10-06 — G3 passed: 60 of 60
+
+The author audited round 1 by hand: 60 questions, 12 per stratum, one per
+family, drawn from outside the evaluation splits, each checked against an
+independent source for the game as asked (named version group, default form)
+before reading the gold. **60 of 60 correct** (pass at 58); no `wrong`, no
+unreadable item, so no fix and no second round (G3 in `docs/contingency.md`
+not triggered).
+
+The benchmark card records the result and the release log, with the SHA-256 of
+`questions.jsonl` and `manifest.json`, before the upload. The `v0.3-examiner`
+pre-release ships the benchmark v0 at the Phase 2 close.
+
+What G3 does not cover: 60 questions bound the gold error rate only loosely
+(0 of 60 is compatible with a rate up to about 6% at 95%, Wilson); the
+remaining checks (labeler golden trajectories, shortcut scan, reachability,
+export leak checks) are the rest of the evidence.
+
+
+## 2026-10-06 — Phase 2 close: deliverable audit
+
+Every Phase 2 deliverable and completion criterion is present except two
+items, decided by the author:
+
+- **`examiner/filters.py` consciously dropped.** The filters live in
+  `examiner/generate.py`, applied in the order `docs/examiner.md` (Filters)
+  gives, each with its N-of-M per template (Counts). A separate module would
+  only move code.
+- **S3 set-size distribution** was published as range and median only; the
+  full distribution per template is now in `docs/examiner.md` (Splits).
+
+The benchmark v0 upload goes with the `v0.3-examiner` pre-release. PI-021 is
+triaged as a plan revision (Phases 3–6 gain tasks and Phase 6 its sizing),
+done before the tag.
+
+## 2026-10-06 — Plan revised for PI-021
+
+The plan for Phases 3 to 6 was revised at the Phase 2 close to carry the E-001
+amendments of 2026-09-30. No hypothesis, threshold (0.25), Δ_design (0.35),
+budget cap or API call changes; the protocol itself was already amended in the
+registry before any run.
+
+- **Phase 3** adds the trajectory-level check: under the tool contract, the
+  minimum calls and tokens from each eval-L1 question to a sufficient state,
+  published N-of-M (one call; beyond T_max or B) before dev is first used, and
+  every subtype and code reachable by a trajectory on dev. n_max_eff =
+  min(n_max, 448) is logged beside n_max.
+- **Phase 5** adds the error-code assigner (`evaluation/errors.py`), a decision
+  list with one golden test per branch, and implements O2's operational rule.
+- **Phase 6** adds the cluster file (hashed in the freeze manifest), the design
+  effect on n* with ρ from the dress rehearsal, cluster inference for every
+  interval, trap-state detector precision and recall, the stratum-standardized
+  A × B gap, futility and rows 0b, 6 and 7 on S1–S3, and the 10 declared
+  threats in the limitations.
+- **Sizes:** Phase 5 becomes 9–12 partial days (was 8–11), Phase 6 6–8 (was
+  5–7), paid by the Phase 2 slack (about 3 partial days used of 9–12).
+- **Measurability gate re-run:** the available n (448 for balanced growth) and
+  the unit of independence (cluster) changed; the plan of 320 sits below 448
+  and the abort branch (row 0) stays written, now comparing n* times the
+  design effect with n_max_eff. `docs/measurability-gate.md` (gates 3 and 7,
+  Updates) and `docs/contingency.md` (G5) synced.
+
+**Plan impact PI-021 resolved:** plan revised on 2026-10-06 — Phases 3, 5 and 6 gain the trajectory-level check, the code assigner with golden tests and the cluster inference with the design effect; Phase 5 and 6 sizes grow by one partial day each, paid by the Phase 2 slack.

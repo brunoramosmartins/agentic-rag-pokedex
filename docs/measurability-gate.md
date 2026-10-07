@@ -171,6 +171,13 @@ row 5; the README says so when it happens.
 **Fails if:** the SD of D measured in the dress rehearsal (Phase 6) requires
 n\* > n_max → gate 8.
 
+**Update 2026-10-06 (Phase 2 close, PI-021).** eval-L1 questions are clustered
+(withheld pairs in S4, moves in S3, evolution lines in S1), so *n* above still
+counts questions but the tables hold for the **effective n**, n divided by the
+design effect, known only once ρ is estimated on the dress rehearsal (gate 8,
+Updates). Intervals and sign-flip p-values are computed by clusters (E-001,
+amendment of 2026-09-30).
+
 ---
 
 ## Gate 4 — The evaluator ceiling
@@ -251,6 +258,17 @@ threshold or stratum.
 **Fails if:** a number in `docs/evaluation.md` comes from an instrument without
 its registered check.
 
+**Update 2026-10-06 (Phase 2 close).** World v1 has no flavor text (PI-013), so
+the generator audit no longer reads it and the scan's flavor-text plant is
+gone: every scan run plants a prose leak and a structured-line leak for 5
+questions per template. Checks run in Phase 2: generator, G3 round 1, **60 of
+60** against independent sources for the game as asked (`docs/examiner.md`, G3
+audit); shortcut scan, **160 of 160** planted leaks flagged; sufficiency
+labeler, **100%** on the golden trajectories; reachability, **14 of 14** codes
+produced by a labelled dev state (`format-error` declared). Added by PI-021:
+the **error-code assigner** runs against golden tests, one per branch of the
+taxonomy's decision list, before any code is published.
+
 ---
 
 ## Gate 8 — The abort criterion
@@ -273,6 +291,20 @@ rehearsal**. There is no cap increase after the dress rehearsal.
   The primary claim becomes **descriptive**: detector precision / recall by
   insufficiency subtype, with intervals, and the README states that the budget
   did not support a cost claim. Registered now, not negotiated later.
+
+**Update 2026-09-30 (PI-021, E-001 amendment of the same date).** Two inputs
+of this gate changed before any run. (1) eval-L1 questions are clustered
+(withheld pairs, S3 moves, S1 lines), so n* is multiplied by a design effect
+from the drawn cluster sizes, with ρ = 1 in S3 and S4 and the dress-rehearsal
+estimate elsewhere, and inference is by clusters. (2) Balanced growth stops at
+a pooled S1–S4 n of 448 (material S1): **n_max_eff = min(n_max, 448)**
+replaces n_max in the branches above, and n* > n_max_eff is row 0.
+
+**Update 2026-09-30, later the same day.** ρ is estimated on the dress
+rehearsal (upper 80% limit) in every stratum, S3 and S4 included; and the
+futility rule and rows 0b, 6 and 7 read O2 − A3 on **S1–S3**, since O2
+abstains on every S4 question by construction (E-001, amendment of
+2026-09-30).
 
 **Futility (Phase 6, before the opening):** if the **upper 80% limit** of the
 O2 − A3 difference on dev S1–S4 is below 0.25, a gold-label stop applied to

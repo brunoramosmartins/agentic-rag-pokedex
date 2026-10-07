@@ -83,6 +83,8 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   upper limit of the 80% interval), before eval-L1 ids are frozen.
 - Branches (keep plan / draw more questions / descriptive claim) are fixed in
   measurability gate 8.
+- **Update 2026-09-30 (PI-021):** the n compared is n* times the cluster
+  design effect, against n_max_eff = min(n_max, 448).
 
 ## G5 — Last exit
 
@@ -98,6 +100,8 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   pays for after all three cuts is computed and logged **before the dress
   rehearsal**. If gate 8 asks for more than n_max, the verdict becomes
   descriptive (row 0). **The cap is not raised after the dress rehearsal.**
+- **Update 2026-10-06 (PI-021):** "more than n_max" reads as n* times the
+  cluster design effect above n_max_eff = min(n_max, 448), as in G4.
 - **Extension cut order:** (1) GPT-4o-mini replication, (2) MuSiQue, (3) real
   world, (4) the whole v1.1 — the last only by rule (outcome-space row 6, or the
   Phase 8 futility rule), never by fatigue.

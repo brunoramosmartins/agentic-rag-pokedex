@@ -93,7 +93,7 @@ def test_world_facts(world: render.World) -> None:
     for fact in world_facts(world).values():
         kinds[fact["kind"]] = kinds.get(fact["kind"], 0) + 1
     assert kinds == {
-        "evo": 2, "form": 2, "ptype": 8, "pability": 8,
+        "evo": 2, "evoend": 2, "form": 2, "ptype": 8, "pability": 8,
         "mtype": 3, "mcat": 3, "mpower": 2, "eff": 9, "learn": 7,
     }
 
@@ -163,14 +163,34 @@ def test_species_profile(units, world, real) -> None:
         "Species: Sproutree · Section: Profile\n"
         "Types: [[Moss]] / [[Tide]]\n"
         "Abilities: [[Thicket]] · Hidden ability: [[Undertow]]\n"
-        "Evolution: [[Sprig]] → [[Sprout]]; [[Sprout]] → [[Sproutree]]\n"
+        "Evolves into: —\n"
         "Forms: [[Sproutree (Tidal Form)]]"
     )
 
 
 def test_species_without_evolution(units, world, real) -> None:
     text = texts_by_id(units, world, real)["species/4/profile"]
-    assert "Evolution: does not evolve" in text
+    assert "Evolves into: —" in text
+
+
+def test_profiles_link_forward_only(units, world, real) -> None:
+    # A Profile never names the species it evolves from (PI-017): the anchor
+    # of an S1 question must not share a unit with the answer.
+    texts = texts_by_id(units, world, real)
+    assert "Evolves into: [[Sprout]]" in texts["species/1/profile"]
+    assert "Evolves into: [[Sproutree]]" in texts["species/2/profile"]
+    assert "Sprig" not in texts["species/2/profile"]
+    assert "Sprig" not in texts["species/3/profile"]
+
+
+def test_evolution_facts_sit_on_the_parent_and_finals_are_stated(
+    registry: Registry,
+) -> None:
+    from agentic_pokedex.world.registry import evo_id, evoend_id
+
+    assert registry.fact_units(evo_id(2, 1)) == ["species/1/profile"]
+    assert registry.fact_units(evoend_id(3)) == ["species/3/profile"]
+    assert registry.fact_units(evoend_id(4)) == ["species/4/profile"]
 
 
 def test_learnsets(units, world, real) -> None:

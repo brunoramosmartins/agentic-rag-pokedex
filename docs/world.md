@@ -28,7 +28,7 @@ chain shapes and one more source to validate.
 ## Build
 
 ```bash
-python -m agentic_pokedex.world.download     # 23 CSVs + word list, SHA-256 checked
+python -m agentic_pokedex.world.download     # 24 CSVs + word list, SHA-256 checked
 python -m agentic_pokedex.world.load_graph   # replaces the Neo4j database
 python -m agentic_pokedex.world.coverage     # learnset coverage report
 python -m agentic_pokedex.world.twin         # twin map → data/world/twin_map.json
@@ -243,7 +243,7 @@ header. The examples below use made-up twin names.
 Species: Kedros · Section: Profile
 Types: [[Ranze]] / [[Sonzu]]
 Abilities: [[Thalso]], [[Vihom]] · Hidden ability: [[Daikpil]]
-Evolution: [[Floupei]] → [[Kedros]]; [[Kedros]] → [[Nemzaiva]], [[Resbas]]
+Evolves into: [[Nemzaiva]], [[Resbas]]
 Forms: [[Poukzai Kedros]]
 ```
 ```
@@ -260,7 +260,7 @@ Move: Kresto · Section: Learned by · Version: Diprok/Kastoxgi
 
 | Page | Sections (units) |
 |---|---|
-| Species | `Profile` (types, abilities, the whole evolution line, forms); one `Form` per non-default entry (types, abilities); one `Learnset` per learn method and version group; `Notes` (up to 2 Pokédex texts, free text) only with `--notes` — off in world v1 |
+| Species | `Profile` (types, abilities, the species it evolves into — forward links only, "—" for a final form — and forms); one `Form` per non-default entry (types, abilities); one `Learnset` per learn method and version group; `Notes` (up to 2 Pokédex texts, free text) only with `--notes` — off in world v1 |
 | Move | `Profile` (type, category, power); `Learned by` per version group, level-up only, each entry with the learner's types, split every 20 entries |
 | Ability | `Holders`, split every 20 entries, hidden ones marked |
 | Type | `Matchups`: attacking and defending, by damage factor |
@@ -312,7 +312,7 @@ pagination marker (ADR-009). The move's hub shows each learner's types.
 Species: Humzam · Section: Profile
 Types: [[Laigrel]] / [[Lolmax]]
 Abilities: [[Dralfas]], [[Dunuszaik]] · Hidden ability: [[Teipomde]]
-Evolution: [[Humzam]] → [[Fesouk]]
+Evolves into: [[Fesouk]]
 Forms: [[Salleken Humzam]]
 ```
 
@@ -416,7 +416,7 @@ text outside the registry, marked as such.
 | type / Matchups | 18 |
 | **Total** | **12,452** (12,332 indexed) |
 
-- **Facts:** 144,861, every one stated by at least one unit; no unit states an
+- **Facts:** 145,429, every one stated by at least one unit; no unit states an
   unregistered fact; every unit's text parses back to exactly its registered
   facts, in the twin and in the real naming (`REGISTRY CHECK: PASS`).
 - **Size** (indexed units, estimated as characters / 4): mean 94 tokens, p90
