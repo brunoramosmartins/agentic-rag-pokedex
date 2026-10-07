@@ -36,6 +36,16 @@ brought dev, train and every evaluation split to seconds.
 
 ## E-002 — typed expansion on dev (descriptive)
 
+2026-10-07, before the run. Amendment: link-type order `evolves-into >
+ability > type > move > learner > holder`, the S3 reading under the closure
+label. Red-team: 6 blocking, 6 caveats, all taken. The two that changed data:
+the BM25 tokenizer kept "Kedros's" as one token, so search missed the anchor
+of possessive questions (0 of 59 pool S0-A1 in that form; 55 of 59 after the
+fix; train 133 of 150 anchors found after it) — PI-023; and the pipeline as
+first written could never complete a list, so level 0 (complete each hit's
+section) was added. Hand-traced golden expansion on the fixture world: 13
+results, 597 tokens, 12 calls. Smoke runs on train only; dev untouched.
+
 ## Pilot on dev: A0, A1, A2 on 150; A3 on 30
 
 ## G2 closed-book half: A0 on the twin and on the real world

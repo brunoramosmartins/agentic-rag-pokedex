@@ -400,7 +400,7 @@ def main(argv: list[str] | None = None) -> int:
                         help="also measure the unassigned questions (slower)")
     args = parser.parse_args(argv)
 
-    from agentic_pokedex.examiner.splits import open_split, opaque_id
+    from agentic_pokedex.examiner.splits import opaque_id, open_split
     from agentic_pokedex.tools.contract import default_counter
 
     world = args.world_dir

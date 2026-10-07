@@ -586,6 +586,15 @@ _Not run._
   2. The design effect uses **ρ estimated on the dress rehearsal** (upper
      limit of its 80% interval) in every stratum, S3 and S4 included, instead
      of ρ = 1 in S3 and S4.
+- **2026-10-07 — A2's page reading (E-002 red-team, before any run).** A2's
+  retrieval is `arms/typed_expansion.py` at its frozen hash: search, section
+  completion of each hit, then breadth-first typed links with first windows,
+  up to B. This page-reading policy is a **fixed design, not swept**, and a
+  declared threat: a fixed pipeline that read pages differently could deliver
+  more. The grid's BM25/dense weights (0.3 / 0.5 / 0.7) need weighted RRF in
+  `world/index.py`, which fuses with equal weights today; Phase 4 implements
+  it before the sweep, with the equal-weight point unchanged. Search reads
+  queries through the corrected tokenizer (PI-023).
 
 ---
 
@@ -657,6 +666,95 @@ _Not run._
     claimed all insufficiency strata.
   k = 5 now governs, and the link-type order must be registered before the
   run.
+- **2026-10-07 — pipeline, link-type order and the S3 measurement (Phase 3,
+  before the run; approved by the author).**
+  1. **Pipeline.** `search(twin question text, k)` under the tool contract
+     (700-token cap, so fewer than k units may come back). Links are expanded
+     **breadth-first**: level 1 is the links in the search results, level n+1
+     the links in the windows opened at level n. Each expansion is
+     `open_page(title)`, the first window of the target page from the top;
+     each page is opened at most once. Links whose target is not a page title
+     are skipped (no call, no tokens). Expansion stops at the first window
+     that would take the delivered evidence past B = 4,000 tokens.
+  2. **Link-type order (registered before the run):** `evolves-into`
+     (species Profile → species), `ability` (Profile or Form → ability),
+     `type` (Profile, Form or Matchups → type), `move` (Learnset → move),
+     `learner` (Learned by → species), `holder` (Holders → species). Within a
+     type, links follow their order of appearance in the delivered evidence.
+     Rationale from the construction only, not from any result: first the
+     forward hop of a chain (S1), then an entity's own attributes, then the
+     lists that fan out widely (learnsets, hubs, holders). Counted in the twin
+     corpus: 486 / 2,943 / 3,597 / 134,701 / 31,568 / 2,292 links; 2,770 links
+     name no page (forms) and are skipped.
+  3. **Measurement under the closure label (PI-020).** Sufficiency is the
+     labeler's label of the delivered set; for S3 that is the whole
+     (move, version) hub, so "the delivered fraction of the set" becomes two
+     readings: set members covered (members with every fact delivered, of the
+     set size) and hub units delivered (of the hub's units). S0 states that
+     are not sufficient carry the subtype `not-found`.
+  4. **Reporting.** N-of-M per stratum with Wilson 95%; the intervals ignore
+     clustering, and the reading is descriptive. Also reported: evidence
+     tokens delivered, `open_page` calls made, and the N-of-M where B bound.
+     The 4 dev S3 questions beyond T_max are reported separately (journal,
+     2026-10-07). k = 3 stays descriptive.
+- **2026-10-07, later — red-team before the run (6 blocking, 6 caveats;
+  approved by the author, nothing run on dev).** Supersedes items 1 and 4 of
+  the amendment above where they differ.
+  1. **Level 0, section completion.** After the search and before any link,
+     each search hit's section is read from its top in rank order —
+     `open_page(title, section=<hit's section line>, offset)`, `offset`
+     advanced by the units returned, until a reply holds no unit — and a
+     section is read once. Without it, pages of the hits were never read and
+     each expansion read a first window only, so under the closure label S3
+     was near zero by construction. Level 1 is the links in everything search
+     and level 0 delivered. The objective's "generous upper bound" no longer
+     holds: E-002 measures **what one registered fixed pipeline delivers**.
+  2. **The whole specification** (`arms/typed_expansion.py`, docstring):
+     search fuses BM25 and dense by unweighted RRF (k = 60, 50 candidates,
+     `BAAI/bge-small-en-v1.5`), the equal-weight point of A2's grid; within a
+     link level, links by type rank then order of appearance, a title once
+     per level; a page is opened by a link at most once, even when its units
+     already came back (not delivered twice, but its tokens count); links
+     that no type covers or that name no page are skipped with no call;
+     evidence tokens are the sum of every result's tokens, search, separators
+     and "No more units." included, as for the agent arms; the pipeline stops
+     at the first result that would pass B and skips to nothing smaller.
+  3. **Attribution.** The label is recorded after search, after level 0 and
+     after each link level, N-of-M per stratum, with the level that first
+     delivered a near-certain unit and the deepest level reached: search's
+     share is never credited to expansion.
+  4. **Freeze and log.** Each run writes a manifest — git commit and dirty
+     flag; SHA-256 of `pages/twin.jsonl`, `registry.json`, the question file,
+     `trajectories.json` and the split file; k, B, cap, link order, fusion
+     parameters; `fastembed`, `tiktoken` and `numpy` versions — into its
+     output and into `runs/e002/log.jsonl`. Dev runs whole, once per k
+     (`--limit` is refused on dev); smoke runs use train or the fixture world.
+  5. **Known answer (gate 7).** A hand-traced expansion on the fixture world
+     (13 results: calls, tokens, delivered units, the stop point under a
+     tighter B) must pass at 100% before the run
+     (`tests/test_typed_expansion.py`).
+  6. **Use of the result, widened.** A2's retrieval is this module at its
+     frozen hash, and only the registered grid parameters vary. Any other
+     change to it after E-002's run counts as an A2 prompt-budget iteration,
+     needs a plan-impact line and a new E-002 entry. E-002 changes neither the
+     world, the rendering, the tool contract, the templates nor the filters.
+  7. **Readings (caveats).** S1 per template; S2 and S4 per version group; for
+     S2, sufficient × near-certain delivered (the "sufficient but conflicting"
+     cell is what A2 faces); the cluster count (E-001's keys) beside every
+     N-of-M, and for S3 the clusters with a sufficient question; S4 as "0 of
+     30, by construction", with no interval; the distribution of `open_page`
+     calls and of the deepest level; B bound, N-of-M; S3 headline pooled, the
+     4 questions beyond T_max beside it (B, not T_max, caps a pipeline).
+     "Sufficient" means every gold fact is somewhere in up to 4,000 delivered
+     tokens, not that the pipeline could answer.
+  8. **Declared.** The link-type order was written knowing the shape of S1's
+     chains: a choice from the construction, favouring A2, which is
+     conservative for H2. With level-major breadth-first, wide level-1 lists
+     can spend B before an S1 chain's second hop. "Its reverse" in A2's grid
+     is a weak alternative, so the sweep barely tunes the order.
+  9. **The 2026-09-24 prediction predates the closure label and the
+     pipeline's mechanics** ("S3 is low" now follows from construction); it is
+     kept as written and not counted as confirmed if it holds.
 
 ---
 

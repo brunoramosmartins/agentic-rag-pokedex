@@ -64,7 +64,7 @@ cost instruction ("a wrong answer costs 4× not answering"), the caps
 |---|---|---|---|
 | A0 | Closed-book | No tools; measures contamination (≈ chance on the twin) | v1.0 |
 | A1 | Single-shot | One hybrid search, k tuned on dev | v1.0 |
-| A2 | Fixed pipeline with typed expansion | Search → expand typed links from the pages found, up to B | v1.0 |
+| A2 | Fixed pipeline with typed expansion | Search → read each hit's section to its end → expand typed links breadth-first (first window per page), up to B (E-002, amendments of 2026-10-07) | v1.0 |
 | A3 | Agent, implicit detector | The model decides to stop / continue / abstain (ReAct-style) | v1.0 |
 | A4 | Agent, explicit detector | After each observation a judge answers only yes/no: "is this enough?" ([ADR-006](adr/adr-006-judge-outputs-boolean-only.md)) | v1.0 |
 | A4p | Depth placebo | A3's loop, forced to search until a step k assigned as a permutation of A4's realized step counts in the same stratum ([ADR-010](adr/adr-010-depth-placebo-and-release-slicing.md)) | v1.0 |

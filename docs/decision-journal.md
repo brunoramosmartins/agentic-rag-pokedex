@@ -1257,3 +1257,55 @@ Decided by the author the same day:
   contract — like the per-split distributions of `data/splits/manifest.json`;
   no arm runs and no output is seen. It reads the questions through the
   generator's file, not through `open_split`.
+
+## 2026-10-07 — Trajectory-level check; dev keeps its 4 questions beyond T_max
+
+The trajectory-level check ran before dev was first used
+(`examiner/trajectories.py`; `docs/examiner.md`, Trajectory-level check). No
+evaluation split holds a question beyond T_max or B. Over the benchmark, 19 of
+32,300 questions are beyond T_max — all S3 on one widely learned move whose
+hub takes 7 calls to read whole — 4 of them in dev (one cluster), and 6 of
+those 19 are beyond B. Every S1 question could be made sufficient by one lucky
+search; no S3 question could.
+
+**Decided by the author:** dev stays as frozen, with the 4. Dev readings of S3
+(E-002, the pilot, detector precision and recall, the dress rehearsal) report
+them separately, N-of-M; nothing is excluded and no later phase changes. The
+benchmark card lists the 19 among its known limitations.
+
+## 2026-10-07 — E-002 red-team before its run
+
+The `experiment-redteam` review of E-002 (with its amendment of the same day)
+returned 6 blocking findings and 6 caveats, read from the code; nothing had
+run on dev. The two that change data were checked first, on unassigned pool
+questions only:
+
+- **The BM25 tokenizer drops the anchor of possessive questions.** "Kedros's"
+  becomes the token `kedros's` and "Fiero-type" `fiero-type`, tokens no unit
+  holds. Search returned a unit of the anchor's page for **0 of 59** pool
+  S0-A1 questions in the form "What is {X}'s hidden ability?" (48 of 48 and
+  32 of 43 in the other two forms); with possessives stripped and hyphen
+  parts emitted on both sides, 55 of 59. Only the index uses this tokenizer;
+  the dense vectors do not change.
+- **The registered pipeline could not complete a list.** Pages of the search
+  hits were never read, and each expansion read a page's first window only, so
+  under the closure label S3 was near zero by construction — and A2, which
+  reuses the module, would have inherited it.
+
+**Plan impact PI-023:** Phase 3 (and the Phase 1 index) — the BM25 tokenizer was assumed to keep the anchor's name → it reads "Kedros's" as `kedros's` and "Fiero-type" as `fiero-type`, tokens no unit holds, so search finds the anchor's page for 0 of 59 pool S0-A1 questions in their possessive form (55 of 59 after the fix) → `tokenize` strips possessives and emits hyphen parts on both sides, the lexical index is rebuilt (dense vectors unchanged), the anchor hit rate per surface form is measured on train, all before E-002 and the pilot. Open.
+
+Decided by the author the same day, before any run on dev:
+
+- **Level 0, section completion:** for each search hit, in rank order, the
+  pipeline reads the hit's section to its end (`open_page(title, section,
+  offset)`), then expands typed links breadth-first with first windows. E-002
+  stops calling itself a "generous upper bound": it measures what one
+  registered fixed pipeline delivers. A2's page-reading policy is this module,
+  fixed and not swept, declared as a threat in E-001.
+- Every other finding is taken: the label after search, after level 0 and
+  after each link level; the full pipeline specification in the registry and
+  a freeze manifest in the output; no partial run on dev; a hand-traced golden
+  expansion on the fixture world as gate 7's known answer; a wider non-use
+  clause; and the caveats' readings (by version group, clusters, structural
+  zeros without intervals, the 2026-09-24 prediction marked as predating the
+  closure label).

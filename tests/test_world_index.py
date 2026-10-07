@@ -28,7 +28,18 @@ def unit(uid: str, text: str) -> Unit:
 def test_tokenize_keeps_words_and_numbers() -> None:
     tokens = tokenize("Level 30: [[Vine Lash]] of the X")
     assert tokens == ["level", "30", "vine", "lash"]
-    assert tokenize("Porygon-Z's") == ["porygon-z's"]
+    assert tokenize("Porygon-Z's") == ["porygon-z", "porygon"]
+
+
+def test_tokenize_strips_possessives_and_splits_compounds() -> None:
+    # PI-023: the anchor of a possessive question must match its page.
+    assert tokenize("What is Kedros's hidden ability?") == [
+        "kedros", "hidden", "ability"]
+    assert tokenize("Which Fiero-type Tarnlets learn it?") == [
+        "fiero-type", "fiero", "type", "tarnlets", "learn"]
+    assert tokenize("the players' move") == ["players", "move"]
+    assert tokenize("Farfetch'd") == ["farfetch'd", "farfetch"]
+    assert tokenize("Kedros") == tokenize("Kedros's")
 
 
 def test_bm25_ranks_by_term_frequency_and_breaks_ties_by_id() -> None:

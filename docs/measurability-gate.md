@@ -269,6 +269,13 @@ produced by a labelled dev state (`format-error` declared). Added by PI-021:
 the **error-code assigner** runs against golden tests, one per branch of the
 taxonomy's decision list, before any code is published.
 
+**Update 2026-10-07 (E-002 red-team).** One more instrument: the **typed
+expansion pipeline** (`arms/typed_expansion.py`, E-002 and A2) runs against a
+hand-traced expansion on the fixture world — every call, its tokens, the
+delivered units and the stop point under a tighter B — at 100% before E-002
+runs. The search index's tokenizer is checked against possessive and
+hyphenated names (PI-023).
+
 ---
 
 ## Gate 8 — The abort criterion
