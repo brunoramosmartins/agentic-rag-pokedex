@@ -28,7 +28,7 @@ filled only after the run, next to the date.
 | ID | Phase | Status | Hypothesis | Objective | Actual |
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
-| [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
+| [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | analyzed | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | Dev, k = 5: S0 29, S1 23, S2 28, S3 9 of 30; S4 0 by construction. S0/S2 from search, S1 from link level 1, S3 from section completion; B binds in 150 of 150 |
 | [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
 
 ---
@@ -601,8 +601,10 @@ _Not run._
 ## E-002 — How much does typed expansion already deliver?
 
 - **Phase:** 3 (pilot gate), before any agent exists.
-- **Status:** draft — registered 2026-09-24; made descriptive the same day
-  after a red-team review (see Amendments).
+- **Status:** analyzed — registered 2026-09-24; made descriptive the same day
+  after a red-team review; amended and red-teamed again 2026-10-07; run on dev
+  2026-10-07 at commit `29453ac` (clean tree; manifests in
+  `runs/e002/log.jsonl`).
 - **Hypothesis:** descriptive. It **cannot** change the H2 population, the
   primary family, or any E-001 rule.
 
@@ -652,7 +654,44 @@ S4 is 0 by construction.
 
 ### Actual result
 
-_Not run._
+Run 2026-10-07 on dev (150 questions, group A), commit `29453ac`, no API call
+(`dev-k5-20261007T132525+0000.json`, `dev-k3-20261007T132552+0000.json`). k = 5 governs. Sufficient delivered
+sets, N-of-M with Wilson 95% (intervals ignore clustering; clusters by
+E-001's keys); "by level" is the count after search / level 0 / level 1 / …:
+
+| Stratum | Sufficient (k = 5) | Wilson 95% | Clusters | By level | k = 3 |
+|---|---|---|---|---|---|
+| S0 | 29 of 30 | 83–99% | 30 | 29, 29, 29 | 29 of 30 |
+| S1 | 23 of 30 | 59–88% | 30 | 0, 0, 22, 23 | 25 of 30 |
+| S2 | 28 of 30 | 79–98% | 30 | 26, 26, 28 | 28 of 30 |
+| S3 | 9 of 30 | 17–48% | 8 | 0, 9, 9 | 8 of 30 |
+| S4 | 0 of 30, by construction | — | 14 | — | 0 of 30 |
+
+- **Where sufficiency comes from.** S0 and S2: search alone (29 and 26 of
+  30). S1: never search or section completion; the chain completes at link
+  level 1 (22) or 2 (1) — S1-A1 7 of 9, S1-A2 9 of 14, S1-A3 7 of 7. S3:
+  section completion only (9), when search hit the asked hub; 6 of the 8 S3
+  clusters have a sufficient question; members all covered in 9 of 30. The 4
+  questions beyond T_max: 0 of 4.
+- **Near-certain units.** S2: 7 of 30 delivered sets hold another version's
+  answer, all 7 also sufficient (sufficient and conflicting 7, sufficient only
+  21, neither 2); first delivered by search in 3, level 0 in 1, level 1 in 3.
+  S4: 25 of 30 (search first in 18).
+- **B binds in 150 of 150** at k = 5: the expansion always fills the budget
+  (median 3,672–3,846 evidence tokens per stratum, 6–26 `open_page` calls);
+  link level 2 is reached in 3 S1 and 5 S0 questions only.
+- **Rendered cases** (before quoting these numbers): an S1-A1 question becomes
+  sufficient at level 1 through the anchor's "Evolves into" link, after
+  search and section completion had returned the anchor and two ability
+  holders; an S3-A1 question's search returned other moves' hubs in the asked
+  version (the version and type terms outweighed the move's name), so section
+  completion read the wrong hubs and 0 of 4 members arrived.
+- **Against the 2026-09-24 prediction** (which predates the closure label and
+  the pipeline, amendment 9): S0 and S2 are above 80%; S1 is not the highest;
+  S2 is high on delivered and holds a conflicting version in 7 of 30; S3 is
+  low; S4 is 0 by construction.
+
+Not used to select strata, thresholds or n for E-001.
 
 ### Amendments
 

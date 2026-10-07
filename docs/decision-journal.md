@@ -1309,3 +1309,15 @@ Decided by the author the same day, before any run on dev:
   clause; and the caveats' readings (by version group, clusters, structural
   zeros without intervals, the 2026-09-24 prediction marked as predating the
   closure label).
+
+## 2026-10-07 — E-002 run on dev
+
+E-002 ran on dev at commit `29453ac` (clean tree), no API call; result in the
+registry. Sufficient delivered sets at k = 5: S0 29, S1 23, S2 28, S3 9 of 30;
+S4 0 by construction. S0 and S2 come from search alone, S1 from the first link
+level (the "Evolves into" hop), S3 from section completion when search hits
+the asked hub — and search often returns other moves' hubs in the asked
+version. B binds in every question. Descriptive: it selects no stratum,
+threshold or n for E-001, and it changes nothing in the pipeline A2 inherits.
+
+**Plan impact PI-023 resolved:** absorbed — `tokenize` fixed and tested, the lexical index rebuilt with it (dense vectors unchanged), the anchor hit rate measured on train (133 of 150), all before E-002 ran; no phase, hour or deliverable changes.

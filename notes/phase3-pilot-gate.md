@@ -46,6 +46,12 @@ first written could never complete a list, so level 0 (complete each hit's
 section) was added. Hand-traced golden expansion on the fixture world: 13
 results, 597 tokens, 12 calls. Smoke runs on train only; dev untouched.
 
+Run on dev 2026-10-07, commit `29453ac`: S0 29, S1 23, S2 28, S3 9 of 30 at
+k = 5; S4 0 by construction. Search alone carries S0 and S2; S1 completes at
+link level 1; S3 only through section completion of the asked hub, which
+search often misses for another move's hub in the same version. B binds in
+150 of 150. Actual result in the registry; PI-023 resolved (absorbed).
+
 ## Pilot on dev: A0, A1, A2 on 150; A3 on 30
 
 ## G2 closed-book half: A0 on the twin and on the real world
