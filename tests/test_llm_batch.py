@@ -88,3 +88,29 @@ def test_an_error_line_is_not_ok() -> None:
            "error": {"code": "batch_expired"}}
     result = parse_output_line(row)
     assert not result.ok and "batch_expired" in result.error
+
+
+def test_a_request_with_tools_turns_parallel_calls_off() -> None:
+    tool = {"type": "function", "function": {"name": "search", "parameters": {}}}
+    body = chat_request("x", model="m", messages=[], max_completion_tokens=5,
+                        tools=[tool])["body"]
+    assert body["tools"] == [tool] and body["parallel_tool_calls"] is False
+    assert "tools" not in chat_request("x", model="m", messages=[],
+                                       max_completion_tokens=5)["body"]
+
+
+def test_parse_a_tool_call() -> None:
+    row = output(finish="tool_calls")
+    call = {"id": "call_1", "type": "function",
+            "function": {"name": "search", "arguments": '{"query": "q"}'}}
+    row["response"]["body"]["choices"][0]["message"] = {"content": None,
+                                                        "tool_calls": [call]}
+    result = parse_output_line(row)
+    assert result.ok and result.content is None
+    assert result.tool_calls == (call,)
+
+
+def test_an_empty_message_is_not_ok() -> None:
+    row = output()
+    row["response"]["body"]["choices"][0]["message"] = {"content": None}
+    assert not parse_output_line(row).ok
