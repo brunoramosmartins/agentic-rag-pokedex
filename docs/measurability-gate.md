@@ -198,6 +198,22 @@ design effect, known only once ρ is estimated on the dress rehearsal (gate 8,
 Updates). Intervals and sign-flip p-values are computed by clusters (E-001,
 amendment of 2026-09-30).
 
+**Update 2026-11-14 (Phase 3, preliminary power table).** The pilot's proxy SD
+of D = C(A1) − C(A3) is 2.09, 80% stratified cluster bootstrap 1.81–2.32
+(E-004; 30 questions, 20 discordant). A proxy: A3 and A4 share their search
+and should be more concordant. At the three values, before any design effect:
+
+| Proxy SD | n\* (P(supported) ≥ 0.80 at Δ_design 0.35) | P(supported) at n = 320 | at n = 448 | MDE at n = 320 |
+|---:|---:|---:|---:|---:|
+| 1.81 (lower) | 255 | 0.89 | 0.97 | 0.312 |
+| **2.09** | **339** | 0.77 | 0.90 | 0.360 |
+| 2.32 (upper) | 418 | 0.68 | 0.83 | 0.400 |
+
+n_max = 884 and n_max_eff = 448 (journal, 2026-11-14): the gate 8 extension
+past 320 is affordable, and the design effect from the rehearsal decides
+whether n\* stays within 448. Gate 8 itself is applied on the rehearsal's
+A3 − A4 and A2 − A4.
+
 ---
 
 ## Gate 4 — The evaluator ceiling

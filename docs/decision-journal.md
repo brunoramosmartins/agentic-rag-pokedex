@@ -1454,3 +1454,26 @@ or the verdict becomes descriptive (row 0), as registered.
 **Cost check (Phase 3):** measured cost was 0.39× (E-004) and 0.26× (E-005) the
 estimates, below 1.3×; no cut is applied. The benign S1 slice stays at 40
 questions (US$ 0.21 with margin).
+
+## 2026-11-14 — Phase 3 closed
+
+**Deliverables.** Every Phase 3 deliverable is present: the trajectory-level
+check, E-002 (descriptive), the pilot (E-004), G2's closed-book half (E-005,
+passes), the grader and gate 4 (round 2, 100 of 100), the v1.0 budget
+re-estimated with measured costs, the preliminary power table (gate 3,
+Update of 2026-11-14), n_max and n_max_eff logged before any rehearsal, the
+cost check (0.39× and 0.26× the estimates). The extensions' budgets are set at
+Phase 7 with v1.0's measured cost, as planned. **Carried over to Phase 4:** the
+author's corrections to the Phase 2 note (issue #34). Lessons Learned and
+Failed Attempts written by the author. Effort: about 5 partial days (size S,
+3–5 estimated).
+
+**Plan impact PI-026 (retrospective, logged 2026-11-14):** Phase 6 — the plan of 320 pooled questions assumed SD of D ≈ 1.64 → the pilot's proxy SD is 2.09 (80% upper 2.32), n\* 339–418 → Phase 6 should expect to extend eval-L1 past 320 toward n\* within n_max_eff = 448 (about US$ 0.0147 per pooled question, affordable), and the design effect from the rehearsal decides between the extension and row 0. Open.
+
+**Plan impact PI-027 (retrospective, logged 2026-11-14):** Phase 4 — the A2 sweep grid assumed BM25/dense weights 0.3 / 0.5 / 0.7 were available → `HybridIndex` fuses with equal weights only (E-001, amendment of 2026-10-07) → Phase 4 adds weighted reciprocal-rank fusion, tested, before the sweep, with the equal-weight point unchanged. Open.
+
+**Plan impact PI-026 resolved:** absorbed — gate 8's registered extension branch (320 < n\* ≤ n_max_eff) already covers it, and the budget pays for it; no task, hour or phase changes.
+
+**Plan impact PI-027 resolved:** absorbed — one task added to Phase 4 (weighted fusion with tests before the A2 sweep), within its size; issue opened at Phase 4's kickoff.
+
+No plan impact is open.
