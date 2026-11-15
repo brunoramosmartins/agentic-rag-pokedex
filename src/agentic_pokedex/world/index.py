@@ -65,11 +65,27 @@ STOPWORDS = frozenset(
 and "hidden" carry the question."""
 
 
+_POSSESSIVE = re.compile(r"'s?$")
+_JOINERS = re.compile(r"[-']")
+
+
 def tokenize(text: str) -> list[str]:
-    """Lower-case words and numbers, stopwords and one-letter tokens removed."""
-    return [
-        w for w in _WORD.findall(text.lower()) if w not in STOPWORDS and len(w) > 1
-    ]
+    """Lower-case words and numbers, stopwords and one-letter tokens removed.
+
+    A possessive ending is stripped ("Kedros's" → ``kedros``), and a word
+    joined by hyphens or apostrophes also yields its parts ("Fiero-type" →
+    ``fiero-type``, ``fiero``, ``type``). Queries and units are tokenized the
+    same way, so a twin name inside a possessive or a compound still matches
+    the page that names it (PI-023).
+    """
+    tokens: list[str] = []
+    for word in _WORD.findall(text.lower()):
+        word = _POSSESSIVE.sub("", word)
+        parts = [p for p in _JOINERS.split(word) if p]
+        for token in [word, *parts] if len(parts) > 1 else [word]:
+            if token not in STOPWORDS and len(token) > 1:
+                tokens.append(token)
+    return tokens
 
 
 @dataclass(frozen=True)

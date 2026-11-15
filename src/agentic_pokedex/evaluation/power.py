@@ -136,14 +136,28 @@ def p_supported(
     alpha: float = ALPHA_PER_CONTRAST,
     threshold: float = ACTION_THRESHOLD,
 ) -> float:
-    """P(verdict = supported) = P(point ≥ threshold and lower limit > 0).
+    """P(verdict is supported, either zone) = P(L > 0 and U ≥ threshold).
 
-    With a symmetric interval, lower > 0 ⇔ point > z·SE, so the event is
-    point ≥ max(threshold, z·SE).
+    With a symmetric interval [point ∓ z·SE], L > 0 ⇔ point > z·SE and
+    U ≥ threshold ⇔ point ≥ threshold − z·SE (the four-zone rule, PI-025).
     """
     se = se_paired(n, sd)
-    bar = max(threshold, z_crit(alpha) * se)
+    z_se = z_crit(alpha) * se
+    bar = max(z_se, threshold - z_se)
     return 1 - _Z.cdf((bar - delta) / se)
+
+
+def p_relevance_shown(
+    delta: float,
+    sd: float,
+    n: int,
+    *,
+    alpha: float = ALPHA_PER_CONTRAST,
+    threshold: float = ACTION_THRESHOLD,
+) -> float:
+    """P(supported, relevance shown) = P(L ≥ threshold)."""
+    se = se_paired(n, sd)
+    return 1 - _Z.cdf((threshold + z_crit(alpha) * se - delta) / se)
 
 
 def p_refuted(
@@ -170,8 +184,7 @@ def n_star(
     """Smallest pooled n with P(supported | delta_design) ≥ target (gate 8).
 
     Returns:
-        The n, or None beyond ``N_LIMIT`` (including delta_design ≤ threshold,
-        where the target is unreachable at any n).
+        The n, or None beyond ``N_LIMIT`` (including delta_design ≤ 0).
     """
     for n in range(2, N_LIMIT + 1):
         if p_supported(delta_design, sd, n, alpha=alpha, threshold=threshold) >= target:
@@ -365,6 +378,12 @@ def gate_tables() -> str:
         f"n* at Δ_design = {DELTA_DESIGN}: "
         + " / ".join(str(n_star(s)) for s in SDS)
     )
+    out.append("\nGate 3 — P(supported, relevance shown) at n = 320")
+    for delta in (0.25, 0.35, 0.50):
+        out.append(
+            f"  true effect {delta:.2f}: "
+            + " / ".join(f"{p_relevance_shown(delta, s, 320):.2f}" for s in SDS)
+        )
     out.append("\nGate 3 — P(refuted) at n = 320")
     for delta in (0.0, 0.10):
         out.append(

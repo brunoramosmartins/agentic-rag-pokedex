@@ -28,8 +28,10 @@ filled only after the run, next to the date.
 | ID | Phase | Status | Hypothesis | Objective | Actual |
 |---|---|---|---|---|---|
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
-| [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | draft | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | — |
+| [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | analyzed | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | Dev, k = 5: S0 29, S1 23, S2 28, S3 9 of 30; S4 0 by construction. S0/S2 from search, S1 from link level 1, S3 from section completion; B binds in 150 of 150 |
 | [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
+| [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | analyzed | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | US$ 0.191 for 150 + 30 questions; reasoning medians 0–128; A3 3.6 steps, 28 of 30 search again, S3 always at T_max; proxy SD of D 2.09 (80%: 1.81–2.32) |
+| [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | analyzed | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | **G2 passes**: twin 0 of 50 in 15 of 16 templates (2 of 50 in S0-B1); real-name control 4 of 4 |
 
 ---
 
@@ -586,14 +588,60 @@ _Not run._
   2. The design effect uses **ρ estimated on the dress rehearsal** (upper
      limit of its 80% interval) in every stratum, S3 and S4 included, instead
      of ρ = 1 in S3 and S4.
+- **2026-10-07 — A2's page reading (E-002 red-team, before any run).** A2's
+  retrieval is `arms/typed_expansion.py` at its frozen hash: search, section
+  completion of each hit, then breadth-first typed links with first windows,
+  up to B. This page-reading policy is a **fixed design, not swept**, and a
+  declared threat: a fixed pipeline that read pages differently could deliver
+  more. The grid's BM25/dense weights (0.3 / 0.5 / 0.7) need weighted RRF in
+  `world/index.py`, which fuses with equal weights today; Phase 4 implements
+  it before the sweep, with the equal-weight point unchanged. Search reads
+  queries through the corrected tokenizer (PI-023).
+- **2026-11-14 — the verdict in four zones (author's revision, before any run
+  of E-001 and before the freeze; PI-025).** The three-valued rule called
+  *supported* an interval excluding zero with a point estimate ≥ 0.25: that
+  shows the treatment reduces cost, not that the reduction is at least 0.25.
+  The same registered interval [L, U] (97.5% BCa, Bonferroni, stratified
+  cluster bootstrap) now answers two questions — superiority (L > 0) and
+  relevance (L ≥ 0.25 shown, U < 0.25 ruled out) — in four zones that do not
+  overlap and cover every interval:
+  1. **Supported, relevance shown:** L ≥ 0.25 — "the reduction is at least
+     0.25".
+  2. **Supported, relevance open:** 0 < L < 0.25 ≤ U — "the treatment
+     reduces cost, by at least L; whether the reduction reaches the threshold
+     is not known".
+  3. **Refuted:** U < 0.25 — "a reduction of 0.25 is ruled out" (unchanged).
+  4. **Inconclusive:** L ≤ 0 and U ≥ 0.25 — the interval and the n that would
+     decide.
+
+  The point estimate is published but does not decide. "A reduction of at
+  least 0.25" is written only in zone 1. "H1 supported" in rows 1–4 means
+  zone 1 or 2, with the zone printed beside the row; rows 6–7b read zone 4.
+  One case moves: an interval above zero with a point estimate below 0.25 and
+  U ≥ 0.25 was inconclusive and is now *supported, relevance open*. **H2's
+  sentences:** zone 1 — "A4 reduces expected cost versus the fixed pipeline on
+  S1–S4 by at least the action threshold"; zone 2 — "A4 reduces expected cost
+  versus the fixed pipeline on S1–S4, by at least L; whether the reduction
+  reaches the threshold is not known"; refuted and inconclusive as registered.
+  **Sizing:** power targets *supported* = {L > 0 and U ≥ 0.25}; n\* at
+  Δ_design = 0.35 is unchanged (78 / 175 / 311 for SD 1.0 / 1.5 / 2.0; the
+  plan of 320 holds to SD ≈ 2.03), because at those n the lower limit above
+  zero was already the binding condition. Zone 1 has little power at the plan
+  (0.33 / 0.15 / 0.09 at a true effect of 0.35) and reaches 0.80 only near
+  0.50; declared, not bought with n. H3 (non-inferiority) is unchanged.
+  Implemented in `evaluation/outcome_space.py` (`Verdict`, four values) and
+  `evaluation/power.py` (`p_supported`, `p_relevance_shown`); decided with no
+  outcome data of E-001.
 
 ---
 
 ## E-002 — How much does typed expansion already deliver?
 
 - **Phase:** 3 (pilot gate), before any agent exists.
-- **Status:** draft — registered 2026-09-24; made descriptive the same day
-  after a red-team review (see Amendments).
+- **Status:** analyzed — registered 2026-09-24; made descriptive the same day
+  after a red-team review; amended and red-teamed again 2026-10-07; run on dev
+  2026-10-07 at commit `29453ac` (clean tree; manifests in
+  `runs/e002/log.jsonl`).
 - **Hypothesis:** descriptive. It **cannot** change the H2 population, the
   primary family, or any E-001 rule.
 
@@ -643,7 +691,44 @@ S4 is 0 by construction.
 
 ### Actual result
 
-_Not run._
+Run 2026-10-07 on dev (150 questions, group A), commit `29453ac`, no API call
+(`dev-k5-20261007T132525+0000.json`, `dev-k3-20261007T132552+0000.json`). k = 5 governs. Sufficient delivered
+sets, N-of-M with Wilson 95% (intervals ignore clustering; clusters by
+E-001's keys); "by level" is the count after search / level 0 / level 1 / …:
+
+| Stratum | Sufficient (k = 5) | Wilson 95% | Clusters | By level | k = 3 |
+|---|---|---|---|---|---|
+| S0 | 29 of 30 | 83–99% | 30 | 29, 29, 29 | 29 of 30 |
+| S1 | 23 of 30 | 59–88% | 30 | 0, 0, 22, 23 | 25 of 30 |
+| S2 | 28 of 30 | 79–98% | 30 | 26, 26, 28 | 28 of 30 |
+| S3 | 9 of 30 | 17–48% | 8 | 0, 9, 9 | 8 of 30 |
+| S4 | 0 of 30, by construction | — | 14 | — | 0 of 30 |
+
+- **Where sufficiency comes from.** S0 and S2: search alone (29 and 26 of
+  30). S1: never search or section completion; the chain completes at link
+  level 1 (22) or 2 (1) — S1-A1 7 of 9, S1-A2 9 of 14, S1-A3 7 of 7. S3:
+  section completion only (9), when search hit the asked hub; 6 of the 8 S3
+  clusters have a sufficient question; members all covered in 9 of 30. The 4
+  questions beyond T_max: 0 of 4.
+- **Near-certain units.** S2: 7 of 30 delivered sets hold another version's
+  answer, all 7 also sufficient (sufficient and conflicting 7, sufficient only
+  21, neither 2); first delivered by search in 3, level 0 in 1, level 1 in 3.
+  S4: 25 of 30 (search first in 18).
+- **B binds in 150 of 150** at k = 5: the expansion always fills the budget
+  (median 3,672–3,846 evidence tokens per stratum, 6–26 `open_page` calls);
+  link level 2 is reached in 3 S1 and 5 S0 questions only.
+- **Rendered cases** (before quoting these numbers): an S1-A1 question becomes
+  sufficient at level 1 through the anchor's "Evolves into" link, after
+  search and section completion had returned the anchor and two ability
+  holders; an S3-A1 question's search returned other moves' hubs in the asked
+  version (the version and type terms outweighed the move's name), so section
+  completion read the wrong hubs and 0 of 4 members arrived.
+- **Against the 2026-09-24 prediction** (which predates the closure label and
+  the pipeline, amendment 9): S0 and S2 are above 80%; S1 is not the highest;
+  S2 is high on delivered and holds a conflicting version in 7 of 30; S3 is
+  low; S4 is 0 by construction.
+
+Not used to select strata, thresholds or n for E-001.
 
 ### Amendments
 
@@ -657,6 +742,95 @@ _Not run._
     claimed all insufficiency strata.
   k = 5 now governs, and the link-type order must be registered before the
   run.
+- **2026-10-07 — pipeline, link-type order and the S3 measurement (Phase 3,
+  before the run; approved by the author).**
+  1. **Pipeline.** `search(twin question text, k)` under the tool contract
+     (700-token cap, so fewer than k units may come back). Links are expanded
+     **breadth-first**: level 1 is the links in the search results, level n+1
+     the links in the windows opened at level n. Each expansion is
+     `open_page(title)`, the first window of the target page from the top;
+     each page is opened at most once. Links whose target is not a page title
+     are skipped (no call, no tokens). Expansion stops at the first window
+     that would take the delivered evidence past B = 4,000 tokens.
+  2. **Link-type order (registered before the run):** `evolves-into`
+     (species Profile → species), `ability` (Profile or Form → ability),
+     `type` (Profile, Form or Matchups → type), `move` (Learnset → move),
+     `learner` (Learned by → species), `holder` (Holders → species). Within a
+     type, links follow their order of appearance in the delivered evidence.
+     Rationale from the construction only, not from any result: first the
+     forward hop of a chain (S1), then an entity's own attributes, then the
+     lists that fan out widely (learnsets, hubs, holders). Counted in the twin
+     corpus: 486 / 2,943 / 3,597 / 134,701 / 31,568 / 2,292 links; 2,770 links
+     name no page (forms) and are skipped.
+  3. **Measurement under the closure label (PI-020).** Sufficiency is the
+     labeler's label of the delivered set; for S3 that is the whole
+     (move, version) hub, so "the delivered fraction of the set" becomes two
+     readings: set members covered (members with every fact delivered, of the
+     set size) and hub units delivered (of the hub's units). S0 states that
+     are not sufficient carry the subtype `not-found`.
+  4. **Reporting.** N-of-M per stratum with Wilson 95%; the intervals ignore
+     clustering, and the reading is descriptive. Also reported: evidence
+     tokens delivered, `open_page` calls made, and the N-of-M where B bound.
+     The 4 dev S3 questions beyond T_max are reported separately (journal,
+     2026-10-07). k = 3 stays descriptive.
+- **2026-10-07, later — red-team before the run (6 blocking, 6 caveats;
+  approved by the author, nothing run on dev).** Supersedes items 1 and 4 of
+  the amendment above where they differ.
+  1. **Level 0, section completion.** After the search and before any link,
+     each search hit's section is read from its top in rank order —
+     `open_page(title, section=<hit's section line>, offset)`, `offset`
+     advanced by the units returned, until a reply holds no unit — and a
+     section is read once. Without it, pages of the hits were never read and
+     each expansion read a first window only, so under the closure label S3
+     was near zero by construction. Level 1 is the links in everything search
+     and level 0 delivered. The objective's "generous upper bound" no longer
+     holds: E-002 measures **what one registered fixed pipeline delivers**.
+  2. **The whole specification** (`arms/typed_expansion.py`, docstring):
+     search fuses BM25 and dense by unweighted RRF (k = 60, 50 candidates,
+     `BAAI/bge-small-en-v1.5`), the equal-weight point of A2's grid; within a
+     link level, links by type rank then order of appearance, a title once
+     per level; a page is opened by a link at most once, even when its units
+     already came back (not delivered twice, but its tokens count); links
+     that no type covers or that name no page are skipped with no call;
+     evidence tokens are the sum of every result's tokens, search, separators
+     and "No more units." included, as for the agent arms; the pipeline stops
+     at the first result that would pass B and skips to nothing smaller.
+  3. **Attribution.** The label is recorded after search, after level 0 and
+     after each link level, N-of-M per stratum, with the level that first
+     delivered a near-certain unit and the deepest level reached: search's
+     share is never credited to expansion.
+  4. **Freeze and log.** Each run writes a manifest — git commit and dirty
+     flag; SHA-256 of `pages/twin.jsonl`, `registry.json`, the question file,
+     `trajectories.json` and the split file; k, B, cap, link order, fusion
+     parameters; `fastembed`, `tiktoken` and `numpy` versions — into its
+     output and into `runs/e002/log.jsonl`. Dev runs whole, once per k
+     (`--limit` is refused on dev); smoke runs use train or the fixture world.
+  5. **Known answer (gate 7).** A hand-traced expansion on the fixture world
+     (13 results: calls, tokens, delivered units, the stop point under a
+     tighter B) must pass at 100% before the run
+     (`tests/test_typed_expansion.py`).
+  6. **Use of the result, widened.** A2's retrieval is this module at its
+     frozen hash, and only the registered grid parameters vary. Any other
+     change to it after E-002's run counts as an A2 prompt-budget iteration,
+     needs a plan-impact line and a new E-002 entry. E-002 changes neither the
+     world, the rendering, the tool contract, the templates nor the filters.
+  7. **Readings (caveats).** S1 per template; S2 and S4 per version group; for
+     S2, sufficient × near-certain delivered (the "sufficient but conflicting"
+     cell is what A2 faces); the cluster count (E-001's keys) beside every
+     N-of-M, and for S3 the clusters with a sufficient question; S4 as "0 of
+     30, by construction", with no interval; the distribution of `open_page`
+     calls and of the deepest level; B bound, N-of-M; S3 headline pooled, the
+     4 questions beyond T_max beside it (B, not T_max, caps a pipeline).
+     "Sufficient" means every gold fact is somewhere in up to 4,000 delivered
+     tokens, not that the pipeline could answer.
+  8. **Declared.** The link-type order was written knowing the shape of S1's
+     chains: a choice from the construction, favouring A2, which is
+     conservative for H2. With level-major breadth-first, wide level-1 lists
+     can spend B before an S1 chain's second hop. "Its reverse" in A2's grid
+     is a weak alternative, so the sweep barely tunes the order.
+  9. **The 2026-09-24 prediction predates the closure label and the
+     pipeline's mechanics** ("S3 is low" now follows from construction); it is
+     kept as written and not counted as confirmed if it holds.
 
 ---
 
@@ -885,3 +1059,228 @@ G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
   identity leak on the current pages can only be lower than what run 2
   measured. No re-run.
 
+---
+
+## E-004 — Pilot: noise, cost and reasoning per arm
+
+- **Phase:** 3 (pilot gate).
+- **Status:** analyzed — registered 2026-10-07, before any arm or prompt
+  exists; run 2026-10-08; graded reading 2026-11-14, after the grader's audit.
+- **Hypothesis:** none. The pilot estimates noise, never effect
+  (measurability gate 6).
+
+### Objective
+
+Measure what sizing and budgeting need before any arm is tuned: tokens per
+arm, reasoning tokens included (PI-014); steps per question and the implicit
+detector's firing rate for A3; and a proxy SD of D for the preliminary power
+table (gate 3).
+
+### Configuration
+
+- **Split:** dev, template group A. **A0, A1 and A2 on all 150 questions; A3
+  on 30**, drawn with a registered seed from dev S1–S4 (7 or 8 per stratum,
+  one per cluster where the stratum allows).
+- **Arms, untuned, prompts v0** — written in `prompts/` and hashed before the
+  run. Every arm receives the same cost instruction ("a wrong answer costs 4×
+  not answering") and returns the structured output `{answer, abstain}`.
+  - **A0:** the question alone.
+  - **A1:** `search(question, k = 5)`, one result, then the answer prompt.
+  - **A2:** E-002's pipeline (`arms/typed_expansion.py` at its frozen hash,
+    k = 5), then the answer prompt.
+  - **A3:** the common agent loop with `search` and `open_page`, T_max = 6
+    steps, B = 4,000 evidence tokens; at T_max, or when B binds, the agent
+    answers or abstains. The loop is the one Phase 5 builds on (journal,
+    2026-10-06).
+- **Model:** gpt-5-mini, Batch API, `reasoning_effort` low,
+  `max_completion_tokens` 4,000. A3 submits one batch per step.
+- **Cost:** the estimate is printed before the run, and the scripts take
+  `--limit N`. Estimate at about 600 output tokens a call (E-003's twin
+  median): **US$ 0.50 central, 0.90 pessimistic** (A0 0.09, A1 0.11, A2 0.17,
+  A3 0.12). Measured cost is recorded here.
+- **Grading:** `evaluation/grader.py` (PI-024), read only after the gate 4
+  audit passes.
+
+### Measurement
+
+- Input, output and reasoning tokens per call and per question, per arm:
+  median, p90, max; calls that reach the output cap.
+- A3: steps per question; the share of questions that search again after the
+  first observation (the implicit detector's firing rate); B binding.
+- **Proxy SD of D** = C(A1) − C(A3) on the 30 shared questions (λ = 4), with
+  an 80% cluster-bootstrap interval (E-001's cluster keys).
+- One rendered case per arm (prompt, evidence, completion) before any
+  aggregate.
+
+### What it can and cannot conclude
+
+- **Can:** cost per arm, which fixes n_max (gate 8) and the re-estimated
+  budget; reasoning headroom; the order of magnitude of the SD of D.
+- **Cannot:** any difference between arms. **Mean C per arm is not printed.**
+  No per-stratum rate decides anything; no prompt is chosen from these
+  outputs, and any change made after them counts as prompt iteration 1
+  (journal, 2026-10-06).
+
+### Expected result (author's prediction)
+
+Written 2026-10-08, before the run, as a gut call:
+
+1. Reasoning: about 40 tokens per call.
+2. A3 takes 2 steps on average.
+3. The proxy SD of D comes out above 1.64, gate 3's working value.
+
+### Actual result
+
+**Run 2026-10-08 on dev** (`runs/e004`, prepared at commit `cbc317c`, after
+the author's prediction): 7 Batch rounds, 589 calls, no API failure, no
+output at the 4,000-token cap. **Measured cost US$ 0.191** (estimate 0.49
+central / 0.85 pessimistic). Ungraded readings only; the graded ones (the
+proxy SD of D) wait for the grader's audit (PI-024).
+
+| Arm | Calls | Input tokens (median / max) | Output (median / p90) | Reasoning (median / p90 / max) | US$ | US$ per question |
+|---|---|---|---|---|---|---|
+| A0 | 150 | 163 / 169 | 85 / 149 | 64 / 128 / 320 | 0.019 | 0.00013 |
+| A1 | 150 | 603 / 872 | 151 / 345 | 128 / 320 / 640 | 0.039 | 0.00026 |
+| A2 | 150 | 3,421 / 3,951 | 92 / 492 | 64 / 448 / 896 | 0.097 | 0.00065 |
+| A3 | 139 (30 questions) | 1,327 / 3,594 | 54 / 277 | 0 / 256 / 384 | 0.036 | 0.00118 |
+
+- **A3, 30 of 30 ended:** steps 1 (2), 2 (10), 3 (6), 5 (3), 6 (9); mean
+  3.6, median 3. **28 of 30 searched again after the first observation**
+  (the implicit detector's firing rate, descriptive). T_max reached in 9 of
+  30 — all 8 S3 questions and 1 S4; B never spent (evidence 448–3,049 tokens).
+  By stratum: S1 2–5 steps, S2 1–3, S3 6 every time, S4 2–6. Calls: 80
+  `search`, 29 `open_page`; no invalid call; every final output ends in a
+  JSON object.
+- **Abstentions (ungraded):** A0 150 of 150 on the twin; A1 47 of 150; A2 36
+  of 150.
+- **Rendered cases:** an S0-A1 question in the form "Name the hidden ability
+  of {X}" — A1's search returned other abilities' Holders units, A1 abstained,
+  A2 answered from 3,438 tokens of expanded evidence (its grade waits for the
+  audit); an S1-A2 question where A3 searched, opened the anchor's page, then
+  the final form's page, and answered the type pair in 3 calls.
+- **Against the prediction:** reasoning was 0–128 tokens a call at the median
+  (predicted about 40); A3 took 3.6 steps on average (predicted 2), pushed up
+  by S3, which always ran to T_max.
+
+**Graded reading, 2026-11-14** (after the grader's audit passed in round 2,
+100 of 100): **proxy SD of D = C(A1) − C(A3) = 2.09, 80% stratified cluster
+bootstrap 1.81–2.32**, on the 30 shared questions (30 clusters; 20 of 30 pairs
+discordant). Above gate 3's working value of 1.64, as predicted. It is a
+proxy: A1 against A3, not A3 against A4, which share their search and should
+be more concordant; gate 8 is decided on the dress rehearsal. At SD 2.09,
+n\* = 339; at the upper limit 2.32, n\* = 418 — above the plan of 320, below
+n_max_eff = 448 before any design effect. Rendered case (an S2 question, "Name
+the move Skamsei learns at level 55 in Karek/Zistamdu"): A1's single search
+missed the learnset and A1 abstained (C = 1); A3 searched, opened the species'
+Learnset section and answered the gold (C = 0). No mean of C and no mean of D
+is printed.
+
+**Use, 2026-11-14 (gate 8):** with these costs the v1.0 budget commits US$
+11.69 of 20 (`evaluation/budget.py`), and **n_max = 884, n_max_eff = 448**,
+logged in the journal before any rehearsal.
+
+### Amendments
+
+- **2026-10-07 — implementation details, before any run (approved by the
+  author).**
+  1. **Seed:** the 30 A3 questions are drawn with seed `20261007`
+     (`evaluation/pilot.py`, `PILOT_SEED`): dev S1–S4, 8 / 7 / 8 / 7 or as the
+     seed assigns the two extra, round-robin over clusters.
+  2. **Last turn:** after T_max calls, or once B is spent, the agent gets
+     `prompts/agent_final_v0.md` ("You have no tool calls left. Reply now
+     with your answer, as JSON only.") and no tool.
+  3. **Tool replies in the loop:** a result that would pass B is not shown —
+     the call returns "Evidence budget reached." and the tools end; a call the
+     tools cannot run returns "Invalid call." and counts as a step. A budget
+     signal, not a sufficiency cue, identical for every agent arm.
+  4. **No API JSON mode:** the `{answer, abstain}` format comes from the
+     prompts only, in every arm (JSON mode can conflict with tool calls, and
+     using it in some arms only would break parity).
+  5. **Smoke runs** use train (`--split train`, `runs/e004-smoke`), never dev.
+
+---
+
+## E-005 — G2 closed-book: does memory stand in for evidence on the twin?
+
+- **Phase:** 3 (pilot gate).
+- **Status:** analyzed — registered 2026-10-07, before any run; run
+  2026-10-08; verdict 2026-11-14 (G2 passes), after the grader's audit.
+- **Hypothesis:** gating — G2's closed-book half (`docs/contingency.md`;
+  PI-022). G2's identity half passed in E-003.
+
+### Objective
+
+Whether A0, with no evidence, answers twin questions above each template's
+chance rate: memory standing in for evidence, per template.
+
+### Configuration
+
+- **Sample:** 50 questions per template, all 16 templates (800), drawn with a
+  registered seed from dev, train and the unassigned pool — never from an
+  evaluation split — one per cluster where the pool allows (E-001's cluster
+  keys).
+- **A0** with E-004's prompt v0, on each question's **twin** text and on its
+  **real-name** text (rendered by the generator with real names): 1,600
+  calls. gpt-5-mini, Batch API, `reasoning_effort` low,
+  `max_completion_tokens` 4,000. **Cost estimate: US$ 1.0 central, 1.8
+  pessimistic**; printed before the run, with `--limit N`.
+- **Correct:** exact match with aliases (`evaluation/grader.py`, read after
+  the gate 4 audit; PI-024). In S4, "correct" means stating the withheld
+  value. An abstention is never correct.
+
+### Decision rule (fixed before the run)
+
+- **Chance** per template: its majority-answer rate after the concentration
+  cap (`docs/examiner.md`, Counts), never below uniform; for S4, the majority
+  rate of the withheld values among the sampled questions.
+- **A template fails G2** when the **Wilson 95% lower limit** of A0's correct
+  rate on the twin is above chance + 5 points.
+- **Positive control:** on real names, the Wilson 95% lower limit exceeds
+  chance + 5 points in at least **3 of the 4** templates S0-A1 to S0-A4
+  (well-known facts). If not, the probe, the prompt or the grader is broken,
+  and G2 is not evaluated until it is fixed.
+- **Exit when a template fails:** G2's written exit — the leaking templates
+  leave the primary population, decided on dev and recorded.
+
+### What it can and cannot conclude
+
+- **Can:** catch large leaks per template. With n = 50 and a 10% chance rate,
+  the rule fails a template only above about 25% correct.
+- **Cannot:** show that small leaks are absent.
+
+### Expected result (author's prediction)
+
+Written 2026-10-08, before the run, as a gut call:
+
+1. Whether a template leaks is very hard to call; if one does, perhaps through
+   the most famous species (a Pikachu).
+2. The positive control may fail: the model can get real-name facts wrong,
+   because sources vary on them. To be seen.
+
+### Actual result
+
+**Run 2026-10-08** (`runs/e005`, after the author's prediction, `cbc317c`):
+1,600 calls in one Batch round, no API failure, no output at the cap, no
+unparseable output. **Measured cost US$ 0.280** (estimate 1.06 central).
+Reasoning per call: median 128, p90 256, max 768. Ungraded: on the twin, A0
+answered 4 of 800 questions and abstained on 796; on real names it answered
+405 of 800. The verdict waits for the grader's audit (PI-024).
+
+**Verdict, 2026-11-14** (after the grader's audit passed in round 2, 100 of
+100), by the registered rule: **G2 closed-book half passes.** On the twin, no
+template's Wilson 95% lower limit is above its chance rate + 5 points: 0 of 50
+correct in 15 of 16 templates, 2 of 50 in S0-B1 (chance 38%). **Positive
+control 4 of 4:** on real names, S0-A1 34, S0-A2 35, S0-A3 43, S0-A4 44 of 50
+(lower limits 54–76%, chance 3–40%). Real names also above chance in S0-B1
+(47), S1-A1 (28), S1-A2 (49), S1-A3 (28), S1-B1 (35); 0 of 50 in S2 and S3;
+S4, stating the withheld value: real 7 of 50 (S4-A1, chance 32%) and 2 of 50
+(S4-B1), twin 0 of 50.
+
+### Amendments
+
+- **2026-10-07 — implementation details, before any run (approved by the
+  author).** The 800 questions are drawn with seed `20261008`
+  (`evaluation/closed_book.py`, `CLOSED_BOOK_SEED`), round-robin over
+  clusters within each template. The real-name text is rendered by the
+  generator with the question's own surface form. No API JSON mode (as
+  E-004). `decide` refuses to run until the grader's audit has passed.

@@ -66,6 +66,11 @@ triggers the registered plan. Every gate evaluation gets a dated entry in
   passes.** One species was named from structure alone (a three-stage line
   with a Mega form): a residual fingerprint, declared. The closed-book half
   runs in Phase 3.
+- **Status (2026-11-14): the closed-book half passes** (E-005, 50 questions
+  per template outside the evaluation splits, Wilson lower limit against
+  chance + 5 points; PI-022). On the twin, A0 answered 0 of 50 correctly in 15
+  of 16 templates and 2 of 50 in S0-B1 (chance 38%); the real-name positive
+  control passed in 4 of 4 S0-A templates. **G2 passes.**
 
 ## G3 — Generator correct
 

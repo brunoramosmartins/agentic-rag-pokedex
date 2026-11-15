@@ -36,15 +36,24 @@ one row.
 
 ### Outcome space of v1.0 (the first matching row wins)
 
-**Three-valued verdict**, with D = C(reference) − C(treatment) and a 97.5%
-BCa bootstrap interval (Bonferroni over the two primary contrasts):
+**Four-zone verdict** (since 2026-11-14, PI-025; until then three values, with
+*supported* also needing the point estimate ≥ 0.25), with D = C(reference) −
+C(treatment) and [L, U] the 97.5% BCa bootstrap interval (Bonferroni over the
+two primary contrasts). One interval answers two questions — superiority (does
+the treatment reduce cost? L > 0) and relevance (does the reduction reach
+0.25? L ≥ 0.25 yes, U < 0.25 no):
 
-- **supported:** the interval excludes zero in favour of the treatment **and**
-  the point estimate is ≥ 0.25;
-- **refuted:** the upper limit of the interval is **below 0.25** — the effect,
-  if any, is smaller than would justify acting. Includes the treatment being
-  worse and a statistically significant gain below the threshold;
-- **inconclusive:** everything else.
+| Verdict | Condition | What may be written |
+|---|---|---|
+| **Supported, relevance shown** | L ≥ 0.25 | "The reduction is at least 0.25" |
+| **Supported, relevance open** | 0 < L < 0.25 ≤ U | "The treatment reduces cost, by at least L; whether the reduction reaches the threshold is not known" |
+| **Refuted** | U < 0.25 | "A reduction of 0.25 is ruled out." Includes the treatment being worse and a significant gain below the threshold |
+| **Inconclusive** | L ≤ 0 and U ≥ 0.25 | The interval, and the n that would decide |
+
+The zones do not overlap and cover every interval. The point estimate is always
+published and never decides. Inconclusive is not read as equivalence. In the
+rows below, "H1 supported" means either supported zone, and the published
+reading carries the relevance zone beside it.
 
 | # | Condition | Published reading |
 |---|---|---|
@@ -65,8 +74,8 @@ logged "answer" proposal at an insufficient step, **net of the same count for
 the placebo A4p**. The exact definitions, the placebo delivery rules and the
 A3′ noise null are registered in E-001 (`experiments/registry.md`).
 
-H2 is read independently, with three values (supported / refuted /
-inconclusive), each with its sentence registered in E-001. **The H2 population
+H2 is read independently, with the same four zones, each with its sentence
+registered in E-001. **The H2 population
 is always S1–S4**; the typed-expansion measurement (E-002) is descriptive and
 cannot change it. λ\* accompanies every row: it is the reading that does not
 depend on the λ = 4 scenario
@@ -138,25 +147,36 @@ interval, declared as a check, not a power test.
 ### Power for the *supported* verdict
 
 The table above sizes for "the interval excludes zero". The verdict
-**supported** also needs the point estimate to be ≥ 0.25; at a true effect of
-exactly 0.25 that happens at most half the time, whatever n is (exactly half
-once z·SE ≤ 0.25; slightly less below that n, e.g. 0.498 at n = 320, SD = 2.0). Power is therefore
-computed for the event *supported* = {point ≥ 0.25 and lower limit > 0} at a
-**design effect Δ_design = 0.35**:
+**supported** (either supported zone) is the event {L > 0 and U ≥ 0.25}; with a
+symmetric interval that is point > max(z·SE, 0.25 − z·SE). Power is computed for
+it at a **design effect Δ_design = 0.35**:
 
 | P(supported) at n = 320 | SD = 1.0 | SD = 1.5 | SD = 2.0 |
 |---|---:|---:|---:|
-| true effect 0.25 | 0.50 | 0.50 | 0.50 |
-| true effect 0.30 | 0.81 | 0.72 | 0.67 |
-| **true effect 0.35** | **0.96** | **0.88** | **0.81** |
-| true effect 0.40 | 1.00 | 0.96 | 0.91 |
+| true effect 0.25 | 0.99 | 0.77 | 0.50 |
+| true effect 0.30 | 1.00 | 0.91 | 0.67 |
+| **true effect 0.35** | **1.00** | **0.97** | **0.81** |
+| true effect 0.40 | 1.00 | 0.99 | 0.91 |
 
 n\* for P(supported) ≥ 0.80 at Δ_design = 0.35: **78 / 175 / 311** pooled
-questions for SD 1.0 / 1.5 / 2.0. The plan of 320 holds up to SD ≈ 2.03. In
-words: the design is powered to call an effect of 0.35 *supported*; an effect of
-exactly 0.25 is a coin flip, and that is stated next to the verdict.
-**Δ_design = 0.35 is a budget choice**, not a relevance claim: 0.30 would need
-n ≈ 638 at SD 1.5. True effects in [0.25, 0.35) have 50–88% power at the plan.
+questions for SD 1.0 / 1.5 / 2.0. The plan of 320 holds up to SD ≈ 2.03.
+**Δ_design = 0.35 is a budget choice**, not a relevance claim. Under the
+three-valued rule (until 2026-11-14) the same n\* held, because at those n the
+lower limit above zero was already the binding condition; what changed is the
+power near the threshold, where a true effect of exactly 0.25 was a coin flip
+(0.50 at every SD) and is now called supported 0.99 / 0.77 / 0.50 of the time.
+
+**What this sizing buys.** It is for superiority. The zone **supported,
+relevance shown** (L ≥ 0.25) has little power at the plan, and this is
+declared, not bought with n:
+
+| P(relevance shown) at n = 320 | SD = 1.0 | SD = 1.5 | SD = 2.0 |
+|---|---:|---:|---:|
+| true effect 0.25 | 0.01 | 0.01 | 0.01 |
+| true effect 0.35 | 0.33 | 0.15 | 0.09 |
+| true effect 0.50 | 0.99 | 0.77 | 0.50 |
+
+It reaches 0.80 only near a true effect of 0.50 (n 153 / 343 / 609).
 
 **Power to refute.** *Refuted* needs the upper limit below 0.25. At n = 320:
 
@@ -177,6 +197,22 @@ counts questions but the tables hold for the **effective n**, n divided by the
 design effect, known only once ρ is estimated on the dress rehearsal (gate 8,
 Updates). Intervals and sign-flip p-values are computed by clusters (E-001,
 amendment of 2026-09-30).
+
+**Update 2026-11-14 (Phase 3, preliminary power table).** The pilot's proxy SD
+of D = C(A1) − C(A3) is 2.09, 80% stratified cluster bootstrap 1.81–2.32
+(E-004; 30 questions, 20 discordant). A proxy: A3 and A4 share their search
+and should be more concordant. At the three values, before any design effect:
+
+| Proxy SD | n\* (P(supported) ≥ 0.80 at Δ_design 0.35) | P(supported) at n = 320 | at n = 448 | MDE at n = 320 |
+|---:|---:|---:|---:|---:|
+| 1.81 (lower) | 255 | 0.89 | 0.97 | 0.312 |
+| **2.09** | **339** | 0.77 | 0.90 | 0.360 |
+| 2.32 (upper) | 418 | 0.68 | 0.83 | 0.400 |
+
+n_max = 884 and n_max_eff = 448 (journal, 2026-11-14): the gate 8 extension
+past 320 is affordable, and the design effect from the rehearsal decides
+whether n\* stays within 448. Gate 8 itself is applied on the rehearsal's
+A3 − A4 and A2 − A4.
 
 ---
 
@@ -268,6 +304,13 @@ labeler, **100%** on the golden trajectories; reachability, **14 of 14** codes
 produced by a labelled dev state (`format-error` declared). Added by PI-021:
 the **error-code assigner** runs against golden tests, one per branch of the
 taxonomy's decision list, before any code is published.
+
+**Update 2026-10-07 (E-002 red-team).** One more instrument: the **typed
+expansion pipeline** (`arms/typed_expansion.py`, E-002 and A2) runs against a
+hand-traced expansion on the fixture world — every call, its tokens, the
+delivered units and the stop point under a tighter B — at 100% before E-002
+runs. The search index's tokenizer is checked against possessive and
+hyphenated names (PI-023).
 
 ---
 

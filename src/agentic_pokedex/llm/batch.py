@@ -24,12 +24,17 @@ def chat_request(
     custom_id: str,
     *,
     model: str,
-    messages: Sequence[Mapping[str, str]],
+    messages: Sequence[Mapping[str, Any]],
     max_completion_tokens: int,
     reasoning_effort: str | None = None,
     response_format: Mapping[str, Any] | None = None,
+    tools: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """One line of a Batch input file for the Chat Completions endpoint."""
+    """One line of a Batch input file for the Chat Completions endpoint.
+
+    With ``tools``, the model may call one tool per turn (parallel calls are
+    off, so a step is one call).
+    """
     body: dict[str, Any] = {
         "model": model,
         "messages": [dict(m) for m in messages],
@@ -39,6 +44,9 @@ def chat_request(
         body["reasoning_effort"] = reasoning_effort
     if response_format:
         body["response_format"] = dict(response_format)
+    if tools:
+        body["tools"] = [dict(t) for t in tools]
+        body["parallel_tool_calls"] = False
     return {
         "custom_id": custom_id, "method": "POST", "url": CHAT_ENDPOINT, "body": body
     }
@@ -68,6 +76,7 @@ class BatchResult:
         finish_reason: ``stop``, ``length``, … (``length`` means truncated).
         usage: API-reported usage, when present.
         error: A description of the failure, or ``None``.
+        tool_calls: Tool calls of the assistant message, as the API sent them.
     """
 
     custom_id: str
@@ -75,13 +84,16 @@ class BatchResult:
     finish_reason: str | None
     usage: Usage | None
     error: str | None
+    tool_calls: tuple[dict[str, Any], ...] = ()
 
     @property
     def ok(self) -> bool:
-        """A complete answer came back."""
-        return self.error is None and self.content is not None and (
-            self.finish_reason == "stop"
-        )
+        """A complete answer, or a tool call, came back."""
+        if self.error is not None:
+            return False
+        if self.tool_calls:
+            return self.finish_reason in ("tool_calls", "stop")
+        return self.content is not None and self.finish_reason == "stop"
 
 
 def parse_output_line(row: Mapping[str, Any]) -> BatchResult:
@@ -98,7 +110,8 @@ def parse_output_line(row: Mapping[str, Any]) -> BatchResult:
     choice = (body.get("choices") or [{}])[0]
     message = choice.get("message") or {}
     return BatchResult(
-        custom_id, message.get("content"), choice.get("finish_reason"), usage, None
+        custom_id, message.get("content"), choice.get("finish_reason"), usage, None,
+        tuple(dict(c) for c in message.get("tool_calls") or ()),
     )
 
 

@@ -1214,3 +1214,266 @@ registry before any run.
   Updates) and `docs/contingency.md` (G5) synced.
 
 **Plan impact PI-021 resolved:** plan revised on 2026-10-06 — Phases 3, 5 and 6 gain the trajectory-level check, the code assigner with golden tests and the cluster inference with the design effect; Phase 5 and 6 sizes grow by one partial day each, paid by the Phase 2 slack.
+
+## 2026-10-06 — Phase 3 opened
+
+**Scope.** Phase 3 — Pilot gate: the trajectory-level check, E-002, the pilot
+on dev, G2's closed-book half, reasoning tokens per arm, n_max and n_max_eff.
+Size S (3–5 partial working days, as an estimate; no calendar). Ends with tag
+`v0.4-pilot-gate` (no release).
+
+**Gate check.** Every Phase 2 deliverable is present; PR #28 merged, tag
+`v0.3-examiner` and its pre-release published, the asset digests equal to the
+benchmark card's release log (card status now "published"). Carried over: the
+author's corrections to the Phase 2 note's Lessons Learned and Failed
+Attempts.
+
+**Assumption check.** No open plan impact.
+
+**Before any LLM call in this phase:** E-002 records its link-type order and
+its S3 measurement under the closure label; the pilot and the closed-book
+check are registered with their n, cost estimate and what they can and cannot
+conclude.
+
+## 2026-10-06 — Phase 3 decisions before any LLM call
+
+**Plan impact PI-022:** Phase 3 — G2's closed-book half assumed the dev pilot covers every template with enough questions → dev is group A only (11 of 16 templates, 7–30 questions each) and the rule reads a point estimate within 5 points of chance → the closed-book check draws its own sample per template from outside the evaluation splits, with n per template and an interval-based rule (fail when the Wilson 95% lower limit exceeds chance + 5 points) fixed before the run, registered as its own experiment; the A0 run on real names is its positive control. Open.
+
+Decided by the author the same day:
+
+- **G2 closed-book sample: 50 questions per template**, 16 templates, twin and
+  real world (1,600 calls, about US$ 1.1 at the reasoning measured by E-003),
+  drawn from dev, train and the unassigned pool, never from an evaluation
+  split. With n = 50 the rule catches large leaks only; that is what G2
+  guards against (memory standing in for evidence).
+- **The pilot runs a minimal A3**: the common agent loop and a v0 agent
+  prompt, registered before the run and untuned, reused in Phase 5. It gives
+  the costliest reasoning measurement (PI-014) and the SD proxy for D(A1 − A3).
+  v0 is the starting point, as for the judge and A2 prompts: the three
+  registered iterations count changes made after dev outputs are seen, so any
+  change after the pilot is iteration 1.
+- **The trajectory-level check is not an opening of eval-L1.** It is
+  model-free — the registry, the gold covers and the unit sizes under the tool
+  contract — like the per-split distributions of `data/splits/manifest.json`;
+  no arm runs and no output is seen. It reads the questions through the
+  generator's file, not through `open_split`.
+
+## 2026-10-07 — Trajectory-level check; dev keeps its 4 questions beyond T_max
+
+The trajectory-level check ran before dev was first used
+(`examiner/trajectories.py`; `docs/examiner.md`, Trajectory-level check). No
+evaluation split holds a question beyond T_max or B. Over the benchmark, 19 of
+32,300 questions are beyond T_max — all S3 on one widely learned move whose
+hub takes 7 calls to read whole — 4 of them in dev (one cluster), and 6 of
+those 19 are beyond B. Every S1 question could be made sufficient by one lucky
+search; no S3 question could.
+
+**Decided by the author:** dev stays as frozen, with the 4. Dev readings of S3
+(E-002, the pilot, detector precision and recall, the dress rehearsal) report
+them separately, N-of-M; nothing is excluded and no later phase changes. The
+benchmark card lists the 19 among its known limitations.
+
+## 2026-10-07 — E-002 red-team before its run
+
+The `experiment-redteam` review of E-002 (with its amendment of the same day)
+returned 6 blocking findings and 6 caveats, read from the code; nothing had
+run on dev. The two that change data were checked first, on unassigned pool
+questions only:
+
+- **The BM25 tokenizer drops the anchor of possessive questions.** "Kedros's"
+  becomes the token `kedros's` and "Fiero-type" `fiero-type`, tokens no unit
+  holds. Search returned a unit of the anchor's page for **0 of 59** pool
+  S0-A1 questions in the form "What is {X}'s hidden ability?" (48 of 48 and
+  32 of 43 in the other two forms); with possessives stripped and hyphen
+  parts emitted on both sides, 55 of 59. Only the index uses this tokenizer;
+  the dense vectors do not change.
+- **The registered pipeline could not complete a list.** Pages of the search
+  hits were never read, and each expansion read a page's first window only, so
+  under the closure label S3 was near zero by construction — and A2, which
+  reuses the module, would have inherited it.
+
+**Plan impact PI-023:** Phase 3 (and the Phase 1 index) — the BM25 tokenizer was assumed to keep the anchor's name → it reads "Kedros's" as `kedros's` and "Fiero-type" as `fiero-type`, tokens no unit holds, so search finds the anchor's page for 0 of 59 pool S0-A1 questions in their possessive form (55 of 59 after the fix) → `tokenize` strips possessives and emits hyphen parts on both sides, the lexical index is rebuilt (dense vectors unchanged), the anchor hit rate per surface form is measured on train, all before E-002 and the pilot. Open.
+
+Decided by the author the same day, before any run on dev:
+
+- **Level 0, section completion:** for each search hit, in rank order, the
+  pipeline reads the hit's section to its end (`open_page(title, section,
+  offset)`), then expands typed links breadth-first with first windows. E-002
+  stops calling itself a "generous upper bound": it measures what one
+  registered fixed pipeline delivers. A2's page-reading policy is this module,
+  fixed and not swept, declared as a threat in E-001.
+- Every other finding is taken: the label after search, after level 0 and
+  after each link level; the full pipeline specification in the registry and
+  a freeze manifest in the output; no partial run on dev; a hand-traced golden
+  expansion on the fixture world as gate 7's known answer; a wider non-use
+  clause; and the caveats' readings (by version group, clusters, structural
+  zeros without intervals, the 2026-09-24 prediction marked as predating the
+  closure label).
+
+## 2026-10-07 — E-002 run on dev
+
+E-002 ran on dev at commit `29453ac` (clean tree), no API call; result in the
+registry. Sufficient delivered sets at k = 5: S0 29, S1 23, S2 28, S3 9 of 30;
+S4 0 by construction. S0 and S2 come from search alone, S1 from the first link
+level (the "Evolves into" hop), S3 from section completion when search hits
+the asked hub — and search often returns other moves' hubs in the asked
+version. B binds in every question. Descriptive: it selects no stratum,
+threshold or n for E-001, and it changes nothing in the pipeline A2 inherits.
+
+**Plan impact PI-023 resolved:** absorbed — `tokenize` fixed and tested, the lexical index rebuilt with it (dense vectors unchanged), the anchor hit rate measured on train (133 of 150), all before E-002 ran; no phase, hour or deliverable changes.
+
+## 2026-10-07 — E-004 and E-005 registered; the grader moves to Phase 3
+
+E-004 (the pilot: A0, A1, A2 on dev's 150, a minimal A3 on 30; noise, cost
+and reasoning per arm, a proxy SD of D; mean C per arm not printed) and E-005
+(G2's closed-book half: A0 on 50 questions per template, twin and real names,
+outside the evaluation splits; Wilson lower limit against chance + 5 points;
+real names as the positive control) registered before any arm or prompt
+exists. The author writes both predictions before the runs.
+
+**Plan impact PI-024:** Phases 3 and 4 — the grader and its 100-output audit (gate 4) were planned for Phase 4 → the pilot's SD proxy (E-004) and G2's closed-book rule (E-005) read graded answers in Phase 3 → `evaluation/grader.py` (exact match, alias normalization, structured abstention) is built in Phase 3 with golden tests, and the gate 4 audit (≥ 98 of 100, stratified) runs on E-004 and E-005 outputs before any graded number is read; Phase 4 keeps the arms' tuning and the A2 sweep. Open.
+
+## 2026-10-07 — Arms built; smoke run on train
+
+The one-call arms (A0, A1, A2), the common agent loop over Batch rounds (A3),
+the grader and the E-004 / E-005 runners are built. E-004 and E-005 were
+amended before any run with the author's approval: seeds `20261007` and
+`20261008`, the last-turn message `agent_final_v0`, the loop's tool replies
+("Evidence budget reached.", "Invalid call."), no API JSON mode in any arm,
+smoke runs on train only.
+
+Smoke run on train (`runs/e004-smoke`, not part of E-004): 10 questions for
+A0, A1 and A2, 2 for A3; three Batch rounds, no failure. Measured cost
+US$ 0.009 against an estimate of 0.033 central: reasoning medians were 32–96
+tokens per call, far below the 600 the estimate assumes (E-003's identity
+probe needed more), so the registered estimates are conservative. The answers
+agree with the labels: A1 and A2 answered the gold in the 9 questions whose
+evidence was sufficient and abstained in the one whose search missed the
+anchor; A0 abstained on all 10 twin questions; A3 answered both S1 questions
+correctly in 2 calls each. A dry `prepare` of E-005 (no request sent, files
+deleted) rendered the real-name questions and golds correctly.
+
+## 2026-10-08 — E-004 run on dev
+
+The pilot ran after the author's prediction was committed (`cbc317c`): 589
+calls in 7 Batch rounds, no API failure, **US$ 0.191** against 0.49 estimated.
+Reasoning medians were 0–128 tokens a call, far below the 600 the estimates
+assume, so every later estimate built on them is conservative until the
+budget is re-estimated with these numbers. A3 took 3.6 steps on average and
+searched again after its first observation in 28 of 30 questions; every S3
+question ran to T_max. Graded readings — the proxy SD of D — wait for the
+grader's audit (PI-024). Result in the registry; nothing in it selects a
+stratum, threshold, prompt or n.
+
+## 2026-10-08 — E-005 run; the grader's audit drawn
+
+E-005 ran after the author's prediction: 1,600 calls, one Batch round, no
+failure, US$ 0.280. Ungraded: with no evidence, A0 answered 4 of 800 twin
+questions (abstaining on the rest) and 405 of 800 in real names. The gate 4
+audit sheet is drawn (`runs/grader-audit/sheet.md`, seed `20261009`): 100
+outputs, 20 per stratum, from all six sources; the author marks it before any
+graded number of E-004 or E-005 is read.
+
+## 2026-11-14 — The verdict in four zones
+
+The author revised the plan (2026-11-12): the verdict rule of H1 and H2 called
+*supported* an interval excluding zero with a point estimate at or above 0.25,
+which shows that the treatment reduces cost, not that the reduction is at
+least 0.25. Measured with `power.py` before deciding: at Δ_design = 0.35, n\*
+does not change (78 / 175 / 311), because at those n the lower limit above
+zero was already the binding condition; near the threshold, P(supported) at
+the plan of 320 rises from 0.50 to 0.99 / 0.77 / 0.50; the new zone
+*relevance shown* has little power (0.33 / 0.15 / 0.09 at a true effect of
+0.35). The author approved the change, applied before E-001's freeze and
+before eval-L1 is opened.
+
+**Plan impact PI-025:** Phases 5–6 (and E-001) — the verdict rule assumed "supported" could stand for a reduction of at least 0.25 → an interval above zero with a point estimate at the threshold shows a reduction, not its size → four zones read on the same 97.5% interval: supported with relevance shown (L ≥ 0.25), supported with relevance open (0 < L < 0.25 ≤ U), refuted (U < 0.25), inconclusive (L ≤ 0 and U ≥ 0.25); the point estimate is published but no longer decides; "a reduction of at least 0.25" is written only in the first zone; n\* at Δ_design = 0.35 is unchanged (78 / 175 / 311), and the first zone is declared to need a true effect near 0.50 at the planned n; E-001 amended before its freeze. Open.
+
+**Plan impact PI-025 resolved:** plan revised on 2026-11-14 — E-001 amended (four zones, H2's sentences, sizing note), `outcome_space.Verdict` has four values, `power.p_supported` reads both limits and `p_relevance_shown` is added, `docs/measurability-gate.md` carries the rule and the recomputed tables; no n, phase, hour or budget changes.
+
+## 2026-11-14 — Gate 4, round 1: 97 of 100; the grader reads "level 37"
+
+The author audited the grader on 100 stratified outputs of E-004 and E-005
+(`runs/grader-audit/sheet-r1.md`, seed `20261009`): **97 of 100, fail** (pass at
+98). All 3 disagreements are one defect: a level answer written with its word
+("level 28", "Level 37") was graded wrong, C = λ, though it states the gold
+number; 18 E-004 answers have that form. In the first marking pass the author
+judged the model instead of the grader on 30 items; the corrected sheet is the
+one scored.
+
+Fix, decided after reading the audit and before reading any graded number: for
+level answers the grader drops a leading "level", "lvl" or "lv." before reading
+the number; power and every other kind are unchanged; new golden completions
+cover the forms and the near misses ("level 4", "level 3 or 4"). Per gate 4 the
+grader is re-audited on a **fresh sample**: round 2 is drawn with seed
+`20261010`, excluding the 100 outputs of round 1. No graded number of E-004 or
+E-005 is read before a round passes.
+
+## 2026-11-14 — Gate 4 passes; G2 passes; the pilot's SD of D
+
+**Gate 4, round 2** (fresh sample, seed `20261010`, none of round 1's outputs):
+**100 of 100**, pass, with the grader fixed after round 1. Graded numbers of
+E-004 and E-005 are read from here on.
+
+**G2, closed-book half (E-005): passes** by the registered rule. With no
+evidence, A0 answered 0 of 50 twin questions correctly in 15 of 16 templates
+and 2 of 50 in S0-B1 (chance 38%); the real-name positive control passed in
+4 of 4 S0-A templates (34–44 of 50). The twin hides what the model knows, and
+the probe can see it when it is there. With E-003's identity half, **G2
+passes**.
+
+**E-004, proxy SD of D = C(A1) − C(A3): 2.09** (80% stratified cluster
+bootstrap 1.81–2.32; 30 questions, 20 discordant), above gate 3's working
+1.64, as the author predicted. Preliminary: at 2.09 n\* = 339 and at 2.32
+n\* = 418, above the plan of 320 and below n_max_eff = 448 before any design
+effect. Gate 8 is decided on the dress rehearsal with A3 − A4, which share
+their search and should be more concordant than this proxy. Next in Phase 3:
+the budget re-estimated with measured tokens and n_max.
+
+**Plan impact PI-024 resolved:** absorbed — the grader, its golden tests and the gate 4 audit (round 1 97 of 100, fixed; round 2 100 of 100) were done in Phase 3 before any graded number was read; Phase 4 keeps the arms' tuning and the A2 sweep.
+
+**Plan impact PI-022 resolved:** absorbed — E-005 drew its own sample per template outside the evaluation splits and applied the interval rule; G2's closed-book half passes.
+
+## 2026-11-14 — n_max logged before the dress rehearsal
+
+The v1.0 budget re-estimated with Phase 3's measured costs
+(`evaluation/budget.py`; assumptions approved by the author): **US$ 0.73
+spent**; projected after cuts (1)–(3) with a 1.5× margin, **US$ 10.95**;
+**committed US$ 11.69 of the US$ 20 cap**. Without any cut the total would be
+about US$ 14.1. Arms not yet built are priced as multiples of measured ones
+(A4 = 2.5 × A3, A4p = O2 = 1.5 × A3, A3′ = A3, O1 = A1; A6 at 64,000 evidence
+tokens; A3 on S0 priced as on S2).
+
+**Gate 8 inputs, logged before any rehearsal:** one more pooled S1–S4 question,
+with the S0 share balanced growth adds, costs US$ 0.0147 →
+**n_max = 884, n_max_eff = min(n_max, 448) = 448**. The ceiling is material S1,
+not money. With the pilot's proxy SD (upper 80% limit 2.32, n\* = 418), the
+design effect estimated on the rehearsal decides whether n\* stays within 448
+or the verdict becomes descriptive (row 0), as registered.
+
+**Cost check (Phase 3):** measured cost was 0.39× (E-004) and 0.26× (E-005) the
+estimates, below 1.3×; no cut is applied. The benign S1 slice stays at 40
+questions (US$ 0.21 with margin).
+
+## 2026-11-14 — Phase 3 closed
+
+**Deliverables.** Every Phase 3 deliverable is present: the trajectory-level
+check, E-002 (descriptive), the pilot (E-004), G2's closed-book half (E-005,
+passes), the grader and gate 4 (round 2, 100 of 100), the v1.0 budget
+re-estimated with measured costs, the preliminary power table (gate 3,
+Update of 2026-11-14), n_max and n_max_eff logged before any rehearsal, the
+cost check (0.39× and 0.26× the estimates). The extensions' budgets are set at
+Phase 7 with v1.0's measured cost, as planned. **Carried over to Phase 4:** the
+author's corrections to the Phase 2 note (issue #34). Lessons Learned and
+Failed Attempts written by the author. Effort: about 5 partial days (size S,
+3–5 estimated).
+
+**Plan impact PI-026 (retrospective, logged 2026-11-14):** Phase 6 — the plan of 320 pooled questions assumed SD of D ≈ 1.64 → the pilot's proxy SD is 2.09 (80% upper 2.32), n\* 339–418 → Phase 6 should expect to extend eval-L1 past 320 toward n\* within n_max_eff = 448 (about US$ 0.0147 per pooled question, affordable), and the design effect from the rehearsal decides between the extension and row 0. Open.
+
+**Plan impact PI-027 (retrospective, logged 2026-11-14):** Phase 4 — the A2 sweep grid assumed BM25/dense weights 0.3 / 0.5 / 0.7 were available → `HybridIndex` fuses with equal weights only (E-001, amendment of 2026-10-07) → Phase 4 adds weighted reciprocal-rank fusion, tested, before the sweep, with the equal-weight point unchanged. Open.
+
+**Plan impact PI-026 resolved:** absorbed — gate 8's registered extension branch (320 < n\* ≤ n_max_eff) already covers it, and the budget pays for it; no task, hour or phase changes.
+
+**Plan impact PI-027 resolved:** absorbed — one task added to Phase 4 (weighted fusion with tests before the A2 sweep), within its size; issue opened at Phase 4's kickoff.
+
+No plan impact is open.
