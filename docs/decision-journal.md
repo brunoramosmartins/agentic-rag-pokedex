@@ -1408,3 +1408,28 @@ cover the forms and the near misses ("level 4", "level 3 or 4"). Per gate 4 the
 grader is re-audited on a **fresh sample**: round 2 is drawn with seed
 `20261010`, excluding the 100 outputs of round 1. No graded number of E-004 or
 E-005 is read before a round passes.
+
+## 2026-11-14 — Gate 4 passes; G2 passes; the pilot's SD of D
+
+**Gate 4, round 2** (fresh sample, seed `20261010`, none of round 1's outputs):
+**100 of 100**, pass, with the grader fixed after round 1. Graded numbers of
+E-004 and E-005 are read from here on.
+
+**G2, closed-book half (E-005): passes** by the registered rule. With no
+evidence, A0 answered 0 of 50 twin questions correctly in 15 of 16 templates
+and 2 of 50 in S0-B1 (chance 38%); the real-name positive control passed in
+4 of 4 S0-A templates (34–44 of 50). The twin hides what the model knows, and
+the probe can see it when it is there. With E-003's identity half, **G2
+passes**.
+
+**E-004, proxy SD of D = C(A1) − C(A3): 2.09** (80% stratified cluster
+bootstrap 1.81–2.32; 30 questions, 20 discordant), above gate 3's working
+1.64, as the author predicted. Preliminary: at 2.09 n\* = 339 and at 2.32
+n\* = 418, above the plan of 320 and below n_max_eff = 448 before any design
+effect. Gate 8 is decided on the dress rehearsal with A3 − A4, which share
+their search and should be more concordant than this proxy. Next in Phase 3:
+the budget re-estimated with measured tokens and n_max.
+
+**Plan impact PI-024 resolved:** absorbed — the grader, its golden tests and the gate 4 audit (round 1 97 of 100, fixed; round 2 100 of 100) were done in Phase 3 before any graded number was read; Phase 4 keeps the arms' tuning and the A2 sweep.
+
+**Plan impact PI-022 resolved:** absorbed — E-005 drew its own sample per template outside the evaluation splits and applied the interval rule; G2's closed-book half passes.

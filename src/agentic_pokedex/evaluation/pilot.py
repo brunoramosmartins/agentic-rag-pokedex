@@ -12,6 +12,7 @@ Usage::
     python -m agentic_pokedex.evaluation.pilot submit
     python -m agentic_pokedex.evaluation.pilot collect     # repeat until done
     python -m agentic_pokedex.evaluation.pilot report
+    python -m agentic_pokedex.evaluation.pilot sd        # after the grader audit
 """
 
 from __future__ import annotations
@@ -232,6 +233,47 @@ def render_case(state: Mapping[str, Any], arm: str) -> str:
     return "\n".join(lines)
 
 
+def costs(
+    state: Mapping[str, Any], golds: Mapping[str, Any], arm: str
+) -> dict[str, float]:
+    """C per question (local id) for one arm; an API failure costs λ."""
+    from agentic_pokedex.evaluation.grader import LAMBDA, grade
+
+    out: dict[str, float] = {}
+    if arm == AGENT_ARM:
+        for data in state["agent"].values():
+            run = data["state"]
+            out[data["local"]] = (LAMBDA if run.get("failed")
+                                  else grade(run["final"], golds[data["local"]]).cost)
+        return out
+    for e in state["single"].values():
+        if e["arm"] == arm:
+            out[e["local"]] = (LAMBDA if e["status"] == "failed"
+                               else grade(e.get("completion"), golds[e["local"]]).cost)
+    return out
+
+
+def proxy_sd(
+    state: Mapping[str, Any], golds: Mapping[str, Any],
+    records: Mapping[str, Record], seed: int = PILOT_SEED,
+) -> dict[str, Any]:
+    """The proxy SD of D = C(A1) − C(A3) on A3's questions, with its 80%
+    stratified cluster-bootstrap interval (E-004). Reports no mean of C and no
+    mean of D: the pilot prints noise, never effect."""
+    from agentic_pokedex.evaluation.clusters import Item, bootstrap_interval, sd
+
+    a1, a3 = costs(state, golds, "A1"), costs(state, golds, AGENT_ARM)
+    items = [Item(records[q]["stratum"], cluster_key(records[q]), a1[q] - a3[q])
+             for q in sorted(a3)]
+    point, lo, hi = bootstrap_interval(items, sd, level=0.80, seed=seed)
+    return {
+        "questions": len(items),
+        "clusters": len({(i.stratum, i.cluster) for i in items}),
+        "discordant": sum(i.value != 0 for i in items),
+        "sd": round(point, 3), "sd_80": [round(lo, 3), round(hi, 3)],
+    }
+
+
 def sha256_file(path: Path) -> str:
     """SHA-256 of a file."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -248,7 +290,7 @@ def main(argv: list[str] | None = None) -> int:
     prep.add_argument("--split", default="dev", choices=("dev", "train"),
                       help="train for smoke runs (into runs/e004-smoke)")
     prep.add_argument("--run-dir", type=Path, default=None)
-    for name in ("submit", "collect", "report"):
+    for name in ("submit", "collect", "report", "sd"):
         p = sub.add_parser(name)
         p.add_argument("--run-dir", type=Path, default=RUN_DIR)
     args = parser.parse_args(argv)
@@ -268,10 +310,32 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "collect":
         return collect(run)
+    if args.command == "sd":
+        return report_sd(run)
     print(json.dumps(describe(run.load("state.json")), indent=1))
     state = run.load("state.json")
     for arm in (*SINGLE_ARMS, AGENT_ARM):
         print("\n" + render_case(state, arm))
+    return 0
+
+
+def report_sd(run: RunDir) -> int:
+    """The proxy SD of D, once the grader's audit has passed (PI-024)."""
+    from agentic_pokedex.evaluation.grader_audit import _e004_golds, latest_result
+    from agentic_pokedex.world.index import DEFAULT_WORLD_DIR
+
+    audit = latest_result()
+    if audit is None or audit["decision"] != "pass":
+        print("The grader's audit (gate 4) has not passed: no graded number is "
+              "read before it (PI-024).")
+        return 1
+    state = run.load("state.json")
+    golds, _ = _e004_golds(state)
+    with (DEFAULT_WORLD_DIR / "examiner" / "questions.jsonl").open(
+            encoding="utf-8") as fh:
+        records = {r["id"]: r for r in map(json.loads, fh) if r["id"] in golds}
+    out = proxy_sd(state, golds, records)
+    print(json.dumps(out, indent=1))
     return 0
 
 

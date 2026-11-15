@@ -30,8 +30,8 @@ filled only after the run, next to the date.
 | [E-001](#e-001--layer-1-does-an-explicit-sufficiency-detector-pay-for-itself) | 6 | draft | H1, H2 (+ H1b secondary) | Layer 1 verdict: does an explicit sufficiency judge reduce expected cost vs the implicit detector and vs a fixed pipeline? | — |
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | analyzed | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | Dev, k = 5: S0 29, S1 23, S2 28, S3 9 of 30; S4 0 by construction. S0/S2 from search, S1 from link level 1, S3 from section completion; B binds in 150 of 150 |
 | [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
-| [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | run | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | US$ 0.191 for 150 + 30 questions; reasoning medians 0–128; A3 3.6 steps, 28 of 30 search again, S3 always at T_max; SD of D after the audit |
-| [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | run | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | US$ 0.280; twin: 4 of 800 answered, real: 405 of 800; verdict after the audit |
+| [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | analyzed | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | US$ 0.191 for 150 + 30 questions; reasoning medians 0–128; A3 3.6 steps, 28 of 30 search again, S3 always at T_max; proxy SD of D 2.09 (80%: 1.81–2.32) |
+| [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | analyzed | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | **G2 passes**: twin 0 of 50 in 15 of 16 templates (2 of 50 in S0-B1); real-name control 4 of 4 |
 
 ---
 
@@ -1064,8 +1064,8 @@ G2 3/4, G3 3/5, G4 3/6, G5 2/2, G6 2/4, G7 4/5, G8 1/2, G9 0/2.
 ## E-004 — Pilot: noise, cost and reasoning per arm
 
 - **Phase:** 3 (pilot gate).
-- **Status:** run — registered 2026-10-07, before any arm or prompt exists;
-  run 2026-10-08 (graded readings wait for the grader's audit).
+- **Status:** analyzed — registered 2026-10-07, before any arm or prompt
+  exists; run 2026-10-08; graded reading 2026-11-14, after the grader's audit.
 - **Hypothesis:** none. The pilot estimates noise, never effect
   (measurability gate 6).
 
@@ -1160,7 +1160,20 @@ proxy SD of D) wait for the grader's audit (PI-024).
   the final form's page, and answered the type pair in 3 calls.
 - **Against the prediction:** reasoning was 0–128 tokens a call at the median
   (predicted about 40); A3 took 3.6 steps on average (predicted 2), pushed up
-  by S3, which always ran to T_max; the SD of D is not read yet.
+  by S3, which always ran to T_max.
+
+**Graded reading, 2026-11-14** (after the grader's audit passed in round 2,
+100 of 100): **proxy SD of D = C(A1) − C(A3) = 2.09, 80% stratified cluster
+bootstrap 1.81–2.32**, on the 30 shared questions (30 clusters; 20 of 30 pairs
+discordant). Above gate 3's working value of 1.64, as predicted. It is a
+proxy: A1 against A3, not A3 against A4, which share their search and should
+be more concordant; gate 8 is decided on the dress rehearsal. At SD 2.09,
+n\* = 339; at the upper limit 2.32, n\* = 418 — above the plan of 320, below
+n_max_eff = 448 before any design effect. Rendered case (an S2 question, "Name
+the move Skamsei learns at level 55 in Karek/Zistamdu"): A1's single search
+missed the learnset and A1 abstained (C = 1); A3 searched, opened the species'
+Learnset section and answered the gold (C = 0). No mean of C and no mean of D
+is printed.
 
 ### Amendments
 
@@ -1186,8 +1199,8 @@ proxy SD of D) wait for the grader's audit (PI-024).
 ## E-005 — G2 closed-book: does memory stand in for evidence on the twin?
 
 - **Phase:** 3 (pilot gate).
-- **Status:** run — registered 2026-10-07, before any run; run 2026-10-08
-  (the verdict waits for the grader's audit).
+- **Status:** analyzed — registered 2026-10-07, before any run; run
+  2026-10-08; verdict 2026-11-14 (G2 passes), after the grader's audit.
 - **Hypothesis:** gating — G2's closed-book half (`docs/contingency.md`;
   PI-022). G2's identity half passed in E-003.
 
@@ -1248,6 +1261,16 @@ unparseable output. **Measured cost US$ 0.280** (estimate 1.06 central).
 Reasoning per call: median 128, p90 256, max 768. Ungraded: on the twin, A0
 answered 4 of 800 questions and abstained on 796; on real names it answered
 405 of 800. The verdict waits for the grader's audit (PI-024).
+
+**Verdict, 2026-11-14** (after the grader's audit passed in round 2, 100 of
+100), by the registered rule: **G2 closed-book half passes.** On the twin, no
+template's Wilson 95% lower limit is above its chance rate + 5 points: 0 of 50
+correct in 15 of 16 templates, 2 of 50 in S0-B1 (chance 38%). **Positive
+control 4 of 4:** on real names, S0-A1 34, S0-A2 35, S0-A3 43, S0-A4 44 of 50
+(lower limits 54–76%, chance 3–40%). Real names also above chance in S0-B1
+(47), S1-A1 (28), S1-A2 (49), S1-A3 (28), S1-B1 (35); 0 of 50 in S2 and S3;
+S4, stating the withheld value: real 7 of 50 (S4-A1, chance 32%) and 2 of 50
+(S4-B1), twin 0 of 50.
 
 ### Amendments
 
