@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 
+from agentic_pokedex.evaluation import grader_audit
 from agentic_pokedex.evaluation.grader import GoldAnswer
 from agentic_pokedex.evaluation.grader_audit import (
     THRESHOLD,
@@ -95,3 +97,23 @@ def test_outputs_from_run_states() -> None:
                         {"S2-A1:x": "S2-A1", "S1-A1:y": "S1-A1"})
     assert [(o.source, o.text) for o in outs] == [("e004-A1", "At what level?"),
                                                  ("e004-A3", "Which?")]
+
+
+def test_a_new_round_draws_a_fresh_sample(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(grader_audit, "AUDIT_DIR", tmp_path)
+    first = sample(outputs(), per_stratum=4)
+    grader_audit.sheet_path(1).write_text(render_sheet(first), encoding="utf-8")
+    seen = grader_audit.drawn_before(2)
+    assert seen == {(o.source, o.question) for o in first}
+    second = sample(outputs(), seed=grader_audit.AUDIT_SEED + 1, per_stratum=4,
+                    exclude=seen)
+    assert not {(o.source, o.question) for o in second} & seen
+
+
+def test_latest_result_reads_the_last_round(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(grader_audit, "AUDIT_DIR", tmp_path)
+    assert grader_audit.latest_result() is None
+    for r, decision in ((1, "fail"), (2, "pass"), (10, "fail")):
+        grader_audit.result_path(r).write_text(
+            json.dumps({"decision": decision, "round": r}), encoding="utf-8")
+    assert grader_audit.latest_result() == {"decision": "fail", "round": 10}

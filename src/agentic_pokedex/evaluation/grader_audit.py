@@ -7,16 +7,19 @@ stratum, round-robin over their sources (each E-004 arm, each E-005 naming),
 format errors first and answered outputs before abstentions (an abstention is
 the easy case). The auditor marks each item ``ok`` (the grader is right) or
 ``wrong — <why>``. Pass: at least 98 of 100. Until the audit passes, no graded
-number of E-004 or E-005 is read.
+number of E-004 or E-005 is read. A failed round is followed, after the grader
+is fixed, by a round on a **fresh sample**: seed ``AUDIT_SEED + round − 1``,
+excluding every output an earlier round drew.
 
 The sheet is local (``runs/grader-audit/``): E-005 items carry real names.
 
 Usage::
 
-    python -m agentic_pokedex.evaluation.grader_audit draw
-    python -m agentic_pokedex.evaluation.grader_audit review
-    python -m agentic_pokedex.evaluation.grader_audit mark --item 7 --verdict ok
-    python -m agentic_pokedex.evaluation.grader_audit score
+    python -m agentic_pokedex.evaluation.grader_audit draw --round 2
+    python -m agentic_pokedex.evaluation.grader_audit review --round 2
+    python -m agentic_pokedex.evaluation.grader_audit mark --round 2 --item 7 \\
+        --verdict ok
+    python -m agentic_pokedex.evaluation.grader_audit score --round 2
 """
 
 from __future__ import annotations
@@ -24,6 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
 import sys
 from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
@@ -39,6 +43,7 @@ AUDIT_SEED = 20261009
 PER_STRATUM = 20
 THRESHOLD = 98
 STRATA = ("S0", "S1", "S2", "S3", "S4")
+_ITEM = re.compile(r"(?m)^## \d+\. \S+?/(\S+) — (q-[0-9a-f]+)\s*$")
 
 
 @dataclass(frozen=True)
@@ -102,8 +107,37 @@ def outputs_e004(
     return out
 
 
+def sheet_path(round_: int) -> Path:
+    """The sheet of a round."""
+    return AUDIT_DIR / f"sheet-r{round_}.md"
+
+
+def result_path(round_: int) -> Path:
+    """The scored result of a round."""
+    return AUDIT_DIR / f"result-r{round_}.json"
+
+
+def latest_result() -> dict[str, Any] | None:
+    """The result of the last scored round, or ``None``."""
+    rounds = sorted(AUDIT_DIR.glob("result-r*.json"),
+                    key=lambda p: int(p.stem.split("-r")[1]))
+    return json.loads(rounds[-1].read_text(encoding="utf-8")) if rounds else None
+
+
+def drawn_before(round_: int) -> set[tuple[str, str]]:
+    """(source, question) of every item earlier rounds drew."""
+    seen: set[tuple[str, str]] = set()
+    for r in range(1, round_):
+        path = sheet_path(r)
+        if path.is_file():
+            for m in _ITEM.finditer(path.read_text(encoding="utf-8")):
+                seen.add((m.group(1), m.group(2)))
+    return seen
+
+
 def sample(
-    outputs: Sequence[Output], seed: int = AUDIT_SEED, per_stratum: int = PER_STRATUM
+    outputs: Sequence[Output], seed: int = AUDIT_SEED, per_stratum: int = PER_STRATUM,
+    exclude: frozenset[tuple[str, str]] | set[tuple[str, str]] = frozenset(),
 ) -> list[Output]:
     """``per_stratum`` outputs per stratum: format errors first, then answered
     outputs, then abstentions, round-robin over sources in a seeded order."""
@@ -113,7 +147,7 @@ def sample(
     for stratum in STRATA:
         by_source: dict[str, list[Output]] = defaultdict(list)
         for o in sorted(outputs, key=lambda o: (o.source, o.question)):
-            if o.stratum == stratum:
+            if o.stratum == stratum and (o.source, o.question) not in exclude:
                 by_source[o.source].append(o)
         sources = sorted(by_source)
         rng.shuffle(sources)
@@ -196,23 +230,30 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(description="Gate 4: the grader's audit.")
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("draw")
-    sub.add_parser("review")
-    mark = sub.add_parser("mark")
-    mark.add_argument("--item", type=int, required=True)
-    mark.add_argument("--verdict", required=True, help="ok, or 'wrong — why'")
-    sub.add_parser("score")
+    commands = {name: sub.add_parser(name) for name in
+                ("draw", "review", "mark", "score")}
+    for p in commands.values():
+        p.add_argument("--round", type=int, default=1)
+    commands["mark"].add_argument("--item", type=int, required=True)
+    commands["mark"].add_argument("--verdict", required=True,
+                                  help="ok, or 'wrong — why'")
     args = parser.parse_args(argv)
-    sheet = AUDIT_DIR / "sheet.md"
+    sheet = sheet_path(args.round)
     if args.command == "draw":
         if sheet.exists():
             print(f"{sheet} exists; refusing to redraw over verdicts.")
+            return 1
+        earlier = latest_result()
+        if args.round > 1 and (earlier is None or earlier["decision"] == "pass"):
+            print("A new round follows a scored, failed round only.")
             return 1
         runs = REPO_ROOT / "runs"
         e004 = json.loads((runs / "e004" / "state.json").read_text(encoding="utf-8"))
         e005 = json.loads((runs / "e005" / "state.json").read_text(encoding="utf-8"))
         golds, templates = _e004_golds(e004)
-        items = sample(outputs_e004(e004, golds, templates) + outputs_e005(e005))
+        items = sample(outputs_e004(e004, golds, templates) + outputs_e005(e005),
+                       seed=AUDIT_SEED + args.round - 1,
+                       exclude=drawn_before(args.round))
         AUDIT_DIR.mkdir(parents=True, exist_ok=True)
         sheet.write_text(render_sheet(items), encoding="utf-8")
         mix = Counter(o.source for o in items)
@@ -229,11 +270,12 @@ def main(argv: list[str] | None = None) -> int:
         print(f"item {args.item}: {args.verdict}")
         return 0
     result = score(read_verdicts(sheet.read_text(encoding="utf-8")))
-    (AUDIT_DIR / "result.json").write_text(json.dumps(result, indent=1) + "\n",
-                                           encoding="utf-8")
-    print(f"{result['ok']} ok, {result['wrong']} wrong, {result['pending']} pending, "
-          f"{result['unreadable']} unreadable of {result['items']} → "
-          f"{result['decision']} (pass: ≥ {THRESHOLD})")
+    result["round"] = args.round
+    result_path(args.round).write_text(json.dumps(result, indent=1) + "\n",
+                                       encoding="utf-8")
+    print(f"round {args.round}: {result['ok']} ok, {result['wrong']} wrong, "
+          f"{result['pending']} pending, {result['unreadable']} unreadable of "
+          f"{result['items']} → {result['decision']} (pass: ≥ {THRESHOLD})")
     return 0
 
 

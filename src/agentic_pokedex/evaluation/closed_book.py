@@ -320,8 +320,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "collect":
         return collect(run)
-    audit = REPO_ROOT / "runs" / "grader-audit" / "result.json"
-    if not audit.is_file() or json.loads(audit.read_text())["decision"] != "pass":
+    from agentic_pokedex.evaluation.grader_audit import latest_result
+
+    audit = latest_result()
+    if audit is None or audit["decision"] != "pass":
         print("The grader's audit (gate 4) has not passed: no graded number is "
               "read before it (PI-024).")
         return 1

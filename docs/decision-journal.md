@@ -1390,3 +1390,21 @@ before eval-L1 is opened.
 **Plan impact PI-025:** Phases 5–6 (and E-001) — the verdict rule assumed "supported" could stand for a reduction of at least 0.25 → an interval above zero with a point estimate at the threshold shows a reduction, not its size → four zones read on the same 97.5% interval: supported with relevance shown (L ≥ 0.25), supported with relevance open (0 < L < 0.25 ≤ U), refuted (U < 0.25), inconclusive (L ≤ 0 and U ≥ 0.25); the point estimate is published but no longer decides; "a reduction of at least 0.25" is written only in the first zone; n\* at Δ_design = 0.35 is unchanged (78 / 175 / 311), and the first zone is declared to need a true effect near 0.50 at the planned n; E-001 amended before its freeze. Open.
 
 **Plan impact PI-025 resolved:** plan revised on 2026-11-14 — E-001 amended (four zones, H2's sentences, sizing note), `outcome_space.Verdict` has four values, `power.p_supported` reads both limits and `p_relevance_shown` is added, `docs/measurability-gate.md` carries the rule and the recomputed tables; no n, phase, hour or budget changes.
+
+## 2026-11-14 — Gate 4, round 1: 97 of 100; the grader reads "level 37"
+
+The author audited the grader on 100 stratified outputs of E-004 and E-005
+(`runs/grader-audit/sheet-r1.md`, seed `20261009`): **97 of 100, fail** (pass at
+98). All 3 disagreements are one defect: a level answer written with its word
+("level 28", "Level 37") was graded wrong, C = λ, though it states the gold
+number; 18 E-004 answers have that form. In the first marking pass the author
+judged the model instead of the grader on 30 items; the corrected sheet is the
+one scored.
+
+Fix, decided after reading the audit and before reading any graded number: for
+level answers the grader drops a leading "level", "lvl" or "lv." before reading
+the number; power and every other kind are unchanged; new golden completions
+cover the forms and the near misses ("level 4", "level 3 or 4"). Per gate 4 the
+grader is re-audited on a **fresh sample**: round 2 is drawn with seed
+`20261010`, excluding the 100 outputs of round 1. No graded number of E-004 or
+E-005 is read before a round passes.

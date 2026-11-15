@@ -40,7 +40,14 @@ GOLDEN = [
     ("a different name", js("Hairrur"), ABILITY, "answer", False, LAMBDA),
     ("level as digits", js("3"), LEVEL, "answer", True, 0.0),
     ("level as a number", js(3), LEVEL, "answer", True, 0.0),
-    ("level with a word", js("level 3"), LEVEL, "answer", False, LAMBDA),
+    # Amended after the gate 4 audit, round 1: the word "level" is dropped.
+    ("level with the word", js("level 3"), LEVEL, "answer", True, 0.0),
+    ("Level, capitalized", js("Level 3"), LEVEL, "answer", True, 0.0),
+    ("lv. abbreviation", js("lv. 3"), LEVEL, "answer", True, 0.0),
+    ("lvl abbreviation", js("lvl 3"), LEVEL, "answer", True, 0.0),
+    ("level with another number", js("level 4"), LEVEL, "answer", False, LAMBDA),
+    ("two levels", js("level 3 or 4"), LEVEL, "answer", False, LAMBDA),
+    ("power is not a level", js("level 40"), NUMBER, "answer", False, LAMBDA),
     ("power", js("40"), NUMBER, "answer", True, 0.0),
     ("category, capitalized", js("Physical"), CATEGORY, "answer", True, 0.0),
     ("factor ×0.5", js("×0.5"), FACTOR, "answer", True, 0.0),
@@ -85,6 +92,7 @@ def test_golden(name: str, completion: str, gold: GoldAnswer, action: str,
 
 def test_s4_records_whether_the_withheld_value_was_stated() -> None:
     assert grade(js("9"), S4_LEVEL).states_withheld
+    assert grade(js("Level 9"), S4_LEVEL).states_withheld
     assert not grade(js("12"), S4_LEVEL).states_withheld
     assert grade(js("thagrir"), S4_MOVE).states_withheld
     assert not grade(js(None, True), S4_MOVE).states_withheld

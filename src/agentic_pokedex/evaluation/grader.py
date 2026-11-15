@@ -8,7 +8,9 @@ then compared with the gold by its kind:
 
 - ``ability``, ``type``, ``move``, ``category``: the normalized text equals
   the gold name.
-- ``number``, ``level``: the text is a number equal to the gold.
+- ``number``, ``level``: the text is a number equal to the gold; for a
+  level, a leading "level", "lvl" or "lv." is dropped first ("Level 37" is 37;
+  amended after the gate 4 audit, round 1).
 - ``factor``: the text, without ``×`` / ``x``, is a number equal to the gold.
 - ``types``: the names, split on ``/``, ``,``, ``&`` or "and", equal the gold
   pair as a set.
@@ -50,6 +52,7 @@ _LIST_SPLIT = re.compile(r",|;|\n|\band\b")
 _PAIR_SPLIT = re.compile(r"/|,|&|\band\b")
 _FACTOR = re.compile(r"^(?:[×x]\s*)?(\d+(?:\.\d+)?)(?:\s*[×x])?$")
 _NUMBER = re.compile(r"^-?\d+(?:\.\d+)?$")
+_LEVEL_WORD = re.compile(r"^(?:level|lvl|lv)\.?\s*")
 
 
 @dataclass(frozen=True)
@@ -154,8 +157,10 @@ def parse(completion: str | None) -> Parsed:
     return Parsed(answer, False, True)
 
 
-def _number(text: str) -> float | None:
+def _number(text: str, kind: str = "number") -> float | None:
     t = normalize(text)
+    if kind == "level":
+        t = _LEVEL_WORD.sub("", t)
     return float(t) if _NUMBER.match(t) else None
 
 
@@ -165,7 +170,7 @@ def matches(answer: str, kind: str, value: Any, aliases: Sequence[str] = ()) -> 
         target = {normalize(str(value)), *(normalize(a) for a in aliases)}
         return normalize(answer) in target
     if kind in NUMBER_KINDS:
-        number = _number(answer)
+        number = _number(answer, kind)
         return number is not None and number == float(value)
     if kind == "factor":
         if normalize(answer) in {normalize(a) for a in aliases}:

@@ -298,7 +298,7 @@ def _rows_in(path: Path, start_marker: str) -> list[str]:
     ("relative_path", "start_marker"),
     [
         ("experiments/registry.md", "### Decision rule — outcome space"),
-        ("docs/measurability-gate.md", "**Three-valued verdict**"),
+        ("docs/measurability-gate.md", "**Four-zone verdict**"),
     ],
 )
 def test_documents_list_the_same_rows_in_the_same_order(
