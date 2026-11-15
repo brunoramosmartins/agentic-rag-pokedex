@@ -1175,6 +1175,10 @@ missed the learnset and A1 abstained (C = 1); A3 searched, opened the species'
 Learnset section and answered the gold (C = 0). No mean of C and no mean of D
 is printed.
 
+**Use, 2026-11-14 (gate 8):** with these costs the v1.0 budget commits US$
+11.69 of 20 (`evaluation/budget.py`), and **n_max = 884, n_max_eff = 448**,
+logged in the journal before any rehearsal.
+
 ### Amendments
 
 - **2026-10-07 — implementation details, before any run (approved by the

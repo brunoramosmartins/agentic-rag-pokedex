@@ -77,11 +77,28 @@ abstained on all 150 twin questions. SD of D waits for the grader's audit.
 
 ## G2 closed-book half: A0 on the twin and on the real world
 
+E-005 run 2026-10-08 (1,600 calls, US$ 0.280). Verdict 2026-11-14, after the
+grader's audit: **G2 passes** — twin 0 of 50 in 15 of 16 templates (2 of 50 in
+S0-B1, chance 38%); real-name control 4 of 4. Grader audit: round 1 97 of 100
+(level answers written with the word "level" graded wrong; fixed), round 2 on
+a fresh sample 100 of 100. In round 1's first pass the author judged the
+model rather than the grader on 30 items; corrected before scoring.
+
 ## Reasoning tokens per arm and the re-estimated budget
+
+`evaluation/budget.py`: US$ 0.73 spent, 10.95 projected with a 1.5× margin
+after the three cuts, 11.69 committed of 20 (about 14.1 with no cut).
+Measured cost 0.39× (E-004) and 0.26× (E-005) the estimates.
 
 ## Preliminary power table with the proxy SD
 
+Proxy SD of D = C(A1) − C(A3) = 2.09 (80%: 1.81–2.32; 30 questions, 20
+discordant). n\* = 339 at 2.09 and 418 at 2.32, above the plan of 320.
+
 ## n_max, n_max_eff and the benign S1 slice
+
+n_max = 884; n_max_eff = 448 (material S1 binds, not money); logged
+2026-11-14 before any rehearsal. Benign S1 slice stays at 40.
 
 ---
 

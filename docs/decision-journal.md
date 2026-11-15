@@ -1433,3 +1433,24 @@ the budget re-estimated with measured tokens and n_max.
 **Plan impact PI-024 resolved:** absorbed — the grader, its golden tests and the gate 4 audit (round 1 97 of 100, fixed; round 2 100 of 100) were done in Phase 3 before any graded number was read; Phase 4 keeps the arms' tuning and the A2 sweep.
 
 **Plan impact PI-022 resolved:** absorbed — E-005 drew its own sample per template outside the evaluation splits and applied the interval rule; G2's closed-book half passes.
+
+## 2026-11-14 — n_max logged before the dress rehearsal
+
+The v1.0 budget re-estimated with Phase 3's measured costs
+(`evaluation/budget.py`; assumptions approved by the author): **US$ 0.73
+spent**; projected after cuts (1)–(3) with a 1.5× margin, **US$ 10.95**;
+**committed US$ 11.69 of the US$ 20 cap**. Without any cut the total would be
+about US$ 14.1. Arms not yet built are priced as multiples of measured ones
+(A4 = 2.5 × A3, A4p = O2 = 1.5 × A3, A3′ = A3, O1 = A1; A6 at 64,000 evidence
+tokens; A3 on S0 priced as on S2).
+
+**Gate 8 inputs, logged before any rehearsal:** one more pooled S1–S4 question,
+with the S0 share balanced growth adds, costs US$ 0.0147 →
+**n_max = 884, n_max_eff = min(n_max, 448) = 448**. The ceiling is material S1,
+not money. With the pilot's proxy SD (upper 80% limit 2.32, n\* = 418), the
+design effect estimated on the rehearsal decides whether n\* stays within 448
+or the verdict becomes descriptive (row 0), as registered.
+
+**Cost check (Phase 3):** measured cost was 0.39× (E-004) and 0.26× (E-005) the
+estimates, below 1.3×; no cut is applied. The benign S1 slice stays at 40
+questions (US$ 0.21 with margin).
