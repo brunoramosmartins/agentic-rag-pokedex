@@ -31,7 +31,7 @@ filled only after the run, next to the date.
 | [E-002](#e-002--how-much-does-typed-expansion-already-deliver) | 3 | analyzed | descriptive | How much sufficient evidence does the fixed pipeline with typed expansion already deliver, per stratum? | Dev, k = 5: S0 29, S1 23, S2 28, S3 9 of 30; S4 0 by construction. S0/S2 from search, S1 from link level 1, S3 from section completion; B binds in 150 of 150 |
 | [E-003](#e-003--identity-probe-can-the-model-name-the-real-species-behind-a-twin-page) | 1 | analyzed | gating (G2) | Can the primary model name the real species behind a twin page, when a masked real page shows the probe works? | Run 1: twin 27 of 50 with notes, 1 of 50 without → notes removed. Run 2 (no notes): control 48, twin 1 of 50 — **G2 identity passes** |
 | [E-004](#e-004--pilot-noise-cost-and-reasoning-per-arm) | 3 | run | none (noise) | Tokens and reasoning per arm, A3's steps and firing rate, and a proxy SD of D, for n_max and the preliminary power table | US$ 0.191 for 150 + 30 questions; reasoning medians 0–128; A3 3.6 steps, 28 of 30 search again, S3 always at T_max; SD of D after the audit |
-| [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | draft | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | — |
+| [E-005](#e-005--g2-closed-book-does-memory-stand-in-for-evidence-on-the-twin) | 3 | run | gating (G2) | Does A0, with no evidence, answer twin questions above each template's chance rate? | US$ 0.280; twin: 4 of 800 answered, real: 405 of 800; verdict after the audit |
 
 ---
 
@@ -597,6 +597,41 @@ _Not run._
   `world/index.py`, which fuses with equal weights today; Phase 4 implements
   it before the sweep, with the equal-weight point unchanged. Search reads
   queries through the corrected tokenizer (PI-023).
+- **2026-11-14 — the verdict in four zones (author's revision, before any run
+  of E-001 and before the freeze; PI-025).** The three-valued rule called
+  *supported* an interval excluding zero with a point estimate ≥ 0.25: that
+  shows the treatment reduces cost, not that the reduction is at least 0.25.
+  The same registered interval [L, U] (97.5% BCa, Bonferroni, stratified
+  cluster bootstrap) now answers two questions — superiority (L > 0) and
+  relevance (L ≥ 0.25 shown, U < 0.25 ruled out) — in four zones that do not
+  overlap and cover every interval:
+  1. **Supported, relevance shown:** L ≥ 0.25 — "the reduction is at least
+     0.25".
+  2. **Supported, relevance open:** 0 < L < 0.25 ≤ U — "the treatment
+     reduces cost, by at least L; whether the reduction reaches the threshold
+     is not known".
+  3. **Refuted:** U < 0.25 — "a reduction of 0.25 is ruled out" (unchanged).
+  4. **Inconclusive:** L ≤ 0 and U ≥ 0.25 — the interval and the n that would
+     decide.
+
+  The point estimate is published but does not decide. "A reduction of at
+  least 0.25" is written only in zone 1. "H1 supported" in rows 1–4 means
+  zone 1 or 2, with the zone printed beside the row; rows 6–7b read zone 4.
+  One case moves: an interval above zero with a point estimate below 0.25 and
+  U ≥ 0.25 was inconclusive and is now *supported, relevance open*. **H2's
+  sentences:** zone 1 — "A4 reduces expected cost versus the fixed pipeline on
+  S1–S4 by at least the action threshold"; zone 2 — "A4 reduces expected cost
+  versus the fixed pipeline on S1–S4, by at least L; whether the reduction
+  reaches the threshold is not known"; refuted and inconclusive as registered.
+  **Sizing:** power targets *supported* = {L > 0 and U ≥ 0.25}; n\* at
+  Δ_design = 0.35 is unchanged (78 / 175 / 311 for SD 1.0 / 1.5 / 2.0; the
+  plan of 320 holds to SD ≈ 2.03), because at those n the lower limit above
+  zero was already the binding condition. Zone 1 has little power at the plan
+  (0.33 / 0.15 / 0.09 at a true effect of 0.35) and reaches 0.80 only near
+  0.50; declared, not bought with n. H3 (non-inferiority) is unchanged.
+  Implemented in `evaluation/outcome_space.py` (`Verdict`, four values) and
+  `evaluation/power.py` (`p_supported`, `p_relevance_shown`); decided with no
+  outcome data of E-001.
 
 ---
 
@@ -1151,7 +1186,8 @@ proxy SD of D) wait for the grader's audit (PI-024).
 ## E-005 — G2 closed-book: does memory stand in for evidence on the twin?
 
 - **Phase:** 3 (pilot gate).
-- **Status:** draft — registered 2026-10-07, before any run.
+- **Status:** run — registered 2026-10-07, before any run; run 2026-10-08
+  (the verdict waits for the grader's audit).
 - **Hypothesis:** gating — G2's closed-book half (`docs/contingency.md`;
   PI-022). G2's identity half passed in E-003.
 
@@ -1206,7 +1242,12 @@ Written 2026-10-08, before the run, as a gut call:
 
 ### Actual result
 
-_Not run._
+**Run 2026-10-08** (`runs/e005`, after the author's prediction, `cbc317c`):
+1,600 calls in one Batch round, no API failure, no output at the cap, no
+unparseable output. **Measured cost US$ 0.280** (estimate 1.06 central).
+Reasoning per call: median 128, p90 256, max 768. Ungraded: on the twin, A0
+answered 4 of 800 questions and abstained on 796; on real names it answered
+405 of 800. The verdict waits for the grader's audit (PI-024).
 
 ### Amendments
 

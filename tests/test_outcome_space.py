@@ -72,7 +72,7 @@ def _inputs(**overrides: object) -> OutcomeInputs:
     base = dict(
         descriptive_branch=False,
         futility_fired=False,
-        h1=Verdict.SUPPORTED,
+        h1=Verdict.SUPPORTED_RELEVANCE_SHOWN,
         s0_share_ge_half=False,
         s0_excludes_zero=False,
         placebo=PlaceboStatus.DELIVERED,
@@ -162,20 +162,25 @@ def test_documented_edge_cases(overrides: dict[str, object], expected: str) -> N
 
 
 # ---------------------------------------------------------------------------
-# Three-valued verdict
+# Four-zone verdict (PI-025)
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
     ("point", "lower", "upper", "expected"),
     [
-        (0.40, 0.10, 0.70, Verdict.SUPPORTED),
-        (0.25, 0.01, 0.49, Verdict.SUPPORTED),  # point exactly at the threshold
-        (0.20, 0.05, 0.35, Verdict.INCONCLUSIVE),  # excludes zero, below threshold
-        (0.30, -0.05, 0.65, Verdict.INCONCLUSIVE),  # above threshold, includes zero
+        (0.45, 0.25, 0.65, Verdict.SUPPORTED_RELEVANCE_SHOWN),  # L at the threshold
+        (0.60, 0.30, 0.90, Verdict.SUPPORTED_RELEVANCE_SHOWN),
+        (0.40, 0.10, 0.70, Verdict.SUPPORTED_RELEVANCE_OPEN),
+        (0.25, 0.01, 0.49, Verdict.SUPPORTED_RELEVANCE_OPEN),
+        # Reclassified by the amendment: above zero, point below the threshold,
+        # U at or above it (was inconclusive).
+        (0.20, 0.05, 0.35, Verdict.SUPPORTED_RELEVANCE_OPEN),
+        (0.30, -0.05, 0.65, Verdict.INCONCLUSIVE),  # includes zero
         (0.10, 0.02, 0.20, Verdict.REFUTED),  # significant but too small
         (-0.30, -0.60, 0.00, Verdict.REFUTED),  # treatment worse
         (0.00, -0.25, 0.25, Verdict.INCONCLUSIVE),  # upper exactly at threshold
+        (0.10, 0.00, 0.30, Verdict.INCONCLUSIVE),  # lower exactly at zero
     ],
 )
 def test_verdict(point: float, lower: float, upper: float, expected: Verdict) -> None:
@@ -187,21 +192,29 @@ def test_verdict_rejects_interval_without_point() -> None:
         verdict(0.30, -0.20, 0.20)
 
 
-def test_verdict_values_are_mutually_exclusive_on_a_grid() -> None:
+def test_the_point_estimate_does_not_decide() -> None:
+    for point in (0.06, 0.15, 0.24, 0.26, 0.40):
+        assert verdict(point, 0.05, 0.45) is Verdict.SUPPORTED_RELEVANCE_OPEN
+
+
+def test_verdict_zones_partition_a_grid() -> None:
     grid = [x / 20 for x in range(-20, 21)]
     for lower, point, upper in itertools.product(grid, repeat=3):
         if not lower <= point <= upper:
             continue
-        supported = lower > 0 and point >= 0.25
-        refuted = upper < 0.25
-        assert not (supported and refuted)
-        assert verdict(point, lower, upper) is (
-            Verdict.SUPPORTED
-            if supported
-            else Verdict.REFUTED
-            if refuted
-            else Verdict.INCONCLUSIVE
-        )
+        zones = {
+            Verdict.SUPPORTED_RELEVANCE_SHOWN: lower >= 0.25,
+            Verdict.SUPPORTED_RELEVANCE_OPEN: 0 < lower < 0.25 <= upper,
+            Verdict.REFUTED: upper < 0.25,
+            Verdict.INCONCLUSIVE: lower <= 0 and upper >= 0.25,
+        }
+        assert sum(zones.values()) == 1, (lower, point, upper)
+        assert zones[verdict(point, lower, upper)]
+
+
+def test_supported_covers_both_supported_zones() -> None:
+    assert {v for v in Verdict if v.supported} == {
+        Verdict.SUPPORTED_RELEVANCE_SHOWN, Verdict.SUPPORTED_RELEVANCE_OPEN}
 
 
 # ---------------------------------------------------------------------------

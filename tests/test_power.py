@@ -11,6 +11,7 @@ from __future__ import annotations
 import math
 import re
 from pathlib import Path
+from statistics import NormalDist
 
 import pytest
 
@@ -124,29 +125,52 @@ def test_h3_noninferiority_n() -> None:
 @pytest.mark.parametrize(
     ("delta", "expected"),
     [
-        (0.25, [0.50, 0.50, 0.50]),
-        (0.30, [0.81, 0.72, 0.67]),
-        (0.35, [0.96, 0.88, 0.81]),
-        (0.40, [1.00, 0.96, 0.91]),
+        (0.25, [0.99, 0.77, 0.50]),
+        (0.30, [1.00, 0.91, 0.67]),
+        (0.35, [1.00, 0.97, 0.81]),
+        (0.40, [1.00, 0.99, 0.91]),
     ],
 )
 def test_p_supported_at_the_plan(delta: float, expected: list[float]) -> None:
     assert [round(pw.p_supported(delta, s, 320), 2) for s in SDS] == expected
 
 
-def test_supported_is_at_most_a_coin_flip_at_the_threshold() -> None:
-    # At a true effect of exactly 0.25, *supported* needs point >= 0.25: half
-    # the time at best. When z·SE > 0.25 the binding condition becomes
-    # "lower limit > 0" and the probability drops below one half.
+def test_supported_reads_both_limits_not_the_point() -> None:
+    # Four zones (PI-025): the point estimate no longer decides. Supported is
+    # {L > 0 and U >= 0.25}; with L = point - z·SE and U = point + z·SE.
+    z = pw.z_crit(pw.ALPHA_PER_CONTRAST)
     for sd in SDS:
-        for n in (100, 320, 640, 5000):
-            p = pw.p_supported(0.25, sd, n)
-            assert p <= 0.5 + 1e-12
-            z_se = pw.z_crit(pw.ALPHA_PER_CONTRAST) * pw.se_paired(n, sd)
-            if z_se <= 0.25:
-                assert p == pytest.approx(0.5)
-            else:
-                assert p < 0.5
+        for n in (50, 320, 5000):
+            se = pw.se_paired(n, sd)
+            bar = max(z * se, 0.25 - z * se)
+            expected = 1 - NormalDist().cdf((bar - 0.25) / se)
+            assert pw.p_supported(0.25, sd, n) == pytest.approx(expected)
+    # Under no effect, supported is a one-sided false positive at α / 2 at most.
+    for sd in SDS:
+        assert pw.p_supported(0.0, sd, 320) <= pw.ALPHA_PER_CONTRAST / 2 + 1e-12
+
+
+@pytest.mark.parametrize(
+    ("delta", "expected"),
+    [(0.25, [0.01, 0.01, 0.01]), (0.35, [0.33, 0.15, 0.09]),
+     (0.50, [0.99, 0.77, 0.50])],
+)
+def test_p_relevance_shown_at_the_plan(delta: float, expected: list[float]) -> None:
+    assert [round(pw.p_relevance_shown(delta, s, 320), 2) for s in SDS] == expected
+
+
+def test_relevance_shown_is_a_subset_of_supported() -> None:
+    for delta in (0.0, 0.25, 0.35, 0.5):
+        for sd in SDS:
+            assert (pw.p_relevance_shown(delta, sd, 320)
+                    <= pw.p_supported(delta, sd, 320) + 1e-12)
+
+
+def test_relevance_shown_needs_about_twice_the_threshold() -> None:
+    # Powered at 0.80 only near a true effect of 0.50: the n to detect 0.25.
+    for sd, n in zip(SDS, (153, 343, 609), strict=True):
+        assert pw.p_relevance_shown(0.50, sd, n) >= 0.80
+        assert pw.p_relevance_shown(0.50, sd, n - 1) < 0.80
 
 
 def test_n_star_at_design_effect() -> None:
@@ -158,8 +182,11 @@ def test_sd_thresholds_quoted_for_gate_8() -> None:
     assert pw.n_star(2.87) <= 640 < pw.n_star(2.88)
 
 
-def test_n_star_unreachable_when_design_effect_is_the_threshold() -> None:
-    assert pw.n_star(1.0, delta_design=0.25) is None
+def test_n_star_at_the_threshold_is_the_superiority_n() -> None:
+    # Under the four-zone rule, an effect of exactly 0.25 can be called
+    # supported: n* there is the n to detect 0.25 (153 / 343 / 609).
+    assert [pw.n_star(s, delta_design=0.25) for s in SDS] == [153, 343, 609]
+    assert pw.n_star(1.0, delta_design=0.0) is None
 
 
 @pytest.mark.parametrize(

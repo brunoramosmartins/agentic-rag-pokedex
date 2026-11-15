@@ -1364,3 +1364,29 @@ searched again after its first observation in 28 of 30 questions; every S3
 question ran to T_max. Graded readings — the proxy SD of D — wait for the
 grader's audit (PI-024). Result in the registry; nothing in it selects a
 stratum, threshold, prompt or n.
+
+## 2026-10-08 — E-005 run; the grader's audit drawn
+
+E-005 ran after the author's prediction: 1,600 calls, one Batch round, no
+failure, US$ 0.280. Ungraded: with no evidence, A0 answered 4 of 800 twin
+questions (abstaining on the rest) and 405 of 800 in real names. The gate 4
+audit sheet is drawn (`runs/grader-audit/sheet.md`, seed `20261009`): 100
+outputs, 20 per stratum, from all six sources; the author marks it before any
+graded number of E-004 or E-005 is read.
+
+## 2026-11-14 — The verdict in four zones
+
+The author revised the plan (2026-11-12): the verdict rule of H1 and H2 called
+*supported* an interval excluding zero with a point estimate at or above 0.25,
+which shows that the treatment reduces cost, not that the reduction is at
+least 0.25. Measured with `power.py` before deciding: at Δ_design = 0.35, n\*
+does not change (78 / 175 / 311), because at those n the lower limit above
+zero was already the binding condition; near the threshold, P(supported) at
+the plan of 320 rises from 0.50 to 0.99 / 0.77 / 0.50; the new zone
+*relevance shown* has little power (0.33 / 0.15 / 0.09 at a true effect of
+0.35). The author approved the change, applied before E-001's freeze and
+before eval-L1 is opened.
+
+**Plan impact PI-025:** Phases 5–6 (and E-001) — the verdict rule assumed "supported" could stand for a reduction of at least 0.25 → an interval above zero with a point estimate at the threshold shows a reduction, not its size → four zones read on the same 97.5% interval: supported with relevance shown (L ≥ 0.25), supported with relevance open (0 < L < 0.25 ≤ U), refuted (U < 0.25), inconclusive (L ≤ 0 and U ≥ 0.25); the point estimate is published but no longer decides; "a reduction of at least 0.25" is written only in the first zone; n\* at Δ_design = 0.35 is unchanged (78 / 175 / 311), and the first zone is declared to need a true effect near 0.50 at the planned n; E-001 amended before its freeze. Open.
+
+**Plan impact PI-025 resolved:** plan revised on 2026-11-14 — E-001 amended (four zones, H2's sentences, sizing note), `outcome_space.Verdict` has four values, `power.p_supported` reads both limits and `p_relevance_shown` is added, `docs/measurability-gate.md` carries the rule and the recomputed tables; no n, phase, hour or budget changes.

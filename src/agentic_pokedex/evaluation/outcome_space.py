@@ -4,7 +4,7 @@ Encodes, as code, the decision rule registered in `experiments/registry.md`
 (E-001, "Decision rule — outcome space") and mirrored in
 `docs/measurability-gate.md` (gate 1):
 
-- the three-valued verdict of a primary contrast;
+- the four-zone verdict of a primary contrast (amended 2026-11-14, PI-025);
 - the outcome-space rows, evaluated in order (the first matching row wins);
 - the four λ* cases (plus "no difference" and "undetermined").
 
@@ -24,11 +24,27 @@ ACTION_THRESHOLD = 0.25
 
 
 class Verdict(Enum):
-    """Three-valued verdict of a primary contrast."""
+    """Four-zone verdict of a primary contrast, read on one interval [L, U].
 
-    SUPPORTED = "supported"
+    Superiority asks whether L > 0; relevance asks whether the reduction
+    reaches the threshold (L ≥ 0.25 shown, U < 0.25 ruled out). The zones do
+    not overlap and cover every interval.
+    """
+
+    SUPPORTED_RELEVANCE_SHOWN = "supported, relevance shown"
+    """L ≥ threshold: "the reduction is at least 0.25"."""
+    SUPPORTED_RELEVANCE_OPEN = "supported, relevance open"
+    """0 < L < threshold ≤ U: the treatment reduces cost, by at least L."""
     REFUTED = "refuted"
+    """U < threshold: a reduction of 0.25 is ruled out."""
     INCONCLUSIVE = "inconclusive"
+    """L ≤ 0 and U ≥ threshold: neither question is answered."""
+
+    @property
+    def supported(self) -> bool:
+        """Either supported zone (what rows 1–4 read as "H1 supported")."""
+        return self in (Verdict.SUPPORTED_RELEVANCE_SHOWN,
+                        Verdict.SUPPORTED_RELEVANCE_OPEN)
 
 
 class PlaceboStatus(Enum):
@@ -67,31 +83,34 @@ class LambdaCase(Enum):
 def verdict(
     point: float, lower: float, upper: float, threshold: float = ACTION_THRESHOLD
 ) -> Verdict:
-    """Three-valued verdict of a contrast D = C(reference) − C(treatment).
+    """Four-zone verdict of a contrast D = C(reference) − C(treatment).
+
+    The point estimate is published but does not decide (PI-025); it is taken
+    only to check that the interval contains it.
 
     Args:
         point: Point estimate of the mean of D.
-        lower: Lower limit of the registered interval (97.5% BCa).
-        upper: Upper limit of the registered interval.
+        lower: Lower limit L of the registered interval (97.5% BCa).
+        upper: Upper limit U of the registered interval.
         threshold: Action threshold in units of C.
 
     Returns:
-        SUPPORTED if the interval excludes zero in favour of the treatment and
-        the point estimate is at least the threshold; REFUTED if the upper limit
-        is below the threshold; INCONCLUSIVE otherwise.
+        SUPPORTED_RELEVANCE_SHOWN if L ≥ threshold; REFUTED if U < threshold;
+        SUPPORTED_RELEVANCE_OPEN if L > 0 otherwise; INCONCLUSIVE otherwise.
 
     Raises:
-        ValueError: If the interval does not contain the point estimate, which
-            would make SUPPORTED and REFUTED simultaneously possible.
+        ValueError: If the interval does not contain the point estimate.
     """
     if not lower <= point <= upper:
         raise ValueError(
             f"interval [{lower}, {upper}] does not contain the point {point}"
         )
-    if lower > 0 and point >= threshold:
-        return Verdict.SUPPORTED
+    if lower >= threshold:
+        return Verdict.SUPPORTED_RELEVANCE_SHOWN
     if upper < threshold:
         return Verdict.REFUTED
+    if lower > 0:
+        return Verdict.SUPPORTED_RELEVANCE_OPEN
     return Verdict.INCONCLUSIVE
 
 
@@ -129,7 +148,7 @@ class OutcomeInputs:
 
 
 def _supported(x: OutcomeInputs) -> bool:
-    return x.h1 is Verdict.SUPPORTED
+    return x.h1.supported
 
 
 ROWS: tuple[tuple[str, Callable[[OutcomeInputs], bool]], ...] = (
